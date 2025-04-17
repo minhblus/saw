@@ -850,7 +850,9 @@ end})
 MainSection:CreateToggle({Title="Auto Alen Shop",Enable=getgenv().Configs.AutoBuyAllienShop,Callback=function(v)
     getgenv().Configs.AutoBuyAllienShop=v
 end})
-
+MainSection:CreateToggle({Title="Auto BlackMakert Shop",Enable=getgenv().Configs.BuyBlackMarket,Callback=function(v)
+    getgenv().Configs.BuyBlackMarket=v
+end})
 
 local Misc = Sawhub:CreatePage({Title="Misc"})
 local MiscSec = Misc:CreateSection({Title="Others"})
@@ -1208,7 +1210,28 @@ function BuyAllienShop()
 	end
 end
 
+function BuyBlackMarket()
+	for i =1,3 do
 
+		local args = {
+			[1] = "BuyShopItem",
+			[2] = "shard-shop",
+			[3] = i
+		  }
+		  
+		  game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+		  
+	end
+end
+
+task.spawn(function()
+	while wait(1) do
+		if getgenv().Configs.BuyBlackMarket then
+			BuyBlackMarket()
+			wait(60)
+		end
+	end
+end)
 
 
 task.spawn(function()
