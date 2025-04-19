@@ -5,6 +5,7 @@ local plr = game:GetService("Players").LocalPlayer
 local Mouse = plr:GetMouse()
 local UIS = game:GetService("UserInputService")
 local Tweeninfo = TweenInfo.new
+local MainUI={}
 
 function TweenObject(obj, properties, duration, ...)
 	game:GetService("TweenService"):Create(obj, Tweeninfo(duration, ...), properties):Play()
@@ -86,12 +87,12 @@ function MainUI:CreateWindow(win_val : {})
 	local Main = Instance.new("Frame")
 	local UICorner = Instance.new("UICorner")
 	local Bar = Instance.new("Frame")
-	local title = Instance.new("TextLabel")
+	local Title = Instance.new("TextLabel")
 	local ListTab = Instance.new("ScrollingFrame")
 	local UIListLayout = Instance.new("UIListLayout")
 	local UIPadding = Instance.new("UIPadding")
 	local Pages = Instance.new("Frame")
-	local titleTab = Instance.new("TextLabel")
+	local TitleTab = Instance.new("TextLabel")
 	local UICorner_2 = Instance.new("UICorner")
 	local Line = Instance.new("Frame")
 	local close = Instance.new("ImageButton")
@@ -120,19 +121,19 @@ function MainUI:CreateWindow(win_val : {})
 	Bar.BorderSizePixel = 0
 	Bar.Size = UDim2.new(0, 500, 0, 35)
 
-	title.Name = "title"
-	title.Parent = Bar
-	title.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
-	title.BackgroundTransparency = 1.000
-	title.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	title.BorderSizePixel = 0
-	title.Size = UDim2.new(0, 135, 0, 35)
-	title.Font = Enum.Font.SourceSansBold
-	title.Text = "    "..win_val.title
-	title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	title.TextSize = 23.000
-	title.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-	title.TextXAlignment = Enum.TextXAlignment.Left
+	Title.Name = "Title"
+	Title.Parent = Bar
+	Title.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
+	Title.BackgroundTransparency = 1.000
+	Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	Title.BorderSizePixel = 0
+	Title.Size = UDim2.new(0, 135, 0, 35)
+	Title.Font = Enum.Font.SourceSansBold
+	Title.Text = "    "..win_val.title
+	Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Title.TextSize = 23.000
+	Title.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+	Title.TextXAlignment = Enum.TextXAlignment.Left
 
 	ListTab.Name = "ListTab"
 	ListTab.Parent = Main
@@ -164,17 +165,17 @@ function MainUI:CreateWindow(win_val : {})
 	Pages.Position = UDim2.new(0.27, 0, 0, 0)
 	Pages.Size = UDim2.new(0, 365, 0, 300)
 
-	titleTab.Parent = Pages
-	titleTab.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	titleTab.BackgroundTransparency = 1.000
-	titleTab.Name="titleTab"
-	titleTab.BorderColor3 = Color3.fromRGB(255, 255, 255)
-	titleTab.Size = UDim2.new(1, 0, 0, 35)
-	titleTab.Font = Enum.Font.RobotoMono
-	titleTab.Text = " #None"
-	titleTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-	titleTab.TextSize = 23.000
-	titleTab.TextXAlignment = Enum.TextXAlignment.Left
+	TitleTab.Parent = Pages
+	TitleTab.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TitleTab.BackgroundTransparency = 1.000
+	TitleTab.Name="TitleTab"
+	TitleTab.BorderColor3 = Color3.fromRGB(255, 255, 255)
+	TitleTab.Size = UDim2.new(1, 0, 0, 35)
+	TitleTab.Font = Enum.Font.RobotoMono
+	TitleTab.Text = " #None"
+	TitleTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+	TitleTab.TextSize = 23.000
+	TitleTab.TextXAlignment = Enum.TextXAlignment.Left
 
 	UICorner_2.Parent = Pages
 
@@ -202,7 +203,7 @@ function MainUI:CreateWindow(win_val : {})
 	mobilesp.BackgroundColor3 = Color3.fromRGB(49, 49, 49)
 	mobilesp.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	mobilesp.BorderSizePixel = 0
-	mobilesp.Position = UDim2.new(0.844586015, 0, 0.347560972, 0)
+	mobilesp.Position = UDim2.new(0.0, 0, 0.0, 0)
 	mobilesp.Size = UDim2.new(0, 50, 0, 50)
 	mobilesp.AutoButtonColor = false
 	mobilesp.Font = Enum.Font.SourceSans
@@ -298,7 +299,7 @@ function MainUI:CreateWindow(win_val : {})
 		
 		local function disableallpage()
 			for i,v in pairs(Pages:GetChildren()) do
-				if v.Name~="UICorner" and v.Name~="titleTab" then
+				if v.Name~="UICorner" and v.Name~="TitleTab" then
 					v.Visible=false
 				end
 			end
@@ -336,7 +337,7 @@ function MainUI:CreateWindow(win_val : {})
 				disableallpage()
 				TS:Create(Sec,Tweeninfo(0.1),{BackgroundColor3=Color3.fromRGB(30, 30, 30)}):Play()
 				Page.Visible=true
-				titleTab.Text=" #"..sec_val.title
+				TitleTab.Text=" #"..sec_val.title
 			end)
 			
 			Page.Name = "Page"
@@ -354,7 +355,7 @@ function MainUI:CreateWindow(win_val : {})
 				disableallpage()
 				TS:Create(Sec,Tweeninfo(0.1),{BackgroundColor3=Color3.fromRGB(30, 30, 30)}):Play()
 				Page.Visible=true
-				titleTab.Text=" #"..sec_val.title
+				TitleTab.Text=" #"..sec_val.title
 				start_section=true
 			end
 			u.Parent = Page
@@ -608,6 +609,205 @@ function MainUI:CreateWindow(win_val : {})
 				end
 				return dropcall
 			end
+			
+			function callback_func:CreateSlider(slider_val)
+				local Slider = Instance.new("Frame")
+				local titleslider = Instance.new("TextLabel")
+				local SliderF = Instance.new("Frame")
+				local SliderMove = Instance.new("Frame")
+				local BoxNum = Instance.new("TextBox")
+
+				Slider.Name = "Slider"
+				Slider.Parent = Page
+				Slider.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
+				Slider.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				Slider.BorderSizePixel = 0
+				Slider.Size = UDim2.new(1, -10, 0, 50)
+
+				titleslider.Name = "titleslider"
+				titleslider.Parent = Slider
+				titleslider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				titleslider.BackgroundTransparency = 1.000
+				titleslider.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				titleslider.BorderSizePixel = 0
+				titleslider.LayoutOrder = 1
+				titleslider.Size = UDim2.new(0, 120, 0, 30)
+				titleslider.Font = Enum.Font.RobotoMono
+				titleslider.Text = " "..slider_val.title
+				titleslider.TextColor3 = Color3.fromRGB(255, 255, 255)
+				titleslider.TextSize = 20.000
+				titleslider.TextXAlignment = Enum.TextXAlignment.Left
+
+				SliderF.Name = "SliderF"
+				SliderF.Parent = Slider
+				SliderF.AnchorPoint = Vector2.new(0.5, 0.5)
+				SliderF.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				SliderF.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				SliderF.BorderSizePixel = 0
+				SliderF.Position = UDim2.new(0.5, 0, 0.699999988, 0)
+				SliderF.Size = UDim2.new(1, -20, 0, 5)
+
+				SliderMove.Name = "SliderMove"
+				SliderMove.Parent = SliderF
+				SliderMove.BackgroundColor3 = Color3.fromRGB(61, 61, 61)
+				SliderMove.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				SliderMove.BorderSizePixel = 0
+				SliderMove.Size = UDim2.new(0.5, 0, 1, 0)
+
+				BoxNum.Name = "BoxNum"
+				BoxNum.Parent = Slider
+				BoxNum.BackgroundColor3 = Color3.fromRGB(39, 39, 39)
+				BoxNum.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				BoxNum.BorderSizePixel = 0
+				BoxNum.Position = UDim2.new(0.800000012, 0, 0.219999999, 0)
+				BoxNum.Size = UDim2.new(0, 61, 0, 15)
+				BoxNum.ClearTextOnFocus = false
+				BoxNum.Font = Enum.Font.RobotoMono
+				BoxNum.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+				BoxNum.Text = "0"
+				BoxNum.TextColor3 = Color3.fromRGB(255, 255, 255)
+				BoxNum.TextScaled = true
+				BoxNum.TextSize = 14.000
+				BoxNum.TextWrapped = true
+				
+				local GlobalSliderValue = 0
+				local Dragging = false
+				local function Sliding(Input)
+					local Position = UDim2.new(math.clamp((Input.Position.X - SliderF.AbsolutePosition.X) / SliderF.AbsoluteSize.X,0,1),0,1,0)
+					SliderMove.Size = Position
+					local SliderPrecise = ((Position.X.Scale * slider_val["Max"]) / slider_val["Max"]) * (slider_val["Max"] - slider_val["Min"]) + slider_val["Min"]
+					local SliderNonPrecise = math.floor(((Position.X.Scale * slider_val["Max"]) / slider_val["Max"]) * (slider_val["Max"] - slider_val["Min"]) + slider_val["Min"])
+					local SliderValue = slider_val["Precise"] and SliderNonPrecise or SliderPrecise
+					SliderValue = tonumber(string.format("%.2f", SliderValue))
+					GlobalSliderValue = SliderValue
+					BoxNum.Text = tostring(SliderValue)
+					slider_val["callback"](GlobalSliderValue)
+				end
+				local function SetValue(Value)
+					GlobalSliderValue = Value
+					SliderMove.Size = UDim2.new(Value / slider_val["Max"],0,1,0)
+					BoxNum.Text = Value
+					slider_val["callback"](Value)
+				end
+				SetValue(slider_val["Precise"])
+				BoxNum.FocusLost:Connect(function()
+					if not tonumber(BoxNum.Text) then
+						BoxNum.Text = GlobalSliderValue
+					elseif BoxNum.Text == "" or tonumber(BoxNum.Text) <= slider_val["Min"] then
+						BoxNum.Text = slider_val["Min"]
+					elseif BoxNum.Text == "" or tonumber(BoxNum.Text) >= slider_val["Max"] then
+						BoxNum.Text = slider_val["Max"]
+					end
+
+					GlobalSliderValue = BoxNum.Text
+					SliderMove.Size = UDim2.new(BoxNum.Text / slider_val["Max"],0,1,0)
+					slider_val["callback"](tonumber(BoxNum.Text))
+				end)
+				SliderF.InputBegan:Connect(function(Input)
+					if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+						Sliding(Input)
+						Dragging = true
+					end
+				end)
+
+				SliderF.InputEnded:Connect(function(Input)
+					if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+						Dragging = false
+					end
+				end)
+				game:GetService("UserInputService").InputChanged:Connect(function(Input)
+					if Dragging and Input.UserInputType == Enum.UserInputType.MouseMovement then
+						Sliding(Input)
+					end
+				end)
+			end
+			
+			function callback_func:CreateLabel(label_val)
+				local Label = Instance.new("TextLabel")
+
+				Label.Name = "Label"
+				Label.Parent = Page
+				Label.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+				Label.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				Label.BorderSizePixel = 0
+				Label.Size = UDim2.new(1, -10, 0, 30)
+				Label.Font = Enum.Font.RobotoMono
+				Label.Text = "Server Time : 20d 0h 1m 2s"
+				Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+				Label.TextSize = 20.000
+				
+				local labelcall={}
+				Label.Text=label_val.default or ""
+				function labelcall:Set(text)
+					Label.Text=text
+				end
+				return labelcall
+			end
+			
+			function callback_func:Line()
+				local AddLine = Instance.new("Frame")
+
+				AddLine.Name = "AddLine"
+				AddLine.Parent = Page
+				AddLine.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+				AddLine.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				AddLine.BorderSizePixel = 0
+				AddLine.Size = UDim2.new(1, -10, 0, 2)
+			end
+			
+			function callback_func:CreateTextbox(textbox_val)
+				local Box = Instance.new("Frame")
+				local titleslider = Instance.new("TextLabel")
+				local BoxText = Instance.new("TextBox")
+
+				Box.Name = "Box"
+				Box.Parent = Page
+				Box.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
+				Box.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				Box.BorderSizePixel = 0
+				Box.Size = UDim2.new(1, -10, 0, 40)
+
+				titleslider.Name = "titleslider"
+				titleslider.Parent = Box
+				titleslider.AnchorPoint = Vector2.new(0, 0.5)
+				titleslider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				titleslider.BackgroundTransparency = 1.000
+				titleslider.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				titleslider.BorderSizePixel = 0
+				titleslider.LayoutOrder = 1
+				titleslider.Position = UDim2.new(0, 0, 0.5, 0)
+				titleslider.Size = UDim2.new(0, 120, 0, 30)
+				titleslider.Font = Enum.Font.RobotoMono
+				titleslider.Text = " "..textbox_val.title
+				titleslider.TextColor3 = Color3.fromRGB(255, 255, 255)
+				titleslider.TextSize = 20.000
+				titleslider.TextXAlignment = Enum.TextXAlignment.Left
+
+				BoxText.Name = "BoxText"
+				BoxText.Parent = Box
+				BoxText.AnchorPoint = Vector2.new(0.5, 0.5)
+				BoxText.BackgroundColor3 = Color3.fromRGB(39, 39, 39)
+				BoxText.BorderColor3 = Color3.fromRGB(0, 0, 0)
+				BoxText.BorderSizePixel = 0
+				BoxText.Position = UDim2.new(1, -50, 0.5, 0)
+				BoxText.Size = UDim2.new(0, 83, 0, 25)
+				BoxText.ClearTextOnFocus = false
+				BoxText.Font = Enum.Font.RobotoMono
+				BoxText.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+				BoxText.Text = textbox_val.default or ""
+				BoxText.TextColor3 = Color3.fromRGB(255, 255, 255)
+				BoxText.TextScaled = true
+				BoxText.TextSize = 14.000
+				BoxText.TextWrapped = true
+				
+				textbox_val.callback(BoxText.Text)
+				
+				BoxText.FocusLost:Connect(function()
+					textbox_val.callback(BoxText.Text)
+				end)
+				
+				
+			end
 			return callback_func
 		end
 		return sections
@@ -615,6 +815,7 @@ function MainUI:CreateWindow(win_val : {})
 	
 	return pages
 end
+
 
 local Sawhub = MainUI:CreateWindow({
 	title = "Saw Hub",
@@ -652,6 +853,7 @@ AutoFarmSec:CreateToggle({title="Auto Collect",default=getgenv().Configs.AutoCol
 end})
 
 local eggpos = {
+	["Bunny Egg"]=CFrame.new(-404.22879, 12012.3809, -58.892086),
 	["Nightmare Egg"]=CFrame.new(-17.5698757, 10148.1084, 186.612473),
 	["Rainbow Egg"]=CFrame.new(-34.4163857, 15972.7217, 43.4907036),
 	["Void Egg"]=CFrame.new(7.74198961, 10148.1748, 186.165726)
@@ -659,9 +861,14 @@ local eggpos = {
 
 local AutoBoostSec = Main:CreateSection({title = "Auto Boost"})
 
-local DropLane = AutoBoostSec:CreateDropdown({title = "Select Egg",list = {"Rainbow Egg","Nightmare Egg","Void Egg"},callback = function (v)
+local EggSelect=AutoBoostSec:CreateLabel({default="Egg Select: "..getgenv().Configs.SelectEgg})
+AutoBoostSec:Line()
+local DropLane = AutoBoostSec:CreateDropdown({title = "Select Egg",list = {"Rainbow Egg","Nightmare Egg","Void Egg","Bunny Egg"},callback = function (v)
     getgenv().Configs.SelectEgg=v
+	EggSelect:Set("Egg Select: "..v)
 end})
+
+
 
 AutoBoostSec:CreateToggle({title="Auto Egg",default=getgenv().Configs.AutoEgg,callback=function(v)
     getgenv().Configs.AutoEgg=v
@@ -714,9 +921,81 @@ MiscSec:CreateButton({title="Rejoin",callback=function()
 end})
 
 local rejoinauto=false
-MiscSec:CreateToggle({title="Auto Rejoin (3hours)",default=true,callback=function(v)
-	rejoinauto=true
+MiscSec:CreateToggle({title="Auto Rejoin (3hours)",default=false,callback=function(v)
+	rejoinauto=v
 end})
+
+local buff=false
+MiscSec:CreateToggle({title="Boost Fps",default=getgenv().Configs.boostfps,callback=function(v)
+	if v then
+		game:GetService("RunService"):Set3dRenderingEnabled(false)
+		if not buff then
+			buff=true
+
+			local g = game
+			local w = g.Workspace
+			local l = g.Lighting
+			local t = w.Terrain
+			t.WaterWaveSize = 0
+			t.WaterWaveSpeed = 0
+			t.WaterReflectance = 0
+			t.WaterTransparency = 0
+			l.GlobalShadows = false
+			game:GetService("Lighting").FogStart = 0
+			game:GetService("Lighting").FogEnd = 100
+			l.Brightness = 0
+			settings().Rendering.QualityLevel = "Level01"
+			for i, v in pairs(g:GetDescendants()) do
+				if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then 
+					v.Material = "Plastic"
+					v.Transparency=1
+					v.Reflectance = 0
+				elseif v:IsA("Sound") then
+					v.Volume = 0
+				elseif v:IsA("Decal") or v:IsA("Texture") then
+					v.Transparency = 1
+				elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+					v.Lifetime = NumberRange.new(0)
+				elseif v:IsA("Explosion") then
+					v.BlastPressure = 1
+					v.BlastRadius = 1
+				elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+					v.Enabled = false
+				elseif v:IsA("MeshPart") then
+					v.Material = "Plastic"
+					v.Transparency=1
+					v.Reflectance = 0
+					v.TextureID = 10385902758728957
+					if v:IsA("SpecialMesh") then
+						v:Destroy()
+					end
+				elseif v:IsA("SpecialMesh") then
+					v:Destroy()
+				elseif v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
+					v:Destroy()
+				elseif v:IsA("Animation") or v:IsA("Animator") then
+					v:Destroy()
+				end
+			end
+			for i, e in pairs(l:GetChildren()) do
+				if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
+					e.Enabled = false
+				end
+			end
+			for _, guiType in pairs(Enum.CoreGuiType:GetEnumItems()) do
+				game:GetService("StarterGui"):SetCoreGuiEnabled(guiType, false)
+			end
+			workspace.Terrain:Clear()
+			local ss = game:GetService("SoundService")
+			ss.RespectFilteringEnabled = false
+			ss.AmbientReverb = Enum.ReverbType.NoReverb			
+		end
+	else
+		game:GetService("RunService"):Set3dRenderingEnabled(true)
+	end
+end})
+
+
 
 task.spawn(function()
     while wait(1) do
@@ -999,9 +1278,13 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    while wait(0.5) do
+    while wait(0.1) do
         if getgenv().Configs.AutoEgg then
-			TP(eggpos[getgenv().Configs.SelectEgg])
+			while (player.Character.HumanoidRootPart.Position - eggpos[getgenv().Configs.SelectEgg].Position).Magnitude >= 5 do
+				TP(eggpos[getgenv().Configs.SelectEgg])
+				task.wait(0.1)
+			end
+			
             local args = {
                 [1] = "HatchEgg",
                 [2] = getgenv().Configs.SelectEgg,
@@ -1039,7 +1322,7 @@ end)
 
 task.spawn(function()
     while wait(.5) do
-        if getgenv().Configs.AutoCollect or getgenv().Configs.AutoFarm then
+        if getgenv().Configs.AutoCollect then
             for i,v in pairs(workspace.Rendered:GetChildren()) do
                 if v.Name=="Chunker" then
                     for _,block in pairs(v:GetChildren()) do
@@ -1123,19 +1406,29 @@ function bubble()
 end
 local player = game:GetService("Players").LocalPlayer
 local TS=game:GetService("TweenService")
+local besttpnew={
+	["Workspace.Event.Portal.Spawn"]=CFrame.new(-378.902679, 12014.5693, 140.281555)
+}
+
 function TP(cf)
     local besttp
     local bestpos=math.huge
     for i,v in pairs(workspace.Worlds["The Overworld"].Islands:GetChildren()) do
-       
-        if (cf.Position-v.Island.UnlockHitbox.Position).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude and (cf.Position-v.Island.UnlockHitbox.Position).Magnitude<bestpos then
+        if (cf.Position-v.Island.UnlockHitbox.Position).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude -  50 and (cf.Position-v.Island.UnlockHitbox.Position).Magnitude<bestpos then
             bestpos=(cf.Position-v.Island.UnlockHitbox.Position).Magnitude
             besttp="Workspace.Worlds.The Overworld.Islands."..v.Name..".Island.Portal.Spawn"
-    
         end
     end
+
+	for i,v in pairs(besttpnew) do
+		if (cf.Position-v.Position).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude - 50 and (cf.Position-v.Position).Magnitude<bestpos then
+            bestpos=(cf.Position-v.Position).Magnitude
+            besttp=i
+        end
+	end
+
     local vitridacbiet=workspace.Worlds["The Overworld"].SpawnLocation.Position
-    if (cf.Position-vitridacbiet).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude and (cf.Position-vitridacbiet).Magnitude<bestpos then
+    if (cf.Position-vitridacbiet).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude -  50 and (cf.Position-vitridacbiet).Magnitude<bestpos then
         besttp="Workspace.Worlds.The Overworld.PortalSpawn"
     end
 
@@ -1159,9 +1452,7 @@ function TP(cf)
     local tween = TS:Create(player.Character.HumanoidRootPart, TweenInfo.new(times,Enum.EasingStyle.Linear), {CFrame = cf})
     tween:Play()
 
-    while (player.Character.HumanoidRootPart.Position - cf.Position).Magnitude >= 5 do
-        task.wait(0.1)
-    end
+
 
 end
 timesell=tick()
@@ -1250,12 +1541,15 @@ v_u_5.Event("HatchEgg"):Connect(function(p13)
 end)
 
 game:GetService("ReplicatedStorage").Remotes.Pickups.SpawnPickups.OnClientEvent:Connect(function(v)
-	for i,c in v do
-		local args = {
-			[1] = c.Id
-		}
+	if getgenv().Configs.AutoCollect then
+		for i,c in v do
+			local args = {
+				[1] = c.Id
+			}
 
 
-		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Pickups"):WaitForChild("CollectPickup"):FireServer(unpack(args))
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Pickups"):WaitForChild("CollectPickup"):FireServer(unpack(args))
+		end
 	end
 end)
+
