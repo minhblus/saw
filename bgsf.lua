@@ -1072,9 +1072,9 @@ spawn(function()
 end)
 
 
-local deletepet={"Common","Rare","Unique","Epic"}
-MiscSec:CreateDropdown({title="Select Pet Delete",list={"Common","Rare","Unique","Epic"},default=deletepet,multi=true,callback=function(v)
-	deletepet=v
+
+MiscSec:CreateDropdown({title="Select Pet Delete",list={"Common","Rare","Unique","Epic"},default=getgenv().Configs.deletepet or {},multi=true,callback=function(v)
+	getgenv().Configs.deletepet=v
 end})
 
 spawn(function()
@@ -1515,28 +1515,36 @@ function dao_nguoc(t,v)
 end
 
 function usep(name,num)
-	local points=game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Items.Main.ScrollingFrame.Potions.Items:FindFirstChild(name.."/"..num)
-	if points and points.Visible==true then
-		for i,v in pairs(getconnections(points.Inner.Button.Activated)) do
-			v.Function()
-		end
-		wait()
-		for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Items.Details.Buttons.Use.Button.Activated)) do
-			v.Function()
-		end
-		wait()
-		
-	end
+	local args = {
+		[1] = "UsePotion",
+		[2] = name,
+		[3] = tonumber(num)
+	}
+	
+	game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+	
 end
 
 function UsePotion()
     for i,v in pointselect do
 		local bicu = v:split(" ")
+
 		print(bicu[1],bicu[2],dao_nguoc(mahoa,bicu[2]))
 		usep(bicu[1],dao_nguoc(mahoa,bicu[2]))
-		wait(1)
+		wait(2)
     end
 end
+
+spawn(function()
+	while wait() do
+		local args = {
+			[1] = "UseGoldenOrb"
+		}
+		
+		game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+		wait(60)
+	end
+end)
 
 function FuseBoost()
 	for i,v in acoconma do
