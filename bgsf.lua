@@ -1,4 +1,3 @@
-wait(1)
 repeat wait(1) until game:IsLoaded()
 repeat wait()
 	if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Intro") then
@@ -11,6 +10,15 @@ repeat wait()
 	end
 until not game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Intro")
 wait(1)
+
+settings().Physics.AllowSleep = false
+settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+if setsimulationradius then
+	sethiddenproperty(game.Players.LocalPlayer, "MaxSimulationRadius", math.huge)
+ end
+if setsimulationradius then
+	sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+end
 local SawUI = {}
 local EnableTP=false
 local TS = game:GetService("TweenService")
@@ -441,7 +449,7 @@ function SawUI:CreateWindow(wintab)
 		ListTab.Parent = Page
 		ListTab.HorizontalAlignment = Enum.HorizontalAlignment.Center
 		ListTab.SortOrder = Enum.SortOrder.LayoutOrder
-		ListTab.Padding = UDim.new(0, 5)
+		ListTab.Padding = UDim.new(0, 8)
 		ListTab:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 			Page.CanvasSize=UDim2.new(0,0,0,ListTab.AbsoluteContentSize.Y+15)
 		end)
@@ -488,7 +496,256 @@ function SawUI:CreateWindow(wintab)
 		end)
 		
 		local elems={}
+
+		function elems:CreateSlider(slidertab)
+			local Slider = Instance.new("TextButton")
+			local USlider = Instance.new("UICorner")
+			local title = Instance.new("TextLabel")
+			local SliderFrame = Instance.new("Frame")
+			local USlider_2 = Instance.new("UICorner")
+			local SliderFrame2 = Instance.new("Frame")
+			local USlider_3 = Instance.new("UICorner")
+			local Box = Instance.new("TextBox")
+			local USlider_4 = Instance.new("UICorner")
+			local UIStro=Instance.new("UIStroke")
+			
+			UIStro.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+			UIStro.Color=Color3.fromRGB(149, 149, 149)
+			UIStro.Parent=Slider
+			
+			local UIStro2=Instance.new("UIStroke")
+			
+			UIStro2.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+			UIStro2.Color=Color3.fromRGB(149, 149, 149)
+			UIStro2.Parent=Box
+			
+			local UIStro4=Instance.new("UIStroke")
+			
+			UIStro4.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+			UIStro4.Color=Color3.fromRGB(149, 149, 149)
+			UIStro4.Parent=SliderFrame2
+			
+			local UIStro3=Instance.new("UIStroke")
+			
+			UIStro3.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+			UIStro3.Color=Color3.fromRGB(149, 149, 149)
+			UIStro3.Parent=SliderFrame
+			
+			Slider.Name = "Slider"
+			Slider.Parent = Page
+			Slider.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+			Slider.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Slider.BorderSizePixel = 0
+			Slider.ClipsDescendants = true
+			Slider.Position = UDim2.new(0.0294117648, 0, -0.217821777, 0)
+			Slider.Size = UDim2.new(1, -20, 0, 60)
+			Slider.AutoButtonColor = false
+			Slider.Font = Enum.Font.Gotham
+			Slider.Text = ""
+			Slider.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Slider.TextSize = 18.000
+			
+			USlider.Name = "USlider"
+			USlider.Parent = Slider
+			
+			title.Name = "title"
+			title.Parent = Slider
+			title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			title.BackgroundTransparency = 1.000
+			title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			title.BorderSizePixel = 0
+			title.Position = UDim2.new(0, 10, 0, 0)
+			title.Size = UDim2.new(0, 234, 0, 28)
+			title.Font = Enum.Font.Gotham
+			title.Text = slidertab["title"]
+			title.TextColor3 = Color3.fromRGB(255, 255, 255)
+			title.TextSize = 20.000
+			title.TextXAlignment = Enum.TextXAlignment.Left
+			
+			SliderFrame.Name = "SliderFrame"
+			SliderFrame.Parent = Slider
+			SliderFrame.BackgroundColor3 = Color3.fromRGB(52, 52, 52)
+			SliderFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderFrame.BorderSizePixel = 0
+			SliderFrame.ClipsDescendants = true
+			SliderFrame.Position = UDim2.new(0.0309999995, 0, 0, 33)
+			SliderFrame.Size = UDim2.new(0, 303, 0, 18)
+			
+			USlider_2.CornerRadius = UDim.new(0, 4)
+			USlider_2.Name = "USlider"
+			USlider_2.Parent = SliderFrame
+			
+			SliderFrame2.Name = "SliderFrame2"
+			SliderFrame2.Parent = SliderFrame
+			SliderFrame2.BackgroundColor3 = Color3.fromRGB(85, 170, 255)
+			SliderFrame2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderFrame2.BorderSizePixel = 0
+			SliderFrame2.Size = UDim2.new(0.5, 0, 1, 0)
+			
+			USlider_3.CornerRadius = UDim.new(0, 4)
+			USlider_3.Name = "USlider"
+			USlider_3.Parent = SliderFrame2
+			
+			Box.Name = "Box"
+			Box.Parent = Slider
+			Box.BackgroundColor3 = Color3.fromRGB(52, 52, 52)
+			Box.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Box.BorderSizePixel = 0
+			Box.Position = UDim2.new(0.675000012, 0, 0.100000001, 0)
+			Box.Size = UDim2.new(0, 95, 0, 21)
+			Box.ClearTextOnFocus = false
+			Box.Font = Enum.Font.Gotham
+			Box.Text = ""
+			Box.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Box.TextSize = 14.000
+			Box.TextWrapped = true
+			
+			USlider_4.CornerRadius = UDim.new(0, 4)
+			USlider_4.Name = "USlider"
+			USlider_4.Parent = Box
+
+			local GlobalSliderValue = 0
+			local Dragging = false
+			local function Sliding(Input)
+				local Position = UDim2.new(math.clamp((Input.Position.X - SliderFrame.AbsolutePosition.X) / SliderFrame.AbsoluteSize.X,0,1),0,1,0)
+				SliderFrame2.Size = Position
+				local SliderPrecise = ((Position.X.Scale * slidertab["Max"]) / slidertab["Max"]) * (slidertab["Max"] - slidertab["Min"]) + slidertab["Min"]
+				local SliderNonPrecise = math.floor(((Position.X.Scale * slidertab["Max"]) / slidertab["Max"]) * (slidertab["Max"] - slidertab["Min"]) + slidertab["Min"])
+				local SliderValue = slidertab["Precise"] and SliderNonPrecise or SliderPrecise
+				SliderValue = tonumber(string.format("%.2f", SliderValue))
+				GlobalSliderValue = SliderValue
+				Box.Text = tostring(SliderValue)
+				slidertab["callback"](GlobalSliderValue)
+			end
+			local function SetValue(Value)
+				GlobalSliderValue = Value
+				SliderFrame2.Size = UDim2.new(Value / slidertab["Max"],0,1,0)
+				Box.Text = Value
+				slidertab["callback"](Value)
+			end
+			SetValue(slidertab["Precise"])
+			Box.FocusLost:Connect(function()
+				if not tonumber(Box.Text) then
+					Box.Text = GlobalSliderValue
+				elseif Box.Text == "" or tonumber(Box.Text) <= slidertab["Min"] then
+					Box.Text = slidertab["Min"]
+				elseif Box.Text == "" or tonumber(Box.Text) >= slidertab["Max"] then
+					Box.Text = slidertab["Max"]
+				end
+
+				GlobalSliderValue = Box.Text
+				SliderFrame2.Size = UDim2.new(Box.Text / slidertab["Max"],0,1,0)
+				slidertab["callback"](tonumber(Box.Text))
+			end)
+			SliderFrame.InputBegan:Connect(function(Input)
+				if Input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch  then
+					Sliding(Input)
+					Dragging = true
+				end
+			end)
+
+			SliderFrame.InputEnded:Connect(function(Input)
+				if Input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch  then
+					Dragging = false
+				end
+			end)
+			game:GetService("UserInputService").InputChanged:Connect(function(Input)
+				if Dragging and Input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+					Sliding(Input)
+				end
+			end)
+		end
 		
+		function elems:CreateTextbox(boxtab)
+			local Textbox = Instance.new("TextButton")
+			local Ubox = Instance.new("UICorner")
+			local help_outline = Instance.new("ImageButton")
+			local title = Instance.new("TextLabel")
+			local Box = Instance.new("TextBox")
+			local UBox = Instance.new("UICorner")
+			local UIStro=Instance.new("UIStroke")
+			
+			UIStro.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+			UIStro.Color=Color3.fromRGB(149, 149, 149)
+			UIStro.Parent=Textbox
+			
+			local UIStro2=Instance.new("UIStroke")
+			
+			UIStro2.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
+			UIStro2.Color=Color3.fromRGB(149, 149, 149)
+			UIStro2.Parent=Box
+			
+			Textbox.Name = "Textbox"
+			Textbox.Parent = Page
+			Textbox.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
+			Textbox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Textbox.BorderSizePixel = 0
+			Textbox.ClipsDescendants = true
+			Textbox.Position = UDim2.new(0.0294117648, 0, -0.217821777, 0)
+			Textbox.Size = UDim2.new(1, -20, 0, 60)
+			Textbox.AutoButtonColor = false
+			Textbox.Font = Enum.Font.Gotham
+			Textbox.Text = ""
+			Textbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Textbox.TextSize = 18.000
+			
+			Ubox.Name = "Ubox"
+			Ubox.Parent = Textbox
+			
+			help_outline.Name = "help_outline"
+			help_outline.Parent = Textbox
+			help_outline.AnchorPoint = Vector2.new(0, 0.5)
+			help_outline.BackgroundTransparency = 1.000
+			help_outline.Position = UDim2.new(1, -32, 0, 14)
+			help_outline.Size = UDim2.new(0, 25, 0, 25)
+			help_outline.ZIndex = 2
+			help_outline.AutoButtonColor = false
+			help_outline.Image = "rbxassetid://3926305904"
+			help_outline.ImageRectOffset = Vector2.new(684, 804)
+			help_outline.ImageRectSize = Vector2.new(36, 36)
+			help_outline.MouseButton1Click:Connect(function()
+				set_use(boxtab["des"])
+			end)
+			title.Name = "title"
+			title.Parent = Textbox
+			title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			title.BackgroundTransparency = 1.000
+			title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			title.BorderSizePixel = 0
+			title.Position = UDim2.new(0, 10, 0, 0)
+			title.Size = UDim2.new(0, 234, 0, 28)
+			title.Font = Enum.Font.Gotham
+			title.Text = boxtab.title
+			title.TextColor3 = Color3.fromRGB(255, 255, 255)
+			title.TextSize = 20.000
+			title.TextXAlignment = Enum.TextXAlignment.Left
+			
+			Box.Name = "Box"
+			Box.Parent = Textbox
+			Box.BackgroundColor3 = Color3.fromRGB(52, 52, 52)
+			Box.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Box.BorderSizePixel = 0
+			Box.Position = UDim2.new(0.0309999995, 0, 0, 32)
+			Box.Size = UDim2.new(0, 303, 0, 20)
+			Box.ClearTextOnFocus = false
+			Box.Font = Enum.Font.Gotham
+			Box.Text = boxtab.default or ""
+			Box.PlaceholderText=boxtab["title"]
+			Box.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Box.TextSize = 14.000
+			Box.TextWrapped = true
+			
+			UBox.CornerRadius = UDim.new(0, 4)
+			UBox.Name = "UBox"
+			UBox.Parent = Box
+
+			boxtab.callback(Box.Text)
+				
+			Box.FocusLost:Connect(function()
+				boxtab.callback(Box.Text)
+			end)
+		end
+
 		function elems:CreateButton(buttontab)
 			local TextButton = Instance.new("TextButton")
 			local UICorner = Instance.new("UICorner")
@@ -591,7 +848,7 @@ function SawUI:CreateWindow(wintab)
 			title.Font = Enum.Font.Gotham
 			title.Text = toggletab["title"]
 			title.TextColor3 = Color3.fromRGB(255, 255, 255)
-			title.TextSize = 20.000
+			title.TextSize = 16.000
 			title.TextXAlignment = Enum.TextXAlignment.Left
 
 			ToggleFrame.Name = "ToggleFrame"
@@ -901,6 +1158,27 @@ HomeTab:CreateToggle({title="Auto Farm Coins",des="min 10m coins , max 10b coins
     getgenv().Configs.AutoFarmCoins=v
 end})
 
+HomeTab:CreateSlider({title="Min Coin",Min=10000000,Max=100000000,Precise=getgenv().Configs.MinCoins or 10000000,callback=function(v)
+	getgenv().Configs.MinCoins=v
+end})
+
+HomeTab:CreateSlider({title="Max Coin",Min=500000000,Max=500000000000,Precise=getgenv().Configs.MaxCoins or 10000000000,callback=function(v)
+	getgenv().Configs.MaxCoins=v
+end})
+
+HomeTab:CreateSection({title="Gems"})
+HomeTab:CreateToggle({title="Auto Farm Gems",des="min 10m coins , max 10b coins",default=getgenv().Configs.AutoFarmCoins,callback=function(v)
+    getgenv().Configs.AutoFarmGems=v
+end})
+
+HomeTab:CreateSlider({title="Min Gems",Min=50000,Max=500000,Precise=getgenv().Configs.MinGems or 50000,callback=function(v)
+	getgenv().Configs.MinGems=v
+end})
+
+HomeTab:CreateSlider({title="Max Gems",Min=1000000,Max=100000000,Precise=getgenv().Configs.MaxGems or 10000000,callback=function(v)
+	getgenv().Configs.MaxGems=v
+end})
+
 HomeTab:CreateSection({title="Automatic"})
 HomeTab:CreateToggle({title="Auto Bubble",default=getgenv().Configs.AutoBubble,callback=function(v)
     getgenv().Configs.AutoBubble=v
@@ -1040,15 +1318,16 @@ HomeTab:CreateToggle({title="Auto Mystery Box",default=getgenv().Configs.AutoMys
     getgenv().Configs.AutoMysteryBox=v
     spawn(function()
         while wait(1) and getgenv().Configs.AutoMysteryBox do
-            if game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Items.Main.ScrollingFrame.Powerups.Items:FindFirstChild("Mystery Box") and game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Items.Main.ScrollingFrame.Powerups.Items:FindFirstChild("Mystery Box").Visible==true then
-                local Amount=tonumber(game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Items.Main.ScrollingFrame.Powerups.Items:FindFirstChild("Mystery Box").Inner.Button.Inner.Amount.Text:split(" ")[2]:split(" ")[1])
-                if Amount>=10 then
-                    Amount=10
+			local data_box=Get_Data().Powerups["Mystery Box"]
+            if data_box > 0 then
+            
+                if data_box>=10 then
+                    data_box=10
                 end
                 local args = {
                     [1] = "UseGift",
                     [2] = "Mystery Box",
-                    [3] = Amount
+                    [3] = data_box
                 }
             
                 game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
@@ -1110,7 +1389,7 @@ end
 HomeTab:CreateDropdown({title="Select Potions",list=pointlist,default=pointselect,multi=true,callback=function(v)
     pointselect=v
 end})
-
+local petall=require(game:GetService("ReplicatedStorage").Shared.Data.Pets)
 function SetSettingGame()
     local args = {
         [1] = "SetSetting",
@@ -1368,14 +1647,17 @@ function Update_Time()
 	
 	timelaps.Text = Hour..":"..Minute..":"..Second
 end
-HomeTab:CreateToggle({title="Black Screen",default=getgenv().Configs.BackScreen,callback=function(v)
-	getgenv().Configs.BackScreen=v
+HomeTab:CreateToggle({title="Disable Anim Hatch",default=getgenv().Configs.DisableAnimHatch,callback=function(v)
+	getgenv().Configs.DisableAnimHatch=v
+end})
+HomeTab:CreateToggle({title="Black Screen",default=getgenv().Configs.BlackScreen,callback=function(v)
+	getgenv().Configs.BlackScreen=v
 	UIFARM.Enabled=v
 	pcall(function()
 		if v then
 			game:GetService("RunService"):Set3dRenderingEnabled(false)
 			spawn(function()
-				while wait() and getgenv().Configs.BackScreen do
+				while wait() and getgenv().Configs.BlackScreen do
 					Update_Time()
 					local coinsget=game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.HUD.Left.Currency.Coins.Frame.Label.Text
 					local gemsget=game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.HUD.Left.Currency.Gems.Frame.Label.Text
@@ -1389,6 +1671,21 @@ HomeTab:CreateToggle({title="Black Screen",default=getgenv().Configs.BackScreen,
 		end
 	end)
 end})
+
+spawn(function()
+	local v_u_39=require(game:GetService("ReplicatedStorage").Client.Effects.HatchEgg)
+	local oldPlay = v_u_39.Play
+	local mt = getrawmetatable(game)
+	setreadonly(mt, false)
+	local sda
+	sda=hookfunction(v_u_39.Play, function(p1, p2)
+		if getgenv().Configs.DisableAnimHatch then
+		   else
+			   return sda(p1, p2)
+		end
+	end)
+	setreadonly(mt, true)
+end)
 
 local PurchaseTab=Sawhub:CreatePage({title="Purchase"})
 PurchaseTab:CreateSection({title="Mastery"})
@@ -1492,11 +1789,11 @@ for k,u in v2 do
     end
 end
 
-HatchTab:CreateDropdown({title="Select Egg",list=eggs,default={getgenv().Configs.SelectEgg},callback=function(v)
+HatchTab:CreateDropdown({title="Select Egg",list=eggs,default={getgenv().Configs.SelectEgg or "Common Egg"},callback=function(v)
     getgenv().Configs.SelectEgg=v
 end})
 
-HatchTab:CreateDropdown({title="Select Rifts Egg",default=getgenv().Configs.SelectEggRifts,list=riftsegg,multi=true,callback=function(v)
+HatchTab:CreateDropdown({title="Select Rifts Egg",default=getgenv().Configs.SelectEggRifts or {},list=riftsegg,multi=true,callback=function(v)
     getgenv().Configs.SelectEggRifts=v
 end})
 
@@ -1548,7 +1845,10 @@ function enchant(petid)
         [2] = petid
     }
     
-game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Function"):InvokeServer(unpack(args))
+	game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Function"):InvokeServer(unpack(args))
+	
+	wait(0.01)
+	return false
 end
 
 local EnchantTab=Sawhub:CreatePage({title="Enchant"})
@@ -1557,20 +1857,28 @@ EnchantTab:CreateButton({title="Open/close enchant ui",callback=function()
 	game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Enchants.Visible = not game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Enchants.Visible
 end})
 EnchantTab:CreateSection({title="Automatic"})
-
-EnchantTab:CreateToggle({title="Enchant Equip Team",default=getgenv().Configs.AutoEnchantTeam,callback=function(v)
+local togautoenchant
+togautoenchant=EnchantTab:CreateToggle({title="Enchant Equip Team",default=getgenv().Configs.AutoEnchantTeam,callback=function(v)
     getgenv().Configs.AutoEnchantTeam=v
     spawn(function()
         while wait() and getgenv().Configs.AutoEnchantTeam do
-            for i,v in Get_Data().Teams[1].Pets do
-                enchant(v)
-                wait(.1)
+			local non_ent=false
+            for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Pets.Main.ScrollingFrame.Team.Main.List:GetChildren()) do
+				if string.find(v.Name,"-") then
+					local check_val=enchant(string.gsub(v.Name,"-team%-0",""))
+					if check_val==false then
+						non_ent=true
+					end
+				end
             end
+			if not non_ent then
+				togautoenchant:Set(false)
+			end
         end
     end)
 end})
 
-EnchantTab:CreateToggle({title="Enchant From UI (Chua lam)",default=getgenv().Configs.AutoEnchantUI,callback=function(v)
+EnchantTab:CreateToggle({title="Enchant UI (Chua lam)",default=getgenv().Configs.AutoEnchantUI,callback=function(v)
     getgenv().Configs.AutoEnchantUI=v
 end})
 
@@ -1590,7 +1898,7 @@ end
 EnchantTab:CreateSection({title="Enchants"})
 
 
-EnchantTab:CreateDropdown({title="Enchant 1",list=listenchant,default=getgenv().Configs.ListEnchants,multi=true,callback=function(v)
+EnchantTab:CreateDropdown({title="Enchant 1",list=listenchant,default=getgenv().Configs.ListEnchants or {},multi=true,callback=function(v)
 	getgenv().Configs.ListEnchants=v
 end})
 
@@ -1633,21 +1941,30 @@ end})
 
 PetTab:CreateToggle({title="Auto Delete Pet",default=getgenv().Configs.AutoDeletePet,callback=function(v)
     getgenv().Configs.AutoDeletePet=v
-    
 end})
 
 PetTab:CreateDropdown({title="Select Pet Delete",list={"Common","Rare","Unique","Epic"},default=getgenv().Configs.deletepet or {},multi=true,callback=function(v)
 	getgenv().Configs.deletepet=v
 end})
 
+local SettingTab=Sawhub:CreatePage({title="Settings"})
+SettingTab:CreateSection({title="Webhook"})
+SettingTab:CreateTextbox({title="Webhook Url",default=getgenv().Configs.WebhookUrl,callback=function(v)
+    getgenv().Configs.WebhookUrl=v
+end})
+SettingTab:CreateToggle({title="Webhook Hatch",default=getgenv().Configs.WebhookHatch,callback=function(v)
+    getgenv().Configs.WebhookHatch=v
+end})
+
 spawn(function()
-	while wait(60) do
-        if AutoDeletePet then
+	while wait(1) do
+        if getgenv().Configs.AutoDeletePet then
             local petdelte={}
             for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Pets.Main.ScrollingFrame.Pets:GetChildren()) do
                 if v.Name~="UIPadding" and v.Name~="UIGridLayout" and v.Name~="Frame" and string.find(v.Name,"-") then
                     local namepet=v.Inner.Button.Inner.DisplayName.Text
-                    if table.find(deletepet,petall[namepet].Rarity) then
+                    if table.find(getgenv().Configs.deletepet,petall[namepet].Rarity) then
+						print(v.Name)
                         table.insert(petdelte,v.Name)
                     end
                 end
@@ -1660,7 +1977,9 @@ spawn(function()
                 }
                 
                 game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
-            end
+				
+			end
+			wait(60)
         end
 	end
 end)
@@ -1704,7 +2023,7 @@ end
 
 spawn(function()
     while wait() do
-        if getgenv().Configs.AutoRoyal and workspace.Rendered.Rifts:FindFirstChild("royal-chest") and game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Items.Main.ScrollingFrame.Powerups.Items:FindFirstChild("Royal Key") and game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Inventory.Frame.Inner.Items.Main.ScrollingFrame.Powerups.Items:FindFirstChild("Royal Key").Visible==true then
+        if getgenv().Configs.AutoRoyal and workspace.Rendered.Rifts:FindFirstChild("royal-chest") and Get_Data().Powerups["Royal Key"] > 0 then
             EnableTP=true
             while getgenv().Configs.AutoRoyal and workspace.Rendered.Rifts:FindFirstChild("royal-chest") and (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - workspace.Rendered.Rifts:FindFirstChild("royal-chest").Output.Position).Magnitude >= 10 do
                 TP(workspace.Rendered.Rifts:FindFirstChild("royal-chest").Output.CFrame)
@@ -1721,7 +2040,6 @@ spawn(function()
             game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
             
         elseif getgenv().Configs.AutoMysteryBox and #workspace.Rendered.Gifts:GetChildren() > 0 then
-
             for i,v in pairs(workspace.Rendered.Gifts:GetChildren()) do
                 EnableTP=true
                 while wait() and getgenv().Configs.AutoMysteryBox and v and v.Parent==workspace.Rendered.Gifts do
@@ -1734,10 +2052,28 @@ spawn(function()
                 end
                 EnableTP=false
             end
-        elseif getgenv().Configs.AutoFarmCoins and Get_Data().Coins <= 10000000 then
-            while wait(1) and getgenv().Configs.AutoFarmCoins and Get_Data().Coins <= 10000000000 do
+		elseif getgenv().Configs.AutoFarmGems and Get_Data().Gems <= getgenv().Configs.MinGems then
+            while wait(1) and getgenv().Configs.AutoFarmGems and Get_Data().Gems <= getgenv().Configs.MaxCoins do
                 UseTpGame("Zen")
             end
+        elseif getgenv().Configs.AutoFarmCoins and Get_Data().Coins <= getgenv().Configs.MinCoins then
+			local args = {
+				[1] = "EquipTeam",
+				[2] = 2
+			}
+
+			game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+
+            while wait(1) and getgenv().Configs.AutoFarmCoins and Get_Data().Coins <= getgenv().Configs.MaxCoins do
+                UseTpGame("Zen")
+            end
+			local args = {
+				[1] = "EquipTeam",
+				[2] = 1
+			}
+			
+			game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+			
         elseif getgenv().Configs.AutoEggRifts and check_table(workspace.Rendered.Rifts:GetChildren(),getgenv().Configs.SelectEggRifts or {}) then
             EnableTP=true
             local eggsfind=check_table(workspace.Rendered.Rifts:GetChildren(),getgenv().Configs.SelectEggRifts or {}).Name
@@ -1792,21 +2128,21 @@ function TP(cf)
     local besttp
     local bestpos=math.huge
     for i,v in pairs(workspace.Worlds["The Overworld"].Islands:GetChildren()) do
-        if (cf.Position-v.Island.UnlockHitbox.Position).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude -  50 and (cf.Position-v.Island.UnlockHitbox.Position).Magnitude<bestpos then
+        if (cf.Position-v.Island.UnlockHitbox.Position).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude -  100 and (cf.Position-v.Island.UnlockHitbox.Position).Magnitude<bestpos then
             bestpos=(cf.Position-v.Island.UnlockHitbox.Position).Magnitude
             besttp="Workspace.Worlds.The Overworld.Islands."..v.Name..".Island.Portal.Spawn"
         end
     end
 
 	for i,v in pairs(besttpnew) do
-		if (cf.Position-v.Position).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude - 50 and (cf.Position-v.Position).Magnitude<bestpos then
+		if (cf.Position-v.Position).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude - 100 and (cf.Position-v.Position).Magnitude<bestpos then
             bestpos=(cf.Position-v.Position).Magnitude
             besttp=i
         end
 	end
 
     local vitridacbiet=workspace.Worlds["The Overworld"].SpawnLocation.Position
-    if (cf.Position-vitridacbiet).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude -  50 and (cf.Position-vitridacbiet).Magnitude<bestpos then
+    if (cf.Position-vitridacbiet).Magnitude < (cf.Position-player.Character.HumanoidRootPart.Position).Magnitude -  100 and (cf.Position-vitridacbiet).Magnitude<bestpos then
         besttp="Workspace.Worlds.The Overworld.PortalSpawn"
     end
 
@@ -1908,3 +2244,168 @@ task.spawn(function()
 		end
 	end
 end)
+
+game.CoreGui.DescendantAdded:Connect(function()
+	pcall(function()
+		if game.CoreGui.RobloxPromptGui.promptOverlay:FindFirstChild("ErrorPrompt") then
+			while wait() do
+				game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+				wait(5)
+			end
+		end
+	end)
+end)
+local eggscharity = require(game:GetService("ReplicatedStorage").Shared.Data.Eggs)
+
+function getpresen(namepet)
+	for _,v in pairs(eggscharity) do
+		for i,v2 in pairs(v.Pool) do
+			if v2.Item.Name==namepet then
+				return v2.Chance
+			end
+		end
+	end
+	return 0.0000000001
+end
+
+function webhook(a,c,b)
+	if not getgenv().Configs.WebhookUrl or getgenv().Configs.WebhookUrl=="" then
+		return
+	end
+	local petimage=petall[a].Images
+	local tile = (1/tonumber(getpresen(a)))*100
+
+	local imageurl=""
+	if c=="true" and b=="true" then
+		imageurl=petimage["MythicShiny"]
+		tile=tile*4000
+	elseif c=="true" then
+		imageurl=petimage["Shiny"]
+		tile=tile*100
+	elseif b=="true" then
+		imageurl=petimage["Mythic"]
+		tile=tile*40
+	else
+		imageurl=petimage["Normal"]
+	end
+	local mythic=(b=="true" and "[Mythic]") or ""
+	local shiny=(c=="true" and "[Shiny]") or ""
+	local namepet=mythic..shiny..a
+
+	id='http://67.220.85.146:6291/get-image/'..string.match(imageurl, "rbxassetid://(%d+)")
+
+    local msg = {
+        ["content"] = "@everyone",
+        ["embeds"] = {{
+            ["title"] = "Saw Hub",
+            ["description"]="**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Hatched**\n- "..namepet.."\n- Rarity: **1 in "..format_thousands(tile).."**\n- Total Hatched: **"..format_thousands(game:GetService("Players").LocalPlayer.leaderstats["\240\159\165\154 Hatches"].Value).."**",
+			["thumbnail"] = {
+				["url"] = id
+			},
+            ["type"] = "rich",
+            ["color"] = tonumber(47103),
+            ["footer"] = {
+                ["text"] = "Saw Hub (" .. os.date("%X") .. ")"
+            }
+        }}
+    }
+
+    request({
+        Url ="https://discord.com/api/webhooks/1360617343499370768/xfso2SpxQYsRMwjg-CEp2vzDqAWYjeDU8rS8wDe3xQSJgORwHHXrriRBw5kMGeT_6InN",
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = game:GetService("HttpService"):JSONEncode(msg)
+    })
+end
+
+function webhook2(a,c)
+	
+	-- local mythic=(a=="true" and "- [Royal Chest] ".."999".."m\n") or ""
+	-- local shiny=(c=="true" and "- [Silly Egg] ".."999".."m") or ""
+
+    local mythic=(a=="true" and "- [Royal Chest] "..math.round(workspace.Rendered.Rifts:FindFirstChild("royal-chest").Output.CFrame.Y).."m\n") or ""
+	local shiny=(c=="true" and "- [Silly Egg] "..math.round(workspace.Rendered.Rifts:FindFirstChild("silly-egg").Output.CFrame.Y).."m") or ""
+
+    local msg = {
+        ["content"] = "@everyone",
+        ["embeds"] = {{
+            ["title"] = "Saw Hub",
+            ["description"]="**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Chest/Egg**\n"..mythic..shiny,
+            ["fields"]= {
+                {
+                    ["name"]= "Server Script",
+                    ["value"]= '```game:GetService("TeleportService"):TeleportToPlaceInstance('..game.PlaceId..",'"..game.JobId.."',game.Players.LocalPlayer)```",
+                    ["inline"]= false,
+                },
+            },
+            ["type"] = "rich",
+            ["color"] = tonumber(47103),
+            ["footer"] = {
+                ["text"] = "Saw Hub (" .. os.date("%X") .. ")"
+            }
+        }}
+    }   
+
+    request({
+        Url =getgenv().Configs.WebhookUrl,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = game:GetService("HttpService"):JSONEncode(msg)
+    })
+end
+
+spawn(function()
+	local t
+	local tchest
+	local doublechest
+	
+	while wait(1) do
+		local f1=workspace.Rendered.Rifts:FindFirstChild("royal-chest")
+		local f2=workspace.Rendered.Rifts:FindFirstChild("silly-egg")
+		
+		if f1 and f2 and (not doublechest or tick()-doublechest>=300) then
+			webhook2("true","true")
+			doublechest=tick()
+		elseif f1 and (not tchest or tick()-tchest>=300) then
+			webhook2("true","false")
+			tchest=tick()
+		elseif f2 and (not t or tick()-t>=300) then
+			webhook2("false","true")
+			t=tick()
+		end
+	end
+end)
+
+local v1 = game:GetService("ReplicatedStorage")
+local v_u_5 = require(v1.Shared.Framework.Network.Remote)
+v_u_5.Event("HatchEgg"):Connect(function(p13)
+    if p13 and getgenv().Configs.WebhookHatch then
+        for _, v14 in p13.Pets do
+            if not v14.Deleted then
+                local v15 = v14.Pet
+				local petrarity = petall[v15.Name].Rarity
+				if not table.find(getgenv().Configs.deletepet,petrarity) then
+                	webhook(v15.Name,tostring(v15.Shiny),tostring(v15.Mythic))
+				end
+            end
+        end
+    end
+end)
+
+for i, v in next, getconnections(game.Players.LocalPlayer.Idled) do
+    pcall(function()
+		v:Disable()
+	end)
+end
+local vu = game:GetService("VirtualUser")
+game:GetService("Players").LocalPlayer.Idled:connect(
+    function()
+        vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+        wait(1)
+        vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    end
+)
