@@ -1282,7 +1282,8 @@ for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Seed_Shop.Fram
         end
     end
 end
-
+local isMobile = UserInputService.TouchEnabled
+local isPC = UserInputService.KeyboardEnabled and not isMobile
 
 function Get_Fruit()
     local fruit={}
@@ -1307,37 +1308,85 @@ function Collect_Moonlit()
 end
 
 function UnLock_Moonlit()
-    for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Inventory.ScrollingFrame.UIGridFrame:GetChildren()) do
-        if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==true then
-            for i,v in pairs(getconnections(v.MouseButton2Click)) do
-                v.Function()
-            end
-        end
-    end
-    for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Hotbar:GetChildren()) do
-        if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==true then
-            for i,v in pairs(getconnections(v.MouseButton2Click)) do
-                v.Function()
-            end
-        end
-    end
+	if isMobile then
+		for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Inventory.ScrollingFrame.UIGridFrame:GetChildren()) do
+			if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==true then
+				for i,v in pairs(getconnections(v.MouseButton1Click)) do
+					v.Function()
+				end
+				for i,v in pairs(getconnections(v.MouseButton1Click)) do
+					v.Function()
+				end
+			end
+		end
+		for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Hotbar:GetChildren()) do
+			if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==true then
+				for i,v in pairs(getconnections(v.MouseButton1Click)) do
+					v.Function()
+				end
+				for i,v in pairs(getconnections(v.MouseButton1Click)) do
+					v.Function()
+				end
+			end
+		end
+	else
+	
+		for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Inventory.ScrollingFrame.UIGridFrame:GetChildren()) do
+			if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==true then
+				for i,v in pairs(getconnections(v.MouseButton2Click)) do
+					v.Function()
+				end
+			end
+		end
+		for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Hotbar:GetChildren()) do
+			if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==true then
+				for i,v in pairs(getconnections(v.MouseButton2Click)) do
+					v.Function()
+				end
+			end
+		end
+	end
 end 
 
 function Lock_Moonlit()
-    for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Inventory.ScrollingFrame.UIGridFrame:GetChildren()) do
-        if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==false then
-            for i,v in pairs(getconnections(v.MouseButton2Click)) do
-                v.Function()
-            end
-        end
-    end
-    for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Hotbar:GetChildren()) do
-        if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==false then
-            for i,v in pairs(getconnections(v.MouseButton2Click)) do
-                v.Function()
-            end
-        end
-    end
+    if isMobile then
+		for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Inventory.ScrollingFrame.UIGridFrame:GetChildren()) do
+			if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==false then
+				for i,v in pairs(getconnections(v.MouseButton1Click)) do
+					v.Function()
+				end
+				for i,v in pairs(getconnections(v.MouseButton1Click)) do
+					v.Function()
+				end
+			end
+		end
+		for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Hotbar:GetChildren()) do
+			if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==false then
+				for i,v in pairs(getconnections(v.MouseButton1Click)) do
+					v.Function()
+				end
+				for i,v in pairs(getconnections(v.MouseButton1Click)) do
+					v.Function()
+				end
+			end
+		end
+	else
+	
+		for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Inventory.ScrollingFrame.UIGridFrame:GetChildren()) do
+			if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==false then
+				for i,v in pairs(getconnections(v.MouseButton2Click)) do
+					v.Function()
+				end
+			end
+		end
+		for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.BackpackGui.Backpack.Hotbar:GetChildren()) do
+			if v.Name ~="UIGridLayout" and v:FindFirstChild("ToolName") and string.find(v.ToolName.Text,"Moonlit") and v.FavIcon.Visible==false then
+				for i,v in pairs(getconnections(v.MouseButton2Click)) do
+					v.Function()
+				end
+			end
+		end
+	end
 end 
 
 function check_str_and(v,v2)
@@ -1348,232 +1397,102 @@ function check_str_and(v,v2)
     end
     return false
 end
-function Get_Seed()
-    for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
-        if string.find(v.Name,"Seed") and check_str_and(v.Name,getgenv().Configs.SeedPut) then
-            game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-            local clean=v.Name:gsub(" Seed", ""):gsub(" %[%w+%]", "")
-            repeat wait()
-                for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-                    if not v or not getgenv().Configs.AutoPuts or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                        break
-                    end
-                    local cf=kuku.CFrame
-                    local sizex,sizez=kuku.Size.X,kuku.Size.Z
-                    local fx=math.round(sizex/2)
-                    local fz=math.round(sizez/2)
-                    for z=-fz,fz do    
-                        for x=-fx,fx do
-                            if v.Parent==game:GetService("Players").LocalPlayer.Backpack then
-                                game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-                            end
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X+x,5,cf.Z+z)
-                            local args = {
-                                [1] = Vector3.new(cf.X+x,cf.Y,cf.Z+z),
-                                [2] = clean
-                            }
+local function PlaceItem(toolName, remoteName, remoteArgsBuilder, checkConfigFlag)
+    local player = game.Players.LocalPlayer
+    local function isActive(tool)
+        return tool and getgenv().Configs[checkConfigFlag] and (tool.Parent == player.Character or tool.Parent == player.Backpack)
+    end
 
-                            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Plant_RE"):FireServer(unpack(args))
-                            if not v or not getgenv().Configs.AutoPuts or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                                break
+    for _, tool in pairs(player.Backpack:GetChildren()) do
+        if tool.Name == toolName or string.find(tool.Name, "Seed") and toolName == "Seed" and check_str_and(tool.Name, getgenv().Configs.SeedPut) then
+            player.Character.Humanoid:EquipTool(tool)
+            local clean = tool.Name:gsub(" Seed", ""):gsub(" %[%w+%]", "")
+            repeat
+                task.wait()
+                for _, plot in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
+                    if not isActive(tool) then break end
+                    local cf, sx, sz = plot.CFrame, math.round(plot.Size.X/2), math.round(plot.Size.Z/2)
+
+                    for z = -sz, sz do
+                        for x = -sx, sx do
+                            if tool.Parent == player.Backpack then
+                                player.Character.Humanoid:EquipTool(tool)
                             end
-                            wait()
+                            local position = Vector3.new(cf.X + x, cf.Y, cf.Z + z)
+                            player.Character.HumanoidRootPart.CFrame = CFrame.new(cf.X + x, 5, cf.Z + z)
+                            local args = remoteArgsBuilder(position, clean)
+                            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild(remoteName):FireServer(unpack(args))
+                            if not isActive(tool) then break end
+                            task.wait()
                         end
-                        if not v or not getgenv().Configs.AutoPuts or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                            break
-                        end
+                        if not isActive(tool) then break end
                     end
                 end
-            until not v or not getgenv().Configs.AutoPuts or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) 
-        end
-    end
-    for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-        if not v or not getgenv().Configs.AutoPuts or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-            break
-        end
-        local cf=kuku.CFrame
-        local sizex,sizez=kuku.Size.X,kuku.Size.Z
-        local fx=math.round(sizex/2)
-        local fz=math.round(sizez/2)
-        for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
-            if string.find(v.Name,"Seed") then
-                local clean=v.Name:gsub(" Seed", ""):gsub(" %[%w+%]", "")
-                repeat wait()
-                    for z=-fz,fz do    
-                        for x=-fx,fx do
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X+x,5,cf.Z+z)
-                            local args = {
-                                [1] = Vector3.new(cf.X+x,cf.Y,cf.Z+z),
-                                [2] = clean
-                            }
-
-                            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Plant_RE"):FireServer(unpack(args))
-                            if not v or not getgenv().Configs.AutoPuts or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
-                                break
-                            end
-                            wait()
-                        end
-                        if not v or not getgenv().Configs.AutoPuts or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
-                            break
-                        end
-                    end
-                until not v or not getgenv().Configs.AutoPuts or v.Parent ~= game:GetService("Players").LocalPlayer.Character
-            end
+            until not isActive(tool)
         end
     end
 end
-
+function Get_Seed()
+    PlaceItem("Seed", "Plant_RE", function(position, clean)
+        return {position, clean}
+    end, "AutoPuts")
+end
 function Place_NightStaff()
-    for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
-        if v.Name=="Night Staff" then
-            game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-            repeat wait()
-                for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-                    if not v or not getgenv().Configs.AutoPlaceNightStaff or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                        break
-                    end
-                    local cf=kuku.CFrame
-                    local sizex,sizez=kuku.Size.X,kuku.Size.Z
-                    local fx=math.round(sizex/2)
-                    local fz=math.round(sizez/2)
-                    for z=-fz,fz do    
-                        for x=-fx,fx do
-                            if v.Parent==game:GetService("Players").LocalPlayer.Backpack then
-                                game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-                            end
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
-                            wait()
-							local args = {
-								[1] = "Create",
-								[2] = CFrame.new(cf.X-x,5,cf.Z-z)
-							}
-							
-							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightStaffRemoteEvent"):FireServer(unpack(args))							
-                            if not v or not getgenv().Configs.AutoPlaceNightStaff or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                                break
-                            end
-                            wait()
-                        end
-                        if not v or not getgenv().Configs.AutoPlaceNightStaff or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                            break
-                        end
-                    end
-                end
-            until not v or not getgenv().Configs.AutoPlaceNightStaff or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) 
-        end
-    end
-    for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-        if not v or not getgenv().Configs.AutoPlaceNightStaff or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-            break
-        end
-        local cf=kuku.CFrame
-        local sizex,sizez=kuku.Size.X,kuku.Size.Z
-        local fx=math.round(sizex/2)
-        local fz=math.round(sizez/2)
-        for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
-            if v.Name=="Night Staff" then
-                repeat wait()
-                    for z=-fz,fz do    
-                        for x=-fx,fx do
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
-                            wait()
-							local args = {
-								[1] = "Create",
-								[2] = CFrame.new(cf.X-x,5,cf.Z-z)
-							}
-							
-							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightStaffRemoteEvent"):FireServer(unpack(args))							
-                            if not v or not getgenv().Configs.AutoPlaceNightStaff or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
-                                break
-                            end
-                            wait()
-                        end
-                        if not v or not getgenv().Configs.AutoPlaceNightStaff or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
-                            break
-                        end
-                    end
-                until not v or not getgenv().Configs.AutoPlaceNightStaff or v.Parent ~= game:GetService("Players").LocalPlayer.Character
-            end
-        end
-    end
+    PlaceItem("Night Staff", "NightStaffRemoteEvent", function(position)
+        return {"Create", CFrame.new(position)}
+    end, "AutoPlaceNightStaff")
+end
+
+function TryPlaceEgg(tool)
+	for _, plot in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
+		if not tool or #MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg then
+			break
+		end
+
+		local cf = plot.CFrame
+		local fx = math.round(plot.Size.X / 2)
+		local fz = math.round(plot.Size.Z / 2)
+
+		for z = -fz, fz do
+			for x = -fx, fx do
+				if tool.Parent == game.Players.LocalPlayer.Backpack then
+					game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+				end
+
+				local pos = Vector3.new(cf.X - x, cf.Y, cf.Z - z)
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(pos.X, 5, pos.Z)
+				task.wait()
+
+				game.ReplicatedStorage.GameEvents.PetEggService:FireServer("CreateEgg", pos)
+
+				if not tool or #MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (tool.Parent ~= game.Players.LocalPlayer.Character and tool.Parent ~= game.Players.LocalPlayer.Backpack) then
+					break
+				end
+
+				task.wait()
+			end
+			if not getgenv().Configs.AutoEgg then break end
+		end
+	end
 end
 
 function Auto_Egg()
-	if #MyFarm.Important.Objects_Physical:GetChildren() < 3 then
-		for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
-			if string.find(v.Name,"Egg") then
-				game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-				repeat wait()
-					for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-						if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-							break
-						end
-						local cf=kuku.CFrame
-						local sizex,sizez=kuku.Size.X,kuku.Size.Z
-						local fx=math.round(sizex/2)
-						local fz=math.round(sizez/2)
-						for z=-fz,fz do    
-							for x=-fx,fx do
-								if v.Parent==game:GetService("Players").LocalPlayer.Backpack then
-									game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-								end
-								game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
-								wait()
-								local args = {
-									[1] = "CreateEgg",
-									[2] = Vector3.new(cf.X-x,cf.Y,cf.Z-z)
-								}
-								
-								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
-								
-								if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-									break
-								end
-								wait()
-							end
-							if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-								break
-							end
-						end
-					end
-				until not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) or not getgenv().Configs.AutoEgg 
-			end
-		end
-		for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-			if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-				break
-			end
-			local cf=kuku.CFrame
-			local sizex,sizez=kuku.Size.X,kuku.Size.Z
-			local fx=math.round(sizex/2)
-			local fz=math.round(sizez/2)
-			for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
-				if string.find(v.Name,"Egg") then
+	if #MyFarm.Important.Objects_Physical:GetChildren() >= 3 then return end
 
-					repeat wait()
-						for z=-fz,fz do    
-							for x=-fx,fx do
-								game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
-								wait()
-								local args = {
-									[1] = "CreateEgg",
-									[2] = Vector3.new(cf.X-x,cf.Y,cf.Z-z)
-								}
-								
-								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
-								
-								if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3  or not getgenv().Configs.AutoEgg or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
-									break
-								end
-								wait()
-							end
-							if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
-								break
-							end
-						end
-					until not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or v.Parent ~= game:GetService("Players").LocalPlayer.Character or not getgenv().Configs.AutoEgg
-				end
-			end
+	for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+		if string.find(tool.Name, "Egg") then
+			game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+			repeat
+				TryPlaceEgg(tool)
+			until not tool or #MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (tool.Parent ~= game.Players.LocalPlayer.Character and tool.Parent ~= game.Players.LocalPlayer.Backpack)
+		end
+	end
+
+	for _, tool in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+		if string.find(tool.Name, "Egg") then
+			repeat
+				TryPlaceEgg(tool)
+			until not tool or #MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or tool.Parent ~= game.Players.LocalPlayer.Character
 		end
 	end
 end
@@ -1618,89 +1537,92 @@ end})
 local tick_out=tick()
 local tick_moonsell=tick()
 local tick_sell=tick()
+local function FeedMoonlit()
+	if tick() - tick_moonsell >= 300 and getgenv().Configs.AutoFeedMoonlit then
+		UnLock_Moonlit()
+		wait(1)
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("GameEvents")
+			:WaitForChild("NightQuestRemoteEvent")
+			:FireServer("SubmitAllPlants")
+		tick_moonsell = tick()
+	end
+end
+
+local function LockMoonlitIfEnabled()
+	if getgenv().Configs.AutoLockMoonlit then
+		wait(1)
+		Lock_Moonlit()
+		wait(1)
+		Lock_Moonlit()
+	end
+end
+
+local function SellInventory()
+	tick_sell = tick()
+	local sellCFrame = CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
+	game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = sellCFrame
+	wait(1)
+	game:GetService("ReplicatedStorage")
+		:WaitForChild("GameEvents")
+		:WaitForChild("Sell_Inventory")
+		:FireServer()
+	wait(5)
+end
+
+local function ShouldSell()
+	local backpack = game.Players.LocalPlayer.Backpack
+	return #backpack:GetChildren() >= getgenv().Configs.BackpackSell or tick() - tick_sell >= getgenv().Configs.TimeSell
+end
+
+local function TeleportAndCollect(v)
+	game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Parent.CFrame
+	wait(0.05)
+	fireproximityprompt(v, 1, true)
+	wait()
+end
+
+local function CollectFruits()
+	local fruits = Get_Fruit()
+	for _, v in pairs(fruits) do
+		local parent = v and v.Parent
+		local grandparent = parent and parent.Parent
+		if parent and grandparent then
+			local isMoonlit = grandparent:GetAttribute("Moonlit")
+			local shouldCollect = not check_str_and(grandparent.Name, getgenv().Configs.Anticollect) or isMoonlit
+			if shouldCollect then
+				TeleportAndCollect(v)
+
+				if ShouldSell() then
+					FeedMoonlit()
+					LockMoonlitIfEnabled()
+					SellInventory()
+				end
+			end
+		end
+	end
+end
 HomeTab:CreateToggle({title="Auto Collect",default=getgenv().Configs.AutoCollect,callback=function(v)
     getgenv().Configs.AutoCollect= v
-    spawn(function()
-        while getgenv().Configs.AutoCollect and wait() do
-            local fruits=Get_Fruit()
-            for i,v in pairs(fruits) do
-                if v and v.Parent and v.Parent.Parent:GetAttribute("Moonlit") then
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=v.Parent.CFrame
-                    wait(0.05)
-                    fireproximityprompt(v, 1, true)
-                    wait()
-                end
-            end
+	spawn(function()
+		while getgenv().Configs.AutoCollect do
+			CollectFruits()
 
-			if tick()-tick_moonsell>=300 and getgenv().Configs.AutoFeedMoonlit then
-				UnLock_Moonlit()
-				wait(1)
-				local args = {
-					[1] = "SubmitAllPlants"
-				}
-				game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
+			if tick() - tick_out >= getgenv().Configs.TimeCollect then
+				tick_out = tick()
+				CollectFruits()
 			end
-	
-			if getgenv().Configs.AutoLockMoonlit then
-				wait(1)
-				Lock_Moonlit()
+
+			FeedMoonlit()
+			LockMoonlitIfEnabled()
+
+			if ShouldSell() then
+				SellInventory()
 			end
-            if tick()-tick_out >= getgenv().Configs.TimeCollect then
-                local fruits=Get_Fruit()
-                for i,v in pairs(fruits) do
-                    if v and v.Parent and (not check_str_and(v.Parent.Parent.Name,getgenv().Configs.Anticollect) or v.Parent.Parent:GetAttribute("Moonlit")) then
-                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=v.Parent.CFrame
-                        wait(0.05)
-                        fireproximityprompt(v, 1, true)
-                        wait()
-						if #game.Players.LocalPlayer.Backpack:GetChildren() >= getgenv().Configs.BackpackSell or tick()-tick_sell >= getgenv().Configs.TimeSell then
-							if tick()-tick_moonsell>=300 and getgenv().Configs.AutoFeedMoonlit then
-								UnLock_Moonlit()
-								wait(1)
-								local args = {
-									[1] = "SubmitAllPlants"
-								}
-								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
-							end
-							wait(0.1)
-							if getgenv().Configs.AutoLockMoonlit then
-								wait(1)
-								Lock_Moonlit()
-							end
-							tick_sell=tick()
-							game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
-							wait(1)
-							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Sell_Inventory"):FireServer()
-							wait(5)
-						end
-                    end
-                end
-                tick_out=tick()
-            end
-			if tick()-tick_moonsell>=300 and getgenv().Configs.AutoFeedMoonlit then
-				UnLock_Moonlit()
-				wait(1)
-				local args = {
-					[1] = "SubmitAllPlants"
-				}
-				game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
-				tick_moonsell=tick()
-			end
-			if getgenv().Configs.AutoLockMoonlit then
-				wait(1)
-				Lock_Moonlit()
-				wait(1)
-				Lock_Moonlit()
-			end
-            if #game.Players.LocalPlayer.Backpack:GetChildren() >= getgenv().Configs.BackpackSell  or tick()-tick_sell >= getgenv().Configs.TimeSell then
-                tick_sell=tick()
-				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
-                wait(1)
-                game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Sell_Inventory"):FireServer()
-                wait(5)
-            end
-        end
-    end)
+
+			wait()
+		end
+	end)
 end})
 
 HomeTab:CreateDropdown({title="Seeds Put",list=allseeds,default=getgenv().Configs.SeedPut,multi=true,callback=function(v)
@@ -1743,43 +1665,50 @@ PetsTab:CreateDropdown({title="Fruit Feed",list=allseeds,default=getgenv().Confi
 end})
 PetsTab:CreateToggle({title="Auto Collect Feed",default=getgenv().Configs.AutoCollectFast,callback=function(v)
     getgenv().Configs.AutoCollectFast= v
-    spawn(function()
-        while getgenv().Configs.AutoCollectFast and wait() do
-            local fruits=Get_Fruit()
-            for i,v in pairs(fruits) do
-                if v and v.Parent and check_str_and(v.Parent.Parent.Name,getgenv().Configs.FruitFeed) and not v.Parent.Parent:GetAttribute("Moonlit") then
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=v.Parent.CFrame
-                    wait(0.05)
-                    fireproximityprompt(v, 1, true)
-                    wait()
-					if #game.Players.LocalPlayer.Backpack:GetChildren() >= getgenv().Configs.BackpackSell or tick()-tick_sell >= getgenv().Configs.TimeSell then
-						if tick()-tick_moonsell>=300 and getgenv().Configs.AutoFeedMoonlit then
-							UnLock_Moonlit()
-							wait(1)
-							local args = {
-								[1] = "SubmitAllPlants"
-							}
-							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
-						end
+	spawn(function()
+		while getgenv().Configs.AutoCollectFast and wait() do
+			local fruits = Get_Fruit()
+			for _, v in pairs(fruits) do
+				local fruitModel = v and v.Parent
+				local fruitTree = fruitModel and fruitModel.Parent
+	
+				if fruitModel and fruitTree 
+				and check_str_and(fruitTree.Name, getgenv().Configs.FruitFeed) 
+				and not fruitTree:GetAttribute("Moonlit") then
+	
+					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = fruitModel.CFrame
+					wait(0.05)
+					fireproximityprompt(v, 1, true)
+					wait()
+	
+					-- Balo đầy hoặc đến thời gian bán
+					if #game.Players.LocalPlayer.Backpack:GetChildren() >= getgenv().Configs.BackpackSell
+					or tick() - tick_sell >= getgenv().Configs.TimeSell then
+						
+						FeedMoonlit()
 						wait(0.1)
-						if getgenv().Configs.AutoLockMoonlit then
-							wait(1)
-							Lock_Moonlit()
-						end
-						tick_sell=tick()
-						game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
+						Lock_Moonlit()
+						tick_sell = tick()
+	
+						-- Di chuyển đến điểm bán
+						game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(
+							61.5817299, 2.99999976, 0.426786184,
+							-0.000244111798, 4.3232312e-08, -1,
+							1.65697653e-12, 1, 4.3232312e-08,
+							1, 8.89654062e-12, -0.000244111798
+						)
 						wait(1)
 						game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Sell_Inventory"):FireServer()
 						wait(5)
 					end
-                end
-            end
-			if getgenv().Configs.AutoLockMoonlit then
-				wait(1)
-				Lock_Moonlit()
+				end
 			end
-        end
-    end)
+	
+			-- Khóa lại Moonlit nếu bật
+			Lock_Moonlit()
+		end
+	end)
+	
 end})
 PetsTab:CreateToggle({title="Auto Feed",default=getgenv().Configs.AutoFeed,callback=function(v)
     getgenv().Configs.AutoFeed=v    
