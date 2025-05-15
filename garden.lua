@@ -1,4 +1,8 @@
-wait(5)
+repeat wait() until game:IsLoaded()
+wait(2)
+local VirtualUser = game:GetService('VirtualUser')
+VirtualUser:CaptureController()
+VirtualUser:ClickButton1(Vector2.new(851, 158), game:GetService("Workspace").Camera.CFrame)
 local SawUI={}
 local TS = game:GetService("TweenService")
 local plr = game:GetService("Players").LocalPlayer
@@ -11,7 +15,17 @@ local TweenService = game:GetService("TweenService")
 function TweenObject(obj, properties, duration, ...)
 	game:GetService("TweenService"):Create(obj, Tweeninfo(duration, ...), properties):Play()
 end
-
+local Theme = {
+    Background = Color3.fromRGB(25, 25, 30),       -- Darker background
+    SecondaryBackground = Color3.fromRGB(35, 35, 42), -- Slightly lighter for secondary elements
+    Accent = Color3.fromRGB(85, 170, 255),         -- Bright blue accent
+    TextColor = Color3.fromRGB(255, 255, 255),     -- White text
+    SubTextColor = Color3.fromRGB(180, 180, 180),  -- Light gray for secondary text
+    ElementBackground = Color3.fromRGB(45, 45, 55), -- Elements background
+    Success = Color3.fromRGB(0, 210, 105),         -- Green for success states
+    Warning = Color3.fromRGB(255, 140, 0),         -- Orange for warnings
+    Error = Color3.fromRGB(255, 60, 60)            -- Red for errors
+}
 function DraggingEnabled(frame, parent)
 	parent = parent or frame
 
@@ -85,48 +99,46 @@ function SawUI:CreateWindow(wintab)
 	local BtnMobile = Instance.new("TextButton")
 	local UICorner124 = Instance.new("UICorner")
 	local UIStrokeHe = Instance.new("UIStroke")
-	UIStrokeHe.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-	UIStrokeHe.Color=Color3.fromRGB(0,0,0)
-	UIStrokeHe.Thickness=2
-	UIStrokeHe.Parent=BtnMobile
-	
-	BtnMobile.Name = "BtnMobile"
-	BtnMobile.Parent = UI
-	BtnMobile.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	BtnMobile.BackgroundTransparency = 0.500
-	BtnMobile.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	BtnMobile.BorderSizePixel = 0
-	BtnMobile.Position = UDim2.new(0.03622251, 0, 0.0609756112, 0)
-	BtnMobile.Size = UDim2.new(0, 50, 0, 50)
-	BtnMobile.AutoButtonColor = false
-	BtnMobile.Font = Enum.Font.SourceSansBold
-	BtnMobile.Text = "OPEN"
-	BtnMobile.TextColor3 = Color3.fromRGB(0, 0, 0)
-	BtnMobile.TextScaled = true
-	BtnMobile.TextSize = 14.000
-	BtnMobile.TextWrapped = true
-	
-	UICorner124.Parent = BtnMobile
+	UIStrokeHe.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    UIStrokeHe.Color = Theme.Accent
+    UIStrokeHe.Thickness = 2
+    UIStrokeHe.Transparency = 0.2
+    UIStrokeHe.Parent = BtnMobile
+    
+    BtnMobile.Name = "BtnMobile"
+    BtnMobile.Parent = UI
+    BtnMobile.BackgroundColor3 = Theme.SecondaryBackground
+    BtnMobile.BackgroundTransparency = 0.3
+    BtnMobile.BorderSizePixel = 0
+    BtnMobile.Position = UDim2.new(0.03, 0, 0.06, 0)
+    BtnMobile.Size = UDim2.new(0, 50, 0, 50)
+    BtnMobile.AutoButtonColor = false
+    BtnMobile.Font = Enum.Font.GothamBold
+    BtnMobile.Text = "MENU"
+    BtnMobile.TextColor3 = Theme.TextColor
+    BtnMobile.TextSize = 14.000
 
-	Notify.Name = "Notify"
-	Notify.Parent = UI
-	Notify.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	Notify.BackgroundTransparency = 1.000
-	Notify.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	Notify.BorderSizePixel = 0
-	Notify.Size = UDim2.new(1, 0, 1, 0)
-	Notify.ZIndex = 2
+	UICorner124.CornerRadius = UDim.new(1, 0)  -- Make it round
+    UICorner124.Parent = BtnMobile
 
-	NotiList.Name = "NotiList"
-	NotiList.Parent = Notify
-	NotiList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	NotiList.SortOrder = Enum.SortOrder.LayoutOrder
-	NotiList.Padding = UDim.new(0, 7)
+    -- Improved notification system
+    Notify.Name = "Notify"
+    Notify.Parent = UI
+    Notify.BackgroundTransparency = 1
+    Notify.Size = UDim2.new(1, 0, 1, 0)
+    Notify.ZIndex = 5
 
-	NotiPadding.Name = "NotiPadding"
-	NotiPadding.Parent = Notify
-	NotiPadding.PaddingTop = UDim.new(0, 10)
-	
+    NotiList.Name = "NotiList"
+    NotiList.Parent = Notify
+    NotiList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+    NotiList.SortOrder = Enum.SortOrder.LayoutOrder
+    NotiList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    NotiList.Padding = UDim.new(0, 10)
+
+    NotiPadding.Name = "NotiPadding"
+    NotiPadding.Parent = Notify
+    NotiPadding.PaddingBottom = UDim.new(0, 20)
+    NotiPadding.PaddingRight = UDim.new(0, 20)
 	UIScale.Parent=HowToUse
 	UIScale.Scale=0
 	UIScale2.Parent=Main
@@ -361,49 +373,102 @@ function SawUI:CreateWindow(wintab)
 	local listpage={}
 	local startpage=false
 	
-	function crepage:Notify(message,colors)
-		colors = colors or Color3.fromRGB(0, 170, 0)
-		message= message or "None"
+	function crepage:Notify(message, options)
+		options = options or {}
+		local color = options.color or Theme.Success
+		local duration = options.duration or 3.5
+		local title = options.title or "Notification"
 		
-		local TextLabele = Instance.new("TextLabel")
+		local NotificationFrame = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
-		local UIStroke5 = Instance.new("UIStroke")
-
-
-		UIStroke5.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-		UIStroke5.Color=colors
-		UIStroke5.Parent=TextLabele
-
-
-		TextLabele.BackgroundColor3 = Color3.fromRGB(48, 48, 48)
-		TextLabele.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		TextLabele.BorderSizePixel = 0
-
-		TextLabele.Font = Enum.Font.Gotham
-		TextLabele.Text=message
-
-		TextLabele.TextColor3 = Color3.fromRGB(255, 255, 255)
-		TextLabele.TextSize = 14.000
-		TextLabele.Parent = Notify
+		local UIStroke = Instance.new("UIStroke")
+		local TitleLabel = Instance.new("TextLabel")
+		local MessageLabel = Instance.new("TextLabel")
+		local StatusBar = Instance.new("Frame")
+		local StatusBarCorner = Instance.new("UICorner")
+		local IconLabel = Instance.new("ImageLabel")
 		
-
-
-		UICorner.CornerRadius = UDim.new(0, 4)
-		UICorner.Parent = TextLabele
+		NotificationFrame.Name = "NotificationFrame"
+		NotificationFrame.BackgroundColor3 = Theme.SecondaryBackground
+		NotificationFrame.BorderSizePixel = 0
+		NotificationFrame.Position = UDim2.new(1, 20, 0, 0)  -- Start off-screen
+		NotificationFrame.Size = UDim2.new(0, 0, 0, 70)  -- Start with zero width
+		NotificationFrame.ClipsDescendants = true
+		NotificationFrame.Parent = Notify
 		
-		local tweenIn = TweenService:Create(TextLabele, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, TextLabele.TextBounds.X + 10, 0, 20)
-		})
-		tweenIn:Play()
-
-		task.delay(1.5, function()
-			local tweenOut = TweenService:Create(TextLabele, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-				Size = UDim2.new(0, 0, 0, 0)
-			})
-			tweenOut:Play()
-
-			tweenOut.Completed:Wait()
-			TextLabele:Destroy()
+		UICorner.CornerRadius = UDim.new(0, 6)
+		UICorner.Parent = NotificationFrame
+		
+		UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		UIStroke.Color = color
+		UIStroke.Thickness = 1
+		UIStroke.Parent = NotificationFrame
+		
+		StatusBar.Name = "StatusBar"
+		StatusBar.BackgroundColor3 = color
+		StatusBar.BorderSizePixel = 0
+		StatusBar.Position = UDim2.new(0, 0, 1, -3)
+		StatusBar.Size = UDim2.new(1, 0, 0, 3)
+		StatusBar.ZIndex = 5
+		StatusBar.Parent = NotificationFrame
+		
+		StatusBarCorner.CornerRadius = UDim.new(0, 3)
+		StatusBarCorner.Parent = StatusBar
+		
+		IconLabel.Name = "IconLabel"
+		IconLabel.BackgroundTransparency = 1
+		IconLabel.Position = UDim2.new(0, 10, 0, 10)
+		IconLabel.Size = UDim2.new(0, 20, 0, 20)
+		IconLabel.Image = "rbxassetid://7072718362"  -- Info icon
+		IconLabel.ImageColor3 = color
+		IconLabel.Parent = NotificationFrame
+		
+		TitleLabel.Name = "TitleLabel"
+		TitleLabel.BackgroundTransparency = 1
+		TitleLabel.Position = UDim2.new(0, 40, 0, 7)
+		TitleLabel.Size = UDim2.new(1, -50, 0, 20)
+		TitleLabel.Font = Enum.Font.GothamBold
+		TitleLabel.Text = title
+		TitleLabel.TextColor3 = Theme.TextColor
+		TitleLabel.TextSize = 14
+		TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+		TitleLabel.Parent = NotificationFrame
+		
+		MessageLabel.Name = "MessageLabel"
+		MessageLabel.BackgroundTransparency = 1
+		MessageLabel.Position = UDim2.new(0, 40, 0, 27)
+		MessageLabel.Size = UDim2.new(1, -50, 1, -37)
+		MessageLabel.Font = Enum.Font.Gotham
+		MessageLabel.Text = message
+		MessageLabel.TextColor3 = Theme.SubTextColor
+		MessageLabel.TextSize = 14
+		MessageLabel.TextWrapped = true
+		MessageLabel.TextXAlignment = Enum.TextXAlignment.Left
+		MessageLabel.TextYAlignment = Enum.TextYAlignment.Top
+		MessageLabel.Parent = NotificationFrame
+		
+		-- Calculate width based on text
+		local textWidth = game:GetService("TextService"):GetTextSize(
+			message, 
+			14, 
+			Enum.Font.Gotham, 
+			Vector2.new(300, math.huge)
+		).X
+		
+		local finalWidth = math.clamp(textWidth + 70, 200, 300)
+		
+		-- Animate in
+		TweenObject(NotificationFrame, {Size = UDim2.new(0, finalWidth, 0, 70)}, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+		TweenObject(NotificationFrame, {Position = UDim2.new(1, -finalWidth - 20, 0, 0)}, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+		
+		-- Animate status bar for countdown
+		TweenObject(StatusBar, {Size = UDim2.new(0, 0, 0, 3)}, duration, Enum.EasingStyle.Linear)
+		
+		-- Animate out after duration
+		task.delay(duration, function()
+			TweenObject(NotificationFrame, {Position = UDim2.new(1, 20, 0, 0)}, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+			task.wait(0.3)
+			NotificationFrame:Destroy()
 		end)
 	end
 	
@@ -486,150 +551,184 @@ function SawUI:CreateWindow(wintab)
 			local USlider_3 = Instance.new("UICorner")
 			local Box = Instance.new("TextBox")
 			local USlider_4 = Instance.new("UICorner")
-			local UIStro=Instance.new("UIStroke")
+			local SliderBall = Instance.new("Frame")
+			local SliderBallCorner = Instance.new("UICorner")
+			local UIStro = Instance.new("UIStroke")
 			
-			UIStro.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-			UIStro.Color=Color3.fromRGB(149, 149, 149)
-			UIStro.Parent=Slider
-			
-			local UIStro2=Instance.new("UIStroke")
-			
-			UIStro2.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-			UIStro2.Color=Color3.fromRGB(149, 149, 149)
-			UIStro2.Parent=Box
-			
-			local UIStro4=Instance.new("UIStroke")
-			
-			UIStro4.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-			UIStro4.Color=Color3.fromRGB(149, 149, 149)
-			UIStro4.Parent=SliderFrame2
-			
-			local UIStro3=Instance.new("UIStroke")
-			
-			UIStro3.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-			UIStro3.Color=Color3.fromRGB(149, 149, 149)
-			UIStro3.Parent=SliderFrame
+			UIStro.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			UIStro.Color = Theme.Accent
+			UIStro.Thickness = 1.5
+			UIStro.Transparency = 0.5
+			UIStro.Parent = Slider
 			
 			Slider.Name = "Slider"
 			Slider.Parent = Page
-			Slider.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
-			Slider.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Slider.BackgroundColor3 = Theme.ElementBackground
 			Slider.BorderSizePixel = 0
 			Slider.ClipsDescendants = true
-			Slider.Position = UDim2.new(0.0294117648, 0, -0.217821777, 0)
+			Slider.Position = UDim2.new(0.029, 0, -0.218, 0)
 			Slider.Size = UDim2.new(1, -20, 0, 60)
 			Slider.AutoButtonColor = false
 			Slider.Font = Enum.Font.Gotham
 			Slider.Text = ""
-			Slider.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Slider.TextColor3 = Theme.TextColor
 			Slider.TextSize = 18.000
 			
-			USlider.Name = "USlider"
+			-- Add hover effect
+			Slider.MouseEnter:Connect(function()
+				TweenObject(Slider, {BackgroundColor3 = Color3.fromRGB(
+					Theme.ElementBackground.R * 1.1,
+					Theme.ElementBackground.G * 1.1,
+					Theme.ElementBackground.B * 1.1
+				)}, 0.2)
+			end)
+			
+			Slider.MouseLeave:Connect(function()
+				TweenObject(Slider, {BackgroundColor3 = Theme.ElementBackground}, 0.2)
+			end)
+			
+			USlider.CornerRadius = UDim.new(0, 6)
 			USlider.Parent = Slider
 			
 			title.Name = "title"
 			title.Parent = Slider
-			title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			title.BackgroundTransparency = 1.000
-			title.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			title.BorderSizePixel = 0
+			title.BackgroundTransparency = 1
 			title.Position = UDim2.new(0, 10, 0, 0)
 			title.Size = UDim2.new(0, 234, 0, 28)
-			title.Font = Enum.Font.Gotham
+			title.Font = Enum.Font.GothamSemibold
 			title.Text = slidertab["title"]
-			title.TextColor3 = Color3.fromRGB(255, 255, 255)
-			title.TextSize = 20.000
+			title.TextColor3 = Theme.TextColor
+			title.TextSize = 16
 			title.TextXAlignment = Enum.TextXAlignment.Left
 			
 			SliderFrame.Name = "SliderFrame"
 			SliderFrame.Parent = Slider
 			SliderFrame.BackgroundColor3 = Color3.fromRGB(52, 52, 52)
-			SliderFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			SliderFrame.BorderSizePixel = 0
-			SliderFrame.ClipsDescendants = true
-			SliderFrame.Position = UDim2.new(0.0309999995, 0, 0, 33)
-			SliderFrame.Size = UDim2.new(0, 303, 0, 18)
+			SliderFrame.AnchorPoint=Vector2.new(0.5,0)
+			SliderFrame.Position = UDim2.new(0.5, 0, 0, 40)
+			SliderFrame.Size = UDim2.new(0, 290, 0, 6)  -- Thinner slider track
 			
-			USlider_2.CornerRadius = UDim.new(0, 4)
-			USlider_2.Name = "USlider"
+			USlider_2.CornerRadius = UDim.new(0, 3)
 			USlider_2.Parent = SliderFrame
 			
 			SliderFrame2.Name = "SliderFrame2"
 			SliderFrame2.Parent = SliderFrame
-			SliderFrame2.BackgroundColor3 = Color3.fromRGB(85, 170, 255)
-			SliderFrame2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SliderFrame2.BackgroundColor3 = Theme.Accent
 			SliderFrame2.BorderSizePixel = 0
 			SliderFrame2.Size = UDim2.new(0.5, 0, 1, 0)
 			
-			USlider_3.CornerRadius = UDim.new(0, 4)
-			USlider_3.Name = "USlider"
+			USlider_3.CornerRadius = UDim.new(0, 3)
 			USlider_3.Parent = SliderFrame2
+			
+			-- Add slider ball for better UX
+			SliderBall.Name = "SliderBall"
+			SliderBall.Parent = SliderFrame
+			SliderBall.AnchorPoint = Vector2.new(0.5, 0.5)
+			SliderBall.BackgroundColor3 = Theme.TextColor
+			SliderBall.BorderSizePixel = 0
+			SliderBall.Position = UDim2.new(0.5, 0, 0.5, 0)
+			SliderBall.Size = UDim2.new(0, 16, 0, 16)
+			
+			SliderBallCorner.CornerRadius = UDim.new(1, 0)
+			SliderBallCorner.Parent = SliderBall
+			
+			-- Add shadow to the ball
+			local BallShadow = Instance.new("ImageLabel")
+			BallShadow.Name = "BallShadow"
+			BallShadow.Parent = SliderBall
+			BallShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+			BallShadow.BackgroundTransparency = 1
+			BallShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+			BallShadow.Size = UDim2.new(1.5, 0, 1.5, 0)
+			BallShadow.ZIndex = 0
+			BallShadow.Image = "rbxassetid://1316045217"
+			BallShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+			BallShadow.ImageTransparency = 0.6
+			BallShadow.ScaleType = Enum.ScaleType.Slice
+			BallShadow.SliceCenter = Rect.new(10, 10, 118, 118)
 			
 			Box.Name = "Box"
 			Box.Parent = Slider
 			Box.BackgroundColor3 = Color3.fromRGB(52, 52, 52)
-			Box.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Box.BorderSizePixel = 0
-			Box.Position = UDim2.new(0.675000012, 0, 0.100000001, 0)
+			Box.Position = UDim2.new(0.675, 0, 0.1, 0)
 			Box.Size = UDim2.new(0, 95, 0, 21)
 			Box.ClearTextOnFocus = false
 			Box.Font = Enum.Font.Gotham
 			Box.Text = ""
-			Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-			Box.TextSize = 14.000
+			Box.TextColor3 = Theme.TextColor
+			Box.TextSize = 14
 			Box.TextWrapped = true
 			
 			USlider_4.CornerRadius = UDim.new(0, 4)
-			USlider_4.Name = "USlider"
 			USlider_4.Parent = Box
-
+		
 			local GlobalSliderValue = 0
 			local Dragging = false
+			
+			local function UpdateSliderBall(Position)
+				SliderBall.Position = UDim2.new(Position.X.Scale, 0, 0.5, 0)
+			end
+			
 			local function Sliding(Input)
-				local Position = UDim2.new(math.clamp((Input.Position.X - SliderFrame.AbsolutePosition.X) / SliderFrame.AbsoluteSize.X,0,1),0,1,0)
+				local Position = UDim2.new(math.clamp((Input.Position.X - SliderFrame.AbsolutePosition.X) / SliderFrame.AbsoluteSize.X, 0, 1), 0, 1, 0)
 				SliderFrame2.Size = Position
+				UpdateSliderBall(Position)
+				
 				local SliderPrecise = ((Position.X.Scale * slidertab["Max"]) / slidertab["Max"]) * (slidertab["Max"] - slidertab["Min"]) + slidertab["Min"]
 				local SliderNonPrecise = math.floor(((Position.X.Scale * slidertab["Max"]) / slidertab["Max"]) * (slidertab["Max"] - slidertab["Min"]) + slidertab["Min"])
 				local SliderValue = slidertab["Precise"] and SliderNonPrecise or SliderPrecise
 				SliderValue = tonumber(string.format("%.2f", SliderValue))
+				
 				GlobalSliderValue = SliderValue
 				Box.Text = tostring(SliderValue)
 				slidertab["callback"](GlobalSliderValue)
 			end
+			
 			local function SetValue(Value)
+				Value = math.clamp(Value, slidertab["Min"], slidertab["Max"])
 				GlobalSliderValue = Value
-				SliderFrame2.Size = UDim2.new(Value / slidertab["Max"],0,1,0)
-				Box.Text = Value
+				local Position = UDim2.new((Value - slidertab["Min"]) / (slidertab["Max"] - slidertab["Min"]), 0, 1, 0)
+				SliderFrame2.Size = Position
+				UpdateSliderBall(Position)
+				Box.Text = tostring(Value)
 				slidertab["callback"](Value)
 			end
-			SetValue(slidertab["Precise"])
+			
+			SetValue(slidertab["Precise"] or slidertab["Min"])
+			
 			Box.FocusLost:Connect(function()
 				if not tonumber(Box.Text) then
-					Box.Text = GlobalSliderValue
-				elseif Box.Text == "" or tonumber(Box.Text) <= slidertab["Min"] then
-					Box.Text = slidertab["Min"]
-				elseif Box.Text == "" or tonumber(Box.Text) >= slidertab["Max"] then
-					Box.Text = slidertab["Max"]
+					Box.Text = tostring(GlobalSliderValue)
+				else
+					local Value = tonumber(Box.Text)
+					Value = math.clamp(Value, slidertab["Min"], slidertab["Max"])
+					SetValue(Value)
 				end
-
-				GlobalSliderValue = Box.Text
-				SliderFrame2.Size = UDim2.new(Box.Text / slidertab["Max"],0,1,0)
-				slidertab["callback"](tonumber(Box.Text))
 			end)
+			
 			SliderFrame.InputBegan:Connect(function(Input)
-				if Input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch  then
+				if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 					Sliding(Input)
 					Dragging = true
+					
+					-- Animate the ball to appear larger when dragging
+					TweenObject(SliderBall, {Size = UDim2.new(0, 20, 0, 20)}, 0.2, Enum.EasingStyle.Back)
 				end
 			end)
-
+			
 			SliderFrame.InputEnded:Connect(function(Input)
-				if Input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch  then
+				if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
 					Dragging = false
+					
+					-- Animate the ball back to normal size
+					TweenObject(SliderBall, {Size = UDim2.new(0, 16, 0, 16)}, 0.2, Enum.EasingStyle.Back)
 				end
 			end)
-			game:GetService("UserInputService").InputChanged:Connect(function(Input)
-				if Dragging and Input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			
+			UIS.InputChanged:Connect(function(Input)
+				if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
 					Sliding(Input)
 				end
 			end)
@@ -781,31 +880,46 @@ function SawUI:CreateWindow(wintab)
 			local Cir = Instance.new("Frame")
 			local UICorner_3 = Instance.new("UICorner")
 			local UIStroke3 = Instance.new("UIStroke")
-
-
-			UIStroke3.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-			UIStroke3.Color=Color3.fromRGB(255,255,255)
-			UIStroke3.Parent=Toggle
+		
+			-- Enhanced stroke appearance
+			UIStroke3.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			UIStroke3.Color = Theme.Accent
+			UIStroke3.Thickness = 1.5
+			UIStroke3.Transparency = 0.5
+			UIStroke3.Parent = Toggle
 			
 			Toggle.Name = "Toggle"
 			Toggle.Parent = Page
-			Toggle.BackgroundColor3 = Color3.fromRGB(33, 33, 33)
-			Toggle.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Toggle.BackgroundColor3 = Theme.ElementBackground
 			Toggle.BorderSizePixel = 0
-			Toggle.Position = UDim2.new(0.0235294122, 0, 0, 0)
+			Toggle.Position = UDim2.new(0.024, 0, 0, 0)
 			Toggle.Size = UDim2.new(1, -20, 0, 45)
 			Toggle.AutoButtonColor = false
 			Toggle.Font = Enum.Font.Gotham
 			Toggle.Text = ""
-			Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Toggle.TextColor3 = Theme.TextColor
 			Toggle.TextSize = 18.000
-
+			
+			-- Add subtle hover effect
+			Toggle.MouseEnter:Connect(function()
+				TweenObject(Toggle, {BackgroundColor3 = Color3.fromRGB(
+					Theme.ElementBackground.R * 1.1,
+					Theme.ElementBackground.G * 1.1,
+					Theme.ElementBackground.B * 1.1
+				)}, 0.2)
+			end)
+			
+			Toggle.MouseLeave:Connect(function()
+				TweenObject(Toggle, {BackgroundColor3 = Theme.ElementBackground}, 0.2)
+			end)
+		
+			UICorner.CornerRadius = UDim.new(0, 6)
 			UICorner.Parent = Toggle
-
+		
 			help_outline.Name = "help_outline"
 			help_outline.Parent = Toggle
 			help_outline.AnchorPoint = Vector2.new(0, 0.5)
-			help_outline.BackgroundTransparency = 1.000
+			help_outline.BackgroundTransparency = 1
 			help_outline.Position = UDim2.new(0, 10, 0.5, 0)
 			help_outline.Size = UDim2.new(0, 25, 0, 25)
 			help_outline.ZIndex = 2
@@ -813,67 +927,86 @@ function SawUI:CreateWindow(wintab)
 			help_outline.Image = "rbxassetid://3926305904"
 			help_outline.ImageRectOffset = Vector2.new(684, 804)
 			help_outline.ImageRectSize = Vector2.new(36, 36)
-			help_outline.MouseButton1Click:Connect(function()
-				set_use(toggletab["des"] or "None")
-			end)
+			help_outline.ImageColor3 = Theme.Accent  -- Changed to accent color
+			
 			title.Name = "title"
 			title.Parent = Toggle
-			title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			title.BackgroundTransparency = 1.000
-			title.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			title.BorderSizePixel = 0
+			title.BackgroundTransparency = 1
 			title.Position = UDim2.new(0, 45, 0, 0)
 			title.Size = UDim2.new(0, 200, 0, 45)
-			title.Font = Enum.Font.Gotham
+			title.Font = Enum.Font.GothamSemibold
 			title.Text = toggletab["title"]
-			title.TextColor3 = Color3.fromRGB(255, 255, 255)
-			title.TextSize = 16.000
+			title.TextColor3 = Theme.TextColor
+			title.TextSize = 16
 			title.TextXAlignment = Enum.TextXAlignment.Left
-
+		
+			-- Modern toggle switch design
 			ToggleFrame.Name = "ToggleFrame"
 			ToggleFrame.Parent = Toggle
 			ToggleFrame.AnchorPoint = Vector2.new(0, 0.5)
 			ToggleFrame.BackgroundColor3 = Color3.fromRGB(61, 61, 61)
-			ToggleFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			ToggleFrame.BorderSizePixel = 0
-			ToggleFrame.Position = UDim2.new(0.78125, 0, 0.5, 0)
+			ToggleFrame.Position = UDim2.new(0.78, 0, 0.5, 0)
 			ToggleFrame.Size = UDim2.new(0, 60, 0, 25)
-
+		
 			UICorner_2.CornerRadius = UDim.new(0, 16)
 			UICorner_2.Parent = ToggleFrame
-
+		
 			Cir.Name = "Cir"
 			Cir.Parent = ToggleFrame
 			Cir.AnchorPoint = Vector2.new(0, 0.5)
-			Cir.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			Cir.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Cir.BackgroundColor3 = Theme.TextColor
 			Cir.BorderSizePixel = 0
 			Cir.Position = UDim2.new(0, 4, 0.5, 0)
 			Cir.Size = UDim2.new(0, 19, 0, 19)
-
+			
+			-- Add shadow to the circle for depth
+			local CircleShadow = Instance.new("ImageLabel")
+			CircleShadow.Name = "CircleShadow"
+			CircleShadow.Parent = Cir
+			CircleShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+			CircleShadow.BackgroundTransparency = 1
+			CircleShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+			CircleShadow.Size = UDim2.new(1.5, 0, 1.5, 0)
+			CircleShadow.ZIndex = 0
+			CircleShadow.Image = "rbxassetid://1316045217"
+			CircleShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+			CircleShadow.ImageTransparency = 0.6
+			CircleShadow.ScaleType = Enum.ScaleType.Slice
+			CircleShadow.SliceCenter = Rect.new(10, 10, 118, 118)
+		
 			UICorner_3.CornerRadius = UDim.new(1, 0)
 			UICorner_3.Parent = Cir
 			
-			local toggled=false
-
-			local togglecall={}
+			local toggled = false
+		
+			local togglecall = {}
 			function togglecall:Set(val)
-				toggled=val
+				toggled = val
 				toggletab.callback(toggled)
 				if toggled then
-					TweenObject(Cir,{BackgroundColor3=Color3.fromRGB(0, 170, 255)},.1)
-					TweenObject(Cir,{Position=UDim2.new(1, -23,0.5, 0)},.1)
+					-- Enhanced animation for toggle
+					TweenObject(ToggleFrame, {BackgroundColor3 = Theme.Accent}, 0.2)
+					TweenObject(Cir, {Position = UDim2.new(1, -23, 0.5, 0)}, 0.2, Enum.EasingStyle.Back)
+					TweenObject(Cir, {BackgroundColor3 = Theme.TextColor}, 0.2)
 				else
-					TweenObject(Cir,{BackgroundColor3=Color3.fromRGB(255, 255, 255)},.1)
-					TweenObject(Cir,{Position=UDim2.new(0, 4,0.5, 0)},.1)
+					TweenObject(ToggleFrame, {BackgroundColor3 = Color3.fromRGB(61, 61, 61)}, 0.2)
+					TweenObject(Cir, {Position = UDim2.new(0, 4, 0.5, 0)}, 0.2, Enum.EasingStyle.Back)
+					TweenObject(Cir, {BackgroundColor3 = Theme.TextColor}, 0.2)
 				end
 			end
+			
 			togglecall:Set(toggletab.default or false)
-
+		
 			Toggle.MouseButton1Click:Connect(function()
-				toggled=not toggled
+				toggled = not toggled
 				togglecall:Set(toggled)
 			end)
+			
+			help_outline.MouseButton1Click:Connect(function()
+				set_use(toggletab["des"] or "None")
+			end)
+			
 			return togglecall
 		end
 		function elems:CreateDropdown(droptab)
@@ -1030,28 +1163,30 @@ function SawUI:CreateWindow(wintab)
 			function dropcall:Set(item)
 				if count > 0 then
 					if droptab.multi then
+						if list[item] then
 						-- MULTI SELECT
-						if selected_items[item] then
-							selected_items[item] = nil
-							list[item].BackgroundColor3=Color3.fromRGB(38, 38, 38)
-						else
-							selected_items[item] = true
-							list[item].BackgroundColor3=Color3.fromRGB(0, 135, 203)
-						end
+							if selected_items[item] then
+								selected_items[item] = nil
+								list[item].BackgroundColor3=Color3.fromRGB(38, 38, 38)
+							else
+								selected_items[item] = true
+								list[item].BackgroundColor3=Color3.fromRGB(0, 135, 203)
+							end
 
-						local selected_list = {}
-						for name, _ in pairs(selected_items) do
-							table.insert(selected_list, name)
-						end
-						
-						if #selected_list>0 then
-							OpendDrop.Text="  "..table.concat(selected_list,",")
+							local selected_list = {}
+							for name, _ in pairs(selected_items) do
+								table.insert(selected_list, name)
+							end
+							
+							if #selected_list>0 then
+								OpendDrop.Text="  "..table.concat(selected_list,",")
 
-						else
-							OpendDrop.Text="  "..droptab["title"]
+							else
+								OpendDrop.Text="  "..droptab["title"]
+							end
+							
+							droptab.callback(selected_list)
 						end
-						
-						droptab.callback(selected_list)
 					else
 						itemchoose = item
 						for i, v in pairs(Items:GetChildren()) do
@@ -1160,8 +1295,6 @@ function Get_Fruit()
     return fruit
 end
 
-
-
 function Collect_Moonlit()
     local fruits=Get_Fruit()
     for i,v in pairs(fruits) do
@@ -1209,7 +1342,7 @@ end
 
 function check_str_and(v,v2)
     for i,k in pairs(v2) do
-        if v==v2 or string.find(v,k) then
+        if v==v2 or string.find(v,k) or string.find(k,v) then
             return true
         end
     end
@@ -1217,7 +1350,7 @@ function check_str_and(v,v2)
 end
 function Get_Seed()
     for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
-        if string.find(v.Name,"Seed") and check_str_and(v.Name,getgenv().SeedPut) then
+        if string.find(v.Name,"Seed") and check_str_and(v.Name,getgenv().Configs.SeedPut) then
             game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
             local clean=v.Name:gsub(" Seed", ""):gsub(" %[%w+%]", "")
             repeat wait()
@@ -1308,11 +1441,11 @@ function Place_NightStaff()
                             if v.Parent==game:GetService("Players").LocalPlayer.Backpack then
                                 game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
                             end
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X+x,5,cf.Z+z)
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
                             wait()
 							local args = {
 								[1] = "Create",
-								[2] = CFrame.new(cf.X+x,5,cf.Z+z)
+								[2] = CFrame.new(cf.X-x,5,cf.Z-z)
 							}
 							
 							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightStaffRemoteEvent"):FireServer(unpack(args))							
@@ -1342,11 +1475,11 @@ function Place_NightStaff()
                 repeat wait()
                     for z=-fz,fz do    
                         for x=-fx,fx do
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X+x,5,cf.Z+z)
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
                             wait()
 							local args = {
 								[1] = "Create",
-								[2] = CFrame.new(cf.X+x,5,cf.Z+z)
+								[2] = CFrame.new(cf.X-x,5,cf.Z-z)
 							}
 							
 							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightStaffRemoteEvent"):FireServer(unpack(args))							
@@ -1365,17 +1498,128 @@ function Place_NightStaff()
     end
 end
 
+function Auto_Egg()
+    for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+        if string.find(v.Name,"Egg") then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+            repeat wait()
+                for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
+                    if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+                        break
+                    end
+                    local cf=kuku.CFrame
+                    local sizex,sizez=kuku.Size.X,kuku.Size.Z
+                    local fx=math.round(sizex/2)
+                    local fz=math.round(sizez/2)
+                    for z=-fz,fz do    
+                        for x=-fx,fx do
+                            if v.Parent==game:GetService("Players").LocalPlayer.Backpack then
+                                game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+                            end
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
+							wait()
+                            local args = {
+								[1] = "CreateEgg",
+								[2] = Vector3.new(cf.X-x,cf.Y,cf.Z-z)
+							}
+							
+							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
+							
+                            if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+                                break
+                            end
+                            wait()
+                        end
+                        if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+                            break
+                        end
+                    end
+                end
+            until not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) 
+        end
+    end
+    for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
+        if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+            break
+        end
+        local cf=kuku.CFrame
+        local sizex,sizez=kuku.Size.X,kuku.Size.Z
+        local fx=math.round(sizex/2)
+        local fz=math.round(sizez/2)
+        for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
+            if string.find(v.Name,"Egg") then
+
+                repeat wait()
+                    for z=-fz,fz do    
+                        for x=-fx,fx do
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
+							wait()
+                            local args = {
+								[1] = "CreateEgg",
+								[2] = Vector3.new(cf.X-x,cf.Y,cf.Z-z)
+							}
+							
+							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
+							
+                            if not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
+                                break
+                            end
+                            wait()
+                        end
+                        if not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
+                            break
+                        end
+                    end
+                until not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character
+            end
+        end
+    end
+end
+
+function HatchEgg()
+    for i,v in pairs(MyFarm.Important.Objects_Physical:GetDescendants()) do
+        if v.Name=="ProximityPrompt" and v.Enabled then
+            pcall(function()
+                fireproximityprompt(v,1,true)
+            end)
+        end
+    end
+end
+
 local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 local HomeTab=Sawhub:CreatePage({title="Home"})
+HomeTab:CreateSection({title="Settings"})
+HomeTab:CreateSlider({title="Time Sell (s)",Min=60,Max=1800,Precise=getgenv().Configs.TimeSell or 600,callback=function(v)
+	getgenv().Configs.TimeSell=v
+end})
+HomeTab:CreateSlider({title="Time Collect (s)",Min=2400,Max=7200,Precise=getgenv().Configs.TimeCollect or 7200,callback=function(v)
+	getgenv().Configs.TimeCollect=v
+end})
+HomeTab:CreateSlider({title="Backpack Sell (Item)",Min=1,Max=199,Precise=getgenv().Configs.BackpackSell or 199,callback=function(v)
+	getgenv().Configs.BackpackSell=v
+end})
+
+HomeTab:CreateToggle({title="Auto Lock Moonlit",default=getgenv().Configs.AutoLockMoonlit,callback=function(v)
+    getgenv().Configs.AutoLockMoonlit= v
+end})
+
+HomeTab:CreateToggle({title="Auto Feed Moonlit",default=getgenv().Configs.AutoFeedMoonlit,callback=function(v)
+    getgenv().Configs.AutoFeedMoonlit= v
+end})
+HomeTab:CreateButton({title="Unlock Moonlit",callback=UnLock_Moonlit})
+HomeTab:CreateButton({title="Lock Moonlit",callback=Lock_Moonlit})
+
 HomeTab:CreateSection({title="Automatic"})
-HomeTab:CreateDropdown({title="Anti Collect (Moonlit)",list=allseeds,default={"Bamboo"},multi=true,callback=function(v)
-	getgenv().Anticollect=v
+HomeTab:CreateDropdown({title="Anti Collect (Moonlit)",list=allseeds,default=getgenv().Configs.Anticollect,multi=true,callback=function(v)
+	getgenv().Configs.Anticollect=v
 end})
 local tick_out=tick()
-HomeTab:CreateToggle({title="Auto Farm Collect",default=true,callback=function(v)
-    getgenv().AutoFarm= v
+local tick_moonsell=tick()
+local tick_sell=tick()
+HomeTab:CreateToggle({title="Auto Collect",default=getgenv().Configs.AutoCollect,callback=function(v)
+    getgenv().Configs.AutoCollect= v
     spawn(function()
-        while getgenv().AutoFarm and wait() do
+        while getgenv().Configs.AutoCollect and wait() do
             local fruits=Get_Fruit()
             for i,v in pairs(fruits) do
                 if v and v.Parent and v.Parent.Parent:GetAttribute("Moonlit") then
@@ -1386,24 +1630,29 @@ HomeTab:CreateToggle({title="Auto Farm Collect",default=true,callback=function(v
                 end
             end
 
-			UnLock_Moonlit()
-			wait(1)
-			local args = {
-				[1] = "SubmitAllPlants"
-			}
-			
-			game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
-            wait(1)
-            Lock_Moonlit()
-            if tick()-tick_out >= 1800 then
+			if tick()-tick_moonsell>=300 and getgenv().Configs.AutoFeedMoonlit then
+				UnLock_Moonlit()
+				wait(1)
+				local args = {
+					[1] = "SubmitAllPlants"
+				}
+				game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
+			end
+	
+			if getgenv().Configs.AutoLockMoonlit then
+				wait(1)
+				Lock_Moonlit()
+			end
+            if tick()-tick_out >= getgenv().Configs.TimeCollect then
                 local fruits=Get_Fruit()
                 for i,v in pairs(fruits) do
-                    if v and v.Parent and (not check_str_and(v.Parent.Parent.Name,getgenv().Anticollect) or v.Parent.Parent:GetAttribute("Moonlit")) then
+                    if v and v.Parent and (not check_str_and(v.Parent.Parent.Name,getgenv().Configs.Anticollect) or v.Parent.Parent:GetAttribute("Moonlit")) then
                         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=v.Parent.CFrame
                         wait(0.05)
                         fireproximityprompt(v, 1, true)
                         wait()
-						if #game.Players.LocalPlayer.Backpack:GetChildren() >= 199 then
+						if #game.Players.LocalPlayer.Backpack:GetChildren() >= getgenv().Configs.BackpackSell or tick()-tick_sell >= getgenv().Configs.TimeSell then
+							tick_sell=tick()
 							game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
 							wait(1)
 							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Sell_Inventory"):FireServer()
@@ -1413,19 +1662,24 @@ HomeTab:CreateToggle({title="Auto Farm Collect",default=true,callback=function(v
                 end
                 tick_out=tick()
             end
-			UnLock_Moonlit()
-			wait(1)
-			local args = {
-				[1] = "SubmitAllPlants"
-			}
-			
-			game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
-            wait(1)
-            Lock_Moonlit()
-            wait(1)
-            Lock_Moonlit()
-            if #game.Players.LocalPlayer.Backpack:GetChildren() >= 199 then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
+			if tick()-tick_moonsell>=300 and getgenv().Configs.AutoFeedMoonlit then
+				UnLock_Moonlit()
+				wait(1)
+				local args = {
+					[1] = "SubmitAllPlants"
+				}
+				game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
+				tick_moonsell=tick()
+			end
+			if getgenv().Configs.AutoLockMoonlit then
+				wait(1)
+				Lock_Moonlit()
+				wait(1)
+				Lock_Moonlit()
+			end
+            if #game.Players.LocalPlayer.Backpack:GetChildren() >= getgenv().Configs.BackpackSell  or tick()-tick_sell >= getgenv().Configs.TimeSell then
+                tick_sell=tick()
+				game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
                 wait(1)
                 game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Sell_Inventory"):FireServer()
                 wait(5)
@@ -1434,41 +1688,86 @@ HomeTab:CreateToggle({title="Auto Farm Collect",default=true,callback=function(v
     end)
 end})
 
-HomeTab:CreateDropdown({title="Seeds Put",list=allseeds,default={"Carrot","Bamboo"},multi=true,callback=function(v)
-	getgenv().SeedPut=v
+
+
+HomeTab:CreateDropdown({title="Seeds Put",list=allseeds,default=getgenv().Configs.SeedPut,multi=true,callback=function(v)
+	getgenv().Configs.SeedPut=v
 end})
 
 
-HomeTab:CreateToggle({title="Auto Put Seeds",default=true,callback=function(v)
-    getgenv().AutoPuts=v    
+HomeTab:CreateToggle({title="Auto Put Seeds",default=getgenv().Configs.AutoPuts,callback=function(v)
+    getgenv().Configs.AutoPuts=v    
     spawn(function()
-        while wait() and getgenv().AutoPuts do
+        while wait() and getgenv().Configs.AutoPuts do
             Get_Seed()
         end
     end)
 end})
 
-HomeTab:CreateToggle({title="Auto Night Staff",default=true,callback=function(v)
-    getgenv().AutoPlaceNightStaff=v    
+HomeTab:CreateToggle({title="Auto Night Staff",default=getgenv().Configs.AutoPlaceNightStaff,callback=function(v)
+    getgenv().Configs.AutoPlaceNightStaff=v    
     spawn(function()
-        while wait() and getgenv().AutoPlaceNightStaff do
+        while wait() and getgenv().Configs.AutoPlaceNightStaff do
             Place_NightStaff()
         end
     end)
 end})
 
+local PetsTab=Sawhub:CreatePage({title="Pets"})
+PetsTab:CreateSection({title="Egg"})
+PetsTab:CreateToggle({title="Auto Egg",default=getgenv().Configs.AutoEgg,callback=function(v)
+    getgenv().Configs.AutoEgg=v    
+    spawn(function()
+        while wait() and getgenv().Configs.AutoEgg do
+            Auto_Egg()
+			HatchEgg()
+        end
+    end)
+end})
+PetsTab:CreateSection({title="Pets"})
+PetsTab:CreateDropdown({title="Fruit Feed",list=allseeds,default=getgenv().Configs.FruitFeed,multi=true,callback=function(v)
+	getgenv().Configs.FruitFeed=v
+end})
+PetsTab:CreateToggle({title="Auto Feed",default=getgenv().Configs.AutoFeed,callback=function(v)
+    getgenv().Configs.AutoFeed=v    
+    spawn(function()
+        while wait() and getgenv().Configs.AutoFeed do
+            for i,pet in pairs(workspace.PetsPhysical:GetChildren()) do
+				if pet:GetAttribute("OWNER")==plr.Name then
+					local eat_val=false
+					repeat wait(1)
+						for _,fruit in pairs(plr.Backpack:GetChildren()) do
+							if fruit:HasTag("FruitTool") and check_str_and(fruit.Name,getgenv().Configs.FruitFeed) then
+								plr.Character.Humanoid:EquipTool(fruit)
+								wait()
+								local args = {
+									[1] = "Feed",
+									[2] = pet:GetAttribute("UUID")
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("ActivePetService"):FireServer(unpack(args))							
+								eat_val=true
+								break
+							end
+						end
+					until eat_val or not getgenv().Configs.AutoFeed
+				end
+			end
+        end
+    end)
+end})
 
-getgenv().Seeds={}
 local PurchaseTab=Sawhub:CreatePage({title="Purchase"})
 PurchaseTab:CreateSection({title="Seed"})
-PurchaseTab:CreateToggle({title="Auto Buy Seeds",default=true,callback=function(v)
-    getgenv().AutoSeeds = v
+PurchaseTab:CreateToggle({title="Auto Buy Seeds",default=getgenv().Configs.AutoBuySeeds,callback=function(v)
+    getgenv().Configs.AutoBuySeeds = v
     spawn(function()
-        while wait() and getgenv().AutoSeeds do
+        while wait() and getgenv().Configs.AutoBuySeeds do
             for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Seed_Shop.Frame.ScrollingFrame:GetChildren()) do
                 if v:IsA("Frame") and not string.find(v.Name,"Padding") then
-                    if v.Main_Frame.Cost_Text.Text ~="NO STOCK" and table.find(getgenv().Seeds,v.Name) then
-                        local args = {
+                    if v.Main_Frame.Cost_Text.Text ~="NO STOCK" and table.find(getgenv().Configs.Seeds,v.Name) then
+                        Sawhub:Notify("Successfully purchased ["..v.Name.." Seed]")
+						local args = {
                             [1] = v.Name
                         }
                         
@@ -1481,20 +1780,21 @@ PurchaseTab:CreateToggle({title="Auto Buy Seeds",default=true,callback=function(
     end)
 end})
 
-PurchaseTab:CreateDropdown({title="Select Seeds",list=allseeds,default={"Mango","Apple","Mushroom","Bamboo"},multi=true,callback=function(v)
-	getgenv().Seeds=v
+PurchaseTab:CreateDropdown({title="Select Seeds",list=allseeds,default=getgenv().Configs.Seeds or {},multi=true,callback=function(v)
+	getgenv().Configs.Seeds=v
 end})
 
-getgenv().Gears={}
+getgenv().Configs.Gears={}
 PurchaseTab:CreateSection({title="Gear"})
-PurchaseTab:CreateToggle({title="Auto Buy Gears",default=false,callback=function(v)
-    getgenv().AutoGears = v
+PurchaseTab:CreateToggle({title="Auto Buy Gears",default=getgenv().Configs.AutoBuyGears,callback=function(v)
+    getgenv().Configs.AutoBuyGears = v
     spawn(function()
-        while wait() and getgenv().AutoGears do
+        while wait() and getgenv().Configs.AutoBuyGears do
             for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Gear_Shop.Frame.ScrollingFrame:GetChildren()) do
                 if v:IsA("Frame") and not string.find(v.Name,"Padding") then
-                    if v.Main_Frame.Cost_Text.Text ~="NO STOCK" and table.find(getgenv().Gears,v.Name) then
-                        local args = {
+                    if v.Main_Frame.Cost_Text.Text ~="NO STOCK" and table.find(getgenv().Configs.Gears,v.Name) then
+                        Sawhub:Notify("Successfully purchased ["..v.Name.."]")
+						local args = {
                             [1] = v.Name
                         }
                         
@@ -1513,10 +1813,146 @@ for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Gear_Shop.Fram
     end
 end
 --"Basic Sprinkler","Godly Sprinkler","Master Sprinkler","Advanced Sprinkler"
-PurchaseTab:CreateDropdown({title="Select Gears",list=allgeears,default={},multi=true,callback=function(v)
-	getgenv().Gears=v
+PurchaseTab:CreateDropdown({title="Select Gears",list=allgeears,default=getgenv().Configs.Gears or {},multi=true,callback=function(v)
+	getgenv().Configs.Gears=v
 end})
 
+local SettingTab=Sawhub:CreatePage({title="Settings"})
+SettingTab:CreateSection({title="Performance"})
+local buff=false
+SettingTab:CreateToggle({title="Boost Fps",default=getgenv().Configs.BoostFps,callback=function(v)
+	getgenv().Configs.BoostFps=v
+	pcall(function()
+		if v then
+			spawn(function()
+                if not buff then
+                    buff=true
+                    local g = game
+                    local w = g.Workspace
+                    local l = g.Lighting
+                    local t = w.Terrain
+                    t.WaterWaveSize = 0
+                    t.WaterWaveSpeed = 0
+                    t.WaterReflectance = 0
+                    t.WaterTransparency = 0
+                    l.GlobalShadows = false
+                    game:GetService("Lighting").FogStart = 0
+                    game:GetService("Lighting").FogEnd = 100
+                    l.Brightness = 0
+                    settings().Rendering.QualityLevel = "Level01"
+                    local index_wait=0
+                    for i, v in pairs(g:GetDescendants()) do
+                        index_wait+=1
+                        if index_wait>=10 then
+                            task.wait()
+                            index_wait=0
+                        end
+                        if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then 
+                            v.Material = "Plastic"
+                            v.Transparency=1
+                            v.Reflectance = 0
+                        elseif v:IsA("Sound") then
+                            v.Volume = 0
+                        elseif v:IsA("Decal") or v:IsA("Texture") then
+                            v.Transparency = 1
+                        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                            v.Lifetime = NumberRange.new(0)
+                        elseif v:IsA("Explosion") then
+                            v.BlastPressure = 1
+                            v.BlastRadius = 1
+                        elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+                            v.Enabled = false
+                        elseif v:IsA("MeshPart") then
+                            v.Material = "Plastic"
+                            v.Transparency=1
+                            v.Reflectance = 0
+                            v.TextureID = 10385902758728957
+                            if v:IsA("SpecialMesh") then
+                                v:Destroy()
+                            end
+                        elseif v:IsA("SpecialMesh") then
+                            v:Destroy()
+                        elseif v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
+                            v:Destroy()
+                        elseif v:IsA("Animation") or v:IsA("Animator") then
+                            v:Destroy()
+                        end
+                    end
+                    for i, e in pairs(l:GetChildren()) do
+                        if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
+                            e.Enabled = false
+                        end
+                    end
+
+                    workspace.Terrain:Clear()
+                    local ss = game:GetService("SoundService")
+                    ss.RespectFilteringEnabled = false
+                    ss.AmbientReverb = Enum.ReverbType.NoReverb			
+                end
+                Sawhub:Notify("Boost Fps Succes")
+            end)
+		end
+	end)
+end})  
+SettingTab:CreateToggle({title="Black Screen",default=getgenv().Configs.BlackScreen,callback=function(v)
+	getgenv().Configs.BlackScreen=v
+	pcall(function()
+		if v then
+			game:GetService("RunService"):Set3dRenderingEnabled(false)
+		else
+			game:GetService("RunService"):Set3dRenderingEnabled(true)
+		end
+	end)
+end})
+SettingTab:CreateSection({title="Humanoid"})
+local org_speed=32
+SettingTab:CreateToggle({title="Buff Walkspeed",default=getgenv().Configs.Walkspeed,callback=function(v)
+	getgenv().Configs.Walkspeed=v
+	spawn(function()
+		if getgenv().Configs.Walkspeed then
+			org_speed=game.Players.LocalPlayer.Character.Humanoid.WalkSpeed
+			while wait() and getgenv().Configs.Walkspeed do
+				pcall(function()
+					game.Players.LocalPlayer.Character.Humanoid.WalkSpeed=org_speed+getgenv().Configs.WalkspeedVal
+				end)
+			end
+		else
+			game.Players.LocalPlayer.Character.Humanoid.WalkSpeed=org_speed
+		end
+	end)
+end})
+SettingTab:CreateSlider({title="Walkspeed",Min=10,Max=1000,Precise=getgenv().Configs.WalkspeedVal or 20,callback=function(v)
+	getgenv().Configs.WalkspeedVal=v
+end})
+SettingTab:CreateSection({title="Others"})
+function Convert_value(val)
+	if type(val) == "table" then
+		local str_list = {}
+		for _, v in ipairs(val) do
+			table.insert(str_list, '"' .. tostring(v) .. '"')
+		end
+		return "{" .. table.concat(str_list, ", ") .. "}"
+	elseif type(val) == "string" then
+		return '"' .. val .. '"'
+	end
+	return tostring(val)
+end
+
+SettingTab:CreateButton({title="Copy Configs",callback=function()
+	local save_configs = "getgenv().Configs = {\n    "
+	for i, v in pairs(getgenv().Configs) do
+		if type(i) == "string" then
+			save_configs = save_configs .. "[" .. '"' .. i .. '"' .. "] = " .. Convert_value(v) .. ",\n    "
+		else
+			save_configs = save_configs .. "[" .. tostring(i) .. "] = " .. Convert_value(v) .. ",\n    "
+		end
+	end
+	save_configs = save_configs:sub(1, -6) .. "\n}"
+	setclipboard(save_configs)
+end})
+SettingTab:CreateButton({title="Rejoin",callback=function()
+	game:GetService("TeleportService"):Teleport(game.PlaceId,game.Players.LocalPlayer)
+end})
 local LP = game.Players.LocalPlayer
 function getRoot(char)
 	if char then
@@ -1545,7 +1981,7 @@ function RemoveFloat()
 	end
 end
 game:GetService('RunService').Stepped:Connect(function()
-	if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and getgenv().AutoFarm then
+	if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and getgenv().Configs.AutoCollect then
 		for k,v in next,game.Players.LocalPlayer.Character:GetChildren() do
 			if v:IsA('BasePart') then
 				v.CanCollide = false
@@ -1556,7 +1992,7 @@ end)
 
 task.spawn(function()
 	while wait(1) do
-		if getgenv().AutoFarm then
+		if getgenv().Configs.AutoCollect then
 			TweenFloat()
 		else
 
@@ -1580,99 +2016,100 @@ game.CoreGui.DescendantAdded:Connect(function()
 		end
 	end)
 end)
-local v_u_4 = require(game:GetService("ReplicatedStorage").Modules.DataService)
-local SeedData=require(game:GetService("ReplicatedStorage").Data.SeedData)
-local v_u_10 = require(game:GetService("ReplicatedStorage").Data.SeedShopData)
-function WebhookSeed()
-    local b = v_u_4:GetData()
-    local msg2 = "**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Seeds**\n"
-    for i,v in pairs(b.SeedStock.Stocks) do
-        msg2=msg2.."- "..i.." x"..v.MaxStock.." Stock ["..SeedData[i]["SeedRarity"].."]\n"
-    end
-    local msg = {
-        ["content"] = "@everyone",
-        ["embeds"] = {{
-            ["title"] = "Saw Hub",
-            ["description"]=msg2,
+-- local v_u_4 = require(game:GetService("ReplicatedStorage").Modules.DataService)
+-- local SeedData=require(game:GetService("ReplicatedStorage").Data.SeedData)
+-- local v_u_10 = require(game:GetService("ReplicatedStorage").Data.SeedShopData)
+-- function WebhookSeed()
+--     local b = v_u_4:GetData()
+--     local msg2 = "**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Seeds**\n"
+--     for i,v in pairs(b.SeedStock.Stocks) do
+--         msg2=msg2.."- "..i.." x"..v.MaxStock.." Stock ["..SeedData[i]["SeedRarity"].."]\n"
+--     end
+--     local msg = {
+--         ["content"] = "@everyone",
+--         ["embeds"] = {{
+--             ["title"] = "Saw Hub",
+--             ["description"]=msg2,
     
-            ["type"] = "rich",
-            ["color"] = tonumber(47103),
-            ["footer"] = {
-                ["text"] = "Saw Hub (" .. os.date("%X") .. ")"
-            }
-        }}
-    }
+--             ["type"] = "rich",
+--             ["color"] = tonumber(47103),
+--             ["footer"] = {
+--                 ["text"] = "Saw Hub (" .. os.date("%X") .. ")"
+--             }
+--         }}
+--     }
     
-    request({
-        Url ="https://discord.com/api/webhooks/1367707476719304704/NB6gEKsaydnj8J-O7YaRJZVJo5y8fk33r-ccunfbSiX5QQZ1GgKZf9rgzJ0DF0jj2zi3",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = game:GetService("HttpService"):JSONEncode(msg)
-    })
-end
-spawn(function()
-    while true do
-        local v21 = workspace:GetServerTimeNow()
-        local v22 = v_u_4:GetData()
-        local v23 = v22.SeedStock.ForcedSeedEndTimestamp and (v22.SeedStock.ForcedSeedEndTimestamp - v21 or -1) or -1
-        if v23 < 0 then
-            v23 = v_u_10.RefreshTime - v21 % v_u_10.RefreshTime
-        end
+--     request({
+--         Url ="https://discord.com/api/webhooks/1367707476719304704/NB6gEKsaydnj8J-O7YaRJZVJo5y8fk33r-ccunfbSiX5QQZ1GgKZf9rgzJ0DF0jj2zi3",
+--         Method = "POST",
+--         Headers = {
+--             ["Content-Type"] = "application/json"
+--         },
+--         Body = game:GetService("HttpService"):JSONEncode(msg)
+--     })
+-- end
+-- spawn(function()
+--     while true do
+--         local v21 = workspace:GetServerTimeNow()
+--         local v22 = v_u_4:GetData()
+--         local v23 = v22.SeedStock.ForcedSeedEndTimestamp and (v22.SeedStock.ForcedSeedEndTimestamp - v21 or -1) or -1
+--         if v23 < 0 then
+--             v23 = v_u_10.RefreshTime - v21 % v_u_10.RefreshTime
+--         end
     
-        if v23 <= 1 then
-            wait(10)
-            WebhookSeed()
-        end
-        task.wait(1)
-    end
-end)
+--         if v23 <= 1 then
+--             wait(10)
+--             WebhookSeed()
+--         end
+--         task.wait(1)
+--     end
+-- end)
 
-local GearData=require(game:GetService("ReplicatedStorage").Data.GearData)
-local v_u_100 = require(game:GetService("ReplicatedStorage").Data.GearShopData)
-function WebhookGear()
-    local b = v_u_4:GetData()
-    local msg2 = "**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Seeds**\n"
-    for i,v in pairs(b.GearStock.Stocks) do
-        msg2=msg2.."- "..i.." x"..v.MaxStock.." Stock ["..GearData[i]["GearRarity"].."]\n"
-    end
-    local msg = {
-        ["content"] = "@everyone",
-        ["embeds"] = {{
-            ["title"] = "Saw Hub",
-            ["description"]=msg2,
+-- local GearData=require(game:GetService("ReplicatedStorage").Data.GearData)
+-- local v_u_100 = require(game:GetService("ReplicatedStorage").Data.GearShopData)
+-- function WebhookGear()
+--     local b = v_u_4:GetData()
+--     local msg2 = "**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Seeds**\n"
+--     for i,v in pairs(b.GearStock.Stocks) do
+--         msg2=msg2.."- "..i.." x"..v.MaxStock.." Stock ["..GearData[i]["GearRarity"].."]\n"
+--     end
+--     local msg = {
+--         ["content"] = "@everyone",
+--         ["embeds"] = {{
+--             ["title"] = "Saw Hub",
+--             ["description"]=msg2,
     
-            ["type"] = "rich",
-            ["color"] = tonumber(47103),
-            ["footer"] = {
-                ["text"] = "Saw Hub (" .. os.date("%X") .. ")"
-            }
-        }}
-    }
+--             ["type"] = "rich",
+--             ["color"] = tonumber(47103),
+--             ["footer"] = {
+--                 ["text"] = "Saw Hub (" .. os.date("%X") .. ")"
+--             }
+--         }}
+--     }
     
-    request({
-        Url ="https://discord.com/api/webhooks/1367715113322287134/MEqvIUg5gtZkCHEFB9LJwjNigpN2SFOG3JygEgc5mXUo_jgj9eDCELmMaNPhQNf5JoK_",
-        Method = "POST",
-        Headers = {
-            ["Content-Type"] = "application/json"
-        },
-        Body = game:GetService("HttpService"):JSONEncode(msg)
-    })
-end
-spawn(function()
-    while true do
-        local v21 = workspace:GetServerTimeNow()
-        local v22 = v_u_4:GetData()
-        local v23 = v22.GearStock.ForcedSeedEndTimestamp and (v22.GearStock.ForcedSeedEndTimestamp - v21 or -1) or -1
-        if v23 < 0 then
-            v23 = v_u_10.RefreshTime - v21 % v_u_10.RefreshTime
-        end
+--     request({
+--         Url ="https://discord.com/api/webhooks/1367715113322287134/MEqvIUg5gtZkCHEFB9LJwjNigpN2SFOG3JygEgc5mXUo_jgj9eDCELmMaNPhQNf5JoK_",
+--         Method = "POST",
+--         Headers = {
+--             ["Content-Type"] = "application/json"
+--         },
+--         Body = game:GetService("HttpService"):JSONEncode(msg)
+--     })
+-- end
+-- spawn(function()
+--     while true do
+--         local v21 = workspace:GetServerTimeNow()
+--         local v22 = v_u_4:GetData()
+--         local v23 = v22.GearStock.ForcedSeedEndTimestamp and (v22.GearStock.ForcedSeedEndTimestamp - v21 or -1) or -1
+--         if v23 < 0 then
+--             v23 = v_u_10.RefreshTime - v21 % v_u_10.RefreshTime
+--         end
     
-        if v23 <= 1 then
-            wait(10)
-            WebhookGear()
-        end
-        task.wait(1)
-    end
-end)
+--         if v23 <= 1 then
+--             wait(10)
+--             WebhookGear()
+--         end
+--         task.wait(1)
+--     end
+-- end)
+Sawhub:Notify("Script Loaded!")
