@@ -1654,6 +1654,19 @@ HomeTab:CreateToggle({title="Auto Collect",default=getgenv().Configs.AutoCollect
                         fireproximityprompt(v, 1, true)
                         wait()
 						if #game.Players.LocalPlayer.Backpack:GetChildren() >= getgenv().Configs.BackpackSell or tick()-tick_sell >= getgenv().Configs.TimeSell then
+							if tick()-tick_moonsell>=300 and getgenv().Configs.AutoFeedMoonlit then
+								UnLock_Moonlit()
+								wait(1)
+								local args = {
+									[1] = "SubmitAllPlants"
+								}
+								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
+							end
+							wait(0.1)
+							if getgenv().Configs.AutoLockMoonlit then
+								wait(1)
+								Lock_Moonlit()
+							end
 							tick_sell=tick()
 							game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
 							wait(1)
@@ -1739,8 +1752,32 @@ PetsTab:CreateToggle({title="Auto Collect Feed",default=getgenv().Configs.AutoCo
                     wait(0.05)
                     fireproximityprompt(v, 1, true)
                     wait()
+					if #game.Players.LocalPlayer.Backpack:GetChildren() >= getgenv().Configs.BackpackSell or tick()-tick_sell >= getgenv().Configs.TimeSell then
+						if tick()-tick_moonsell>=300 and getgenv().Configs.AutoFeedMoonlit then
+							UnLock_Moonlit()
+							wait(1)
+							local args = {
+								[1] = "SubmitAllPlants"
+							}
+							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("NightQuestRemoteEvent"):FireServer(unpack(args))			
+						end
+						wait(0.1)
+						if getgenv().Configs.AutoLockMoonlit then
+							wait(1)
+							Lock_Moonlit()
+						end
+						tick_sell=tick()
+						game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(61.5817299, 2.99999976, 0.426786184, -0.000244111798, 4.3232312e-08, -1, 1.65697653e-12, 1, 4.3232312e-08, 1, 8.89654062e-12, -0.000244111798)
+						wait(1)
+						game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Sell_Inventory"):FireServer()
+						wait(5)
+					end
                 end
             end
+			if getgenv().Configs.AutoLockMoonlit then
+				wait(1)
+				Lock_Moonlit()
+			end
         end
     end)
 end})
