@@ -1505,7 +1505,7 @@ function Auto_Egg()
 				game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
 				repeat wait()
 					for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-						if not v or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+						if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
 							break
 						end
 						local cf=kuku.CFrame
@@ -1526,21 +1526,21 @@ function Auto_Egg()
 								
 								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
 								
-								if not v or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+								if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
 									break
 								end
 								wait()
 							end
-							if not v or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+							if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
 								break
 							end
 						end
 					end
-				until not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) or not getgenv().Configs.AutoEgg 
+				until not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) or not getgenv().Configs.AutoEgg 
 			end
 		end
 		for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-			if not v or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+			if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
 				break
 			end
 			local cf=kuku.CFrame
@@ -1562,16 +1562,16 @@ function Auto_Egg()
 								
 								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
 								
-								if not v or not getgenv().Configs.AutoEgg or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
+								if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3  or not getgenv().Configs.AutoEgg or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
 									break
 								end
 								wait()
 							end
-							if not v or not getgenv().Configs.AutoEgg or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
+							if not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or not getgenv().Configs.AutoEgg or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
 								break
 							end
 						end
-					until not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character or not getgenv().Configs.AutoEgg
+					until not v or MyFarm.Important.Objects_Physical:GetChildren() >= 3 or v.Parent ~= game:GetService("Players").LocalPlayer.Character or not getgenv().Configs.AutoEgg
 				end
 			end
 		end
@@ -1594,7 +1594,7 @@ HomeTab:CreateSection({title="Settings"})
 HomeTab:CreateSlider({title="Time Sell (s)",Min=60,Max=1800,Precise=getgenv().Configs.TimeSell or 600,callback=function(v)
 	getgenv().Configs.TimeSell=v
 end})
-HomeTab:CreateSlider({title="Time Collect (s)",Min=2400,Max=7200,Precise=getgenv().Configs.TimeCollect or 7200,callback=function(v)
+HomeTab:CreateSlider({title="Time Collect (s)",Min=1800,Max=3600,Precise=getgenv().Configs.TimeCollect or 1800,callback=function(v)
 	getgenv().Configs.TimeCollect=v
 end})
 HomeTab:CreateSlider({title="Backpack Sell (Item)",Min=1,Max=199,Precise=getgenv().Configs.BackpackSell or 199,callback=function(v)
