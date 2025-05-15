@@ -1690,12 +1690,9 @@ HomeTab:CreateToggle({title="Auto Collect",default=getgenv().Configs.AutoCollect
     end)
 end})
 
-
-
 HomeTab:CreateDropdown({title="Seeds Put",list=allseeds,default=getgenv().Configs.SeedPut,multi=true,callback=function(v)
 	getgenv().Configs.SeedPut=v
 end})
-
 
 HomeTab:CreateToggle({title="Auto Put Seeds",default=getgenv().Configs.AutoPuts,callback=function(v)
     getgenv().Configs.AutoPuts=v    
@@ -1727,8 +1724,25 @@ PetsTab:CreateToggle({title="Auto Egg",default=getgenv().Configs.AutoEgg,callbac
     end)
 end})
 PetsTab:CreateSection({title="Pets"})
+
 PetsTab:CreateDropdown({title="Fruit Feed",list=allseeds,default=getgenv().Configs.FruitFeed,multi=true,callback=function(v)
 	getgenv().Configs.FruitFeed=v
+end})
+PetsTab:CreateToggle({title="Auto Collect Feed",default=getgenv().Configs.AutoCollectFast,callback=function(v)
+    getgenv().Configs.AutoCollectFast= v
+    spawn(function()
+        while getgenv().Configs.AutoCollectFast and wait() do
+            local fruits=Get_Fruit()
+            for i,v in pairs(fruits) do
+                if v and v.Parent and check_str_and(v.Parent.Parent.Name,getgenv().Configs.FruitFeed) and not v.Parent.Parent:GetAttribute("Moonlit") then
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=v.Parent.CFrame
+                    wait(0.05)
+                    fireproximityprompt(v, 1, true)
+                    wait()
+                end
+            end
+        end
+    end)
 end})
 PetsTab:CreateToggle({title="Auto Feed",default=getgenv().Configs.AutoFeed,callback=function(v)
     getgenv().Configs.AutoFeed=v    
