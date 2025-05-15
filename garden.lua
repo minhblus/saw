@@ -1582,7 +1582,7 @@ local function TeleportAndCollect(v)
 	wait()
 end
 
-local function CollectFruits()
+local function CollectFruits(onlymoonlit)
 	local fruits = Get_Fruit()
 	for _, v in pairs(fruits) do
 		local parent = v and v.Parent
@@ -1590,6 +1590,9 @@ local function CollectFruits()
 		if parent and grandparent then
 			local isMoonlit = grandparent:GetAttribute("Moonlit")
 			local shouldCollect = not check_str_and(grandparent.Name, getgenv().Configs.Anticollect) or isMoonlit
+			if onlymoonlit then
+				shouldCollect=isMoonlit
+			end
 			if shouldCollect then
 				TeleportAndCollect(v)
 
@@ -1606,7 +1609,7 @@ HomeTab:CreateToggle({title="Auto Collect",default=getgenv().Configs.AutoCollect
     getgenv().Configs.AutoCollect= v
 	spawn(function()
 		while getgenv().Configs.AutoCollect do
-			CollectFruits()
+			CollectFruits(true)
 
 			if tick() - tick_out >= getgenv().Configs.TimeCollect then
 				tick_out = tick()
