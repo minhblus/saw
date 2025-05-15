@@ -1739,7 +1739,7 @@ PetsTab:CreateToggle({title="Auto Feed",default=getgenv().Configs.AutoFeed,callb
 					local eat_val=false
 					repeat wait(1)
 						for _,fruit in pairs(plr.Backpack:GetChildren()) do
-							if fruit:HasTag("FruitTool") and check_str_and(fruit.Name,getgenv().Configs.FruitFeed) then
+							if fruit:HasTag("FruitTool") and not string.find(fruit.Name,"Moonlit") and check_str_and(fruit.Name,getgenv().Configs.FruitFeed) then
 								plr.Character.Humanoid:EquipTool(fruit)
 								wait()
 								local args = {
