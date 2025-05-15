@@ -1499,81 +1499,83 @@ function Place_NightStaff()
 end
 
 function Auto_Egg()
-    for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
-        if string.find(v.Name,"Egg") then
-            game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-            repeat wait()
-                for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-                    if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                        break
-                    end
-                    local cf=kuku.CFrame
-                    local sizex,sizez=kuku.Size.X,kuku.Size.Z
-                    local fx=math.round(sizex/2)
-                    local fz=math.round(sizez/2)
-                    for z=-fz,fz do    
-                        for x=-fx,fx do
-                            if v.Parent==game:GetService("Players").LocalPlayer.Backpack then
-                                game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-                            end
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
-							wait()
-                            local args = {
-								[1] = "CreateEgg",
-								[2] = Vector3.new(cf.X-x,cf.Y,cf.Z-z)
-							}
-							
-							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
-							
-                            if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                                break
-                            end
-                            wait()
-                        end
-                        if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-                            break
-                        end
-                    end
-                end
-            until not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) 
-        end
-    end
-    for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
-        if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
-            break
-        end
-        local cf=kuku.CFrame
-        local sizex,sizez=kuku.Size.X,kuku.Size.Z
-        local fx=math.round(sizex/2)
-        local fz=math.round(sizez/2)
-        for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
-            if string.find(v.Name,"Egg") then
+	if #MyFarm.Important.Objects_Physical:GetChildren() < 4 then
+		for i,v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+			if string.find(v.Name,"Egg") then
+				game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+				repeat wait()
+					for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
+						if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+							break
+						end
+						local cf=kuku.CFrame
+						local sizex,sizez=kuku.Size.X,kuku.Size.Z
+						local fx=math.round(sizex/2)
+						local fz=math.round(sizez/2)
+						for z=-fz,fz do    
+							for x=-fx,fx do
+								if v.Parent==game:GetService("Players").LocalPlayer.Backpack then
+									game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+								end
+								game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
+								wait()
+								local args = {
+									[1] = "CreateEgg",
+									[2] = Vector3.new(cf.X-x,cf.Y,cf.Z-z)
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
+								
+								if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+									break
+								end
+								wait()
+							end
+							if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+								break
+							end
+						end
+					end
+				until not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) 
+			end
+		end
+		for k,kuku in pairs(MyFarm.Important.Plant_Locations:GetChildren()) do
+			if not v or (v.Parent ~= game:GetService("Players").LocalPlayer.Character and v.Parent~=game:GetService("Players").LocalPlayer.Backpack) then
+				break
+			end
+			local cf=kuku.CFrame
+			local sizex,sizez=kuku.Size.X,kuku.Size.Z
+			local fx=math.round(sizex/2)
+			local fz=math.round(sizez/2)
+			for i,v in pairs(game:GetService("Players").LocalPlayer.Character:GetChildren()) do
+				if string.find(v.Name,"Egg") then
 
-                repeat wait()
-                    for z=-fz,fz do    
-                        for x=-fx,fx do
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
-							wait()
-                            local args = {
-								[1] = "CreateEgg",
-								[2] = Vector3.new(cf.X-x,cf.Y,cf.Z-z)
-							}
-							
-							game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
-							
-                            if not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
-                                break
-                            end
-                            wait()
-                        end
-                        if not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
-                            break
-                        end
-                    end
-                until not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character
-            end
-        end
-    end
+					repeat wait()
+						for z=-fz,fz do    
+							for x=-fx,fx do
+								game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame=CFrame.new(cf.X-x,5,cf.Z-z)
+								wait()
+								local args = {
+									[1] = "CreateEgg",
+									[2] = Vector3.new(cf.X-x,cf.Y,cf.Z-z)
+								}
+								
+								game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("PetEggService"):FireServer(unpack(args))
+								
+								if not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
+									break
+								end
+								wait()
+							end
+							if not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character then
+								break
+							end
+						end
+					until not v or v.Parent ~= game:GetService("Players").LocalPlayer.Character
+				end
+			end
+		end
+	end
 end
 
 function HatchEgg()
