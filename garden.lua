@@ -1282,8 +1282,8 @@ for i,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Seed_Shop.Fram
         end
     end
 end
-local isMobile = UserInputService.TouchEnabled
-local isPC = UserInputService.KeyboardEnabled and not isMobile
+local isMobile = UIS.TouchEnabled
+local isPC = UIS.KeyboardEnabled and not isMobile
 
 function Get_Fruit()
     local fruit={}
