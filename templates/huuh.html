@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Saw</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #22c0c5;
+            --secondary-color: #1a1a1a;
+            --accent-color: #3a4a6d;
+            --text-color: #ffffff;
+            --border-color: #222222;
+            --hover-color: #333333;
+            --success-color: #22c55e;
+            --danger-color: #dc2626;
+            --gradient-primary: linear-gradient(135deg, #22c0c5, #3a4a6d);
+            --gradient-dark: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .navbar {
+            background: var(--gradient-dark);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .navbar h1 {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .search-bar input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        .search-bar input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(34, 192, 197, 0.2);
+        }
+
+        .cell {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--gradient-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .cell:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1;
+        }
+
+        .cell:hover::before {
+            opacity: 1;
+        }
+
+        .cell img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            transition: var(--transition);
+            z-index: 2;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .cell:hover img {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .quantity {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--gradient-primary);
+            color: var(--text-color);
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(34, 192, 197, 0.3);
+            z-index: 3;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.5px;
+        }
+
+        .label {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.8));
+            color: var(--text-color);
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            z-index: 3;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            transition: var(--transition);
+        }
+
+        .cell:hover .label {
+            padding-bottom: 20px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-content {
+            background: var(--gradient-dark);
+            margin: 15% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 70vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .modal-header {
+            background: var(--gradient-primary);
+            color: var(--text-color);
+            padding: 20px 25px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .close {
+            color: rgba(255, 255, 255, 0.8);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: -5px -5px 0 0;
+        }
+
+        .close:hover {
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 0;
+            overflow-x: hidden;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .account-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .account-item2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .account-item2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--gradient-primary);
+            transform: scaleY(0);
+            transition: var(--transition);
+        }
+
+        .account-item2:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .account-item2:hover::before {
+            transform: scaleY(0.7);
+        }
+
+        .account-item2:last-child {
+            border-bottom: none;
+        }
+
+        .account-name2 {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        .account-quantity {
+            background: var(--gradient-primary);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(34, 192, 197, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .cell {
+                aspect-ratio: 1;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 20% auto;
+            }
+        }
+
+        .stat-box {
+            background: var(--gradient-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--primary-color);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .list-button {
+            background: var(--gradient-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .list-button:hover {
+            background: var(--gradient-primary);
+            color: var(--text-color);
+            transform: translateY(-2px);
+        }
+
+        .stats-table {
+            background: var(--gradient-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stats-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--primary-color);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .money-box {
+            background: var(--gradient-primary);
+            color: var(--text-color);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .pill-button {
+            background: var(--gradient-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .pill-button:hover {
+            background: var(--gradient-primary);
+            transform: translateY(-2px);
+        }
+
+        .pill-button span {
+            background: var(--success-color);
+            box-shadow: 0 0 0 2px var(--secondary-color);
+        }
+
+        .account-updated {
+            color: #666;
+            font-size: 9px;
+            margin-top: 4px;
+        }
+
+        .account-updated span {
+            color: #999;
+        }
+
+        .money-box {
+            display: inline-block;
+            border: 1px solid #3a4a6d;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #3a4a6d;
+            cursor: default;
+        }
+
+        .pill-button {
+            position: relative;
+            background-color: #222;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            overflow: visible;
+        }
+
+        .pill-button span {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background-color: #4ade80;
+            /* xanh lá nhạt */
+            color: black;
+            border-radius: 999px;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 0 2px #222;
+        }
+
+        .stats-table input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #555;
+            border-radius: 4px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .stats-table input[type="checkbox"]:checked {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .stats-table input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            top: -2px;
+            left: 2px;
+        }
+
+        .fancy-textbox-container {
+            width: 0px;
+            height: 0px;
+            overflow: hidden;
+            transition: width 0.5s ease, height 0.5s ease;
+
+        }
+
+        #editor {
+            background-color: #121212;
+            border: 1px solid #222222;
+
+        }
+
+        #editor-parent {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+
+            transition: width 0.5s ease, height 0.5s ease;
+            margin: 0 auto;
+        }
+
+        .item-box {
+            position: absolute;
+            background: #222;
+            color: white;
+            padding: 10px;
+            margin-top: 3px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+    </style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .leftpage {
+            width: 14rem;
+            background-color: #121212;
+            border-right: 1px solid #222222;
+        }
+
+        .main {
+            flex: 1;
+            background-color: #0c0b0b;
+
+        }
+
+        body {
+            margin: 0;
+            background-color: #0c0b0b;
+            font-family: sans-serif;
+        }
+
+        .sidebar {
+            width: 14rem;
+            background-color: #121212;
+            border-right: 1px solid #222222;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 8px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar a:hover {
+            background-color: #222222;
+        }
+
+        .sidebar a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar img {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 52px;
+            padding: 16px;
+            border-bottom: 1px solid #222222;
+        }
+
+        .header img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .header span {
+            font-weight: 800;
+            color: white;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        body {
+            background-color: #0c0b0b;
+            /* Cho dễ nhìn nếu chạy riêng */
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #555;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .toggle-page {
+            padding: 4px;
+            border-radius: 0.25rem;
+            border: 1px solid #222222;
+            background-color: transparent;
+            color: white;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-page:hover {
+            background-color: #222222;
+        }
+
+        .dark-toggle {
+            padding: 8px;
+            /* p-2 ~ 8px */
+            border-radius: 0.25rem;
+            /* rounded */
+            border: 1px solid #222222;
+            margin-left: auto;
+            background-color: transparent;
+            color: white;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .button-group {
+            margin-left: auto;
+            cursor: pointer;
+        }
+
+        .script-open {
+
+            border-radius: 0.25rem;
+            /* rounded */
+            border: 1px solid #222222;
+            width: 34px;
+            height: 34px;
+
+            background-color: transparent;
+            color: white;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .exec-btn {
+
+            border-radius: 0.25rem;
+            /* rounded */
+            border: 1px solid #222222;
+            width: 42px;
+            height: 34px;
+
+            background-color: transparent;
+            color: white;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .dark-toggle:hover,
+        .script-open:hover {
+            background-color: #222222;
+        }
+
+        .stats-container {
+            display: flex;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            margin-left: 10px;
+            margin-right: 10px;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .stat-box {
+            flex: 1 1 180px;
+
+
+            background-color: #121212;
+            border: 1px solid #222222;
+            border-radius: 8px;
+            padding: 1rem;
+            box-sizing: border-box;
+
+            /* Căn giữa nội dung theo cả ngang và dọc */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            color: white;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            justify-content: center;
+            /* căn giữa nhãn */
+        }
+
+        .stat-label.online {
+            color: #22c55e;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .stat-value.online {
+            color: #22c55e;
+        }
+
+        i {
+            font-size: 0.9rem;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #22c0c5;
+            /* yellow-400 */
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        input[type="radio"] {
+            accent-color: #22c0c5;
+            /* yellow-400 */
+            cursor: pointer;
+        }
+
+        .list-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background-color: #222222;
+            border: 1px solid #222222;
+            border-radius: 6px;
+            color: #22c0c5;
+            /* text-yellow-400 */
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .list-button:hover {
+            background-color: #333333;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-spacing: 0;
+            border: 1px solid #222;
+            border-radius: 8px;
+            overflow: hidden;
+
+        }
+
+        .stats-table thead {
+            font-weight: bold;
+
+        }
+
+        .stats-table th {
+            border-bottom: 1px solid #222;
+        }
+
+        .stats-table th input[type="checkbox"]:indeterminate {
+            accent-color: #FF9800;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            padding: 10px;
+            text-align: center;
+            vertical-align: middle;
+            color: white;
+
+        }
+
+        .stats-table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+
+        .stats-table thead {
+            font-weight: bold;
+        }
+
+
+        .status-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 2px;
+            transform: translateY(1px);
+            display: inline-block;
+        }
+
+        .status-circle.red {
+            background-color: #dc2626;
+        }
+
+        .status-circle.green {
+            background-color: #19a014;
+        }
+
+        .account-name {
+            font-weight: 600;
+            color: white;
+            font-size: 12px;
+        }
+
+        .account-type {
+            color: #666;
+            font-size: 10px;
+        }
+
+        .account-updated {
+            color: #666;
+            font-size: 9px;
+            margin-top: 4px;
+        }
+
+        .account-updated span {
+            color: #999;
+        }
+
+        .money-box {
+            display: inline-block;
+            border: 1px solid #3a4a6d;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #3a4a6d;
+            cursor: default;
+        }
+
+        .pill-button {
+            position: relative;
+            background-color: #222;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            overflow: visible;
+        }
+
+        .pill-button span {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background-color: #4ade80;
+            /* xanh lá nhạt */
+            color: black;
+            border-radius: 999px;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 0 2px #222;
+        }
+
+        .stats-table input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #555;
+            border-radius: 4px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .stats-table input[type="checkbox"]:checked {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+
+        .stats-table input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            top: -2px;
+            left: 2px;
+        }
+
+        .fancy-textbox-container {
+            width: 0px;
+            height: 0px;
+            overflow: hidden;
+            transition: width 0.5s ease, height 0.5s ease;
+
+        }
+
+        #editor {
+            background-color: #121212;
+            border: 1px solid #222222;
+
+        }
+
+        #editor-parent {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+
+            transition: width 0.5s ease, height 0.5s ease;
+            margin: 0 auto;
+        }
+
+        .item-box {
+            position: absolute;
+            background: #222;
+            color: white;
+            padding: 10px;
+            margin-top: 3px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <style>
+        /* Thêm vào phần CSS */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .leftpage {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #222222;
+            }
+
+            .navbar {
+                padding: 15px;
+            }
+
+            .navbar h1 {
+                font-size: 20px;
+            }
+
+            .search-bar {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .search-bar input {
+                width: 100%;
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .stats-container {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .stat-box {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .radio-group {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .radio-label {
+                font-size: 13px;
+            }
+
+            .list-button {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .stats-table {
+                font-size: 13px;
+            }
+
+            .stats-table th,
+            .stats-table td {
+                padding: 8px;
+            }
+
+            .account-name {
+                font-size: 13px;
+            }
+
+            .account-updated {
+                font-size: 11px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .cell {
+                aspect-ratio: 1;
+            }
+
+            .quantity {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            .label {
+                font-size: 13px;
+                padding: 10px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                max-height: 80vh;
+            }
+
+            .modal-header {
+                padding: 15px;
+            }
+
+            .modal-header h2 {
+                font-size: 18px;
+            }
+
+            .account-item2 {
+                padding: 12px 15px;
+            }
+
+            .account-name2 {
+                font-size: 14px;
+            }
+
+            .account-quantity {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            /* Tối ưu cho các nút điều khiển */
+            .button-group {
+                display: flex;
+                gap: 5px;
+                margin-left: 0;
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .script-open,
+            .exec-btn {
+                width: 36px;
+                height: 36px;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Tối ưu cho editor */
+            #editor-parent {
+                height: 200px !important;
+            }
+
+            .fancy-textbox-container {
+                height: 200px !important;
+            }
+
+            /* Tối ưu cho popup */
+            .item-box {
+                max-width: 90vw;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            /* Tối ưu cho scrollbar */
+            ::-webkit-scrollbar {
+                width: 4px;
+                height: 4px;
+            }
+        }
+
+        /* Thêm breakpoint cho màn hình rất nhỏ */
+        @media (max-width: 360px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .stats-table {
+                font-size: 12px;
+            }
+
+            .stats-table th,
+            .stats-table td {
+                padding: 6px;
+            }
+
+            .list-button {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
+
+        /* Thêm animation cho mobile */
+        @media (max-width: 768px) {
+            .cell {
+                transition: transform 0.2s ease;
+            }
+
+            .cell:active {
+                transform: scale(0.95);
+            }
+
+            .list-button:active,
+            .script-open:active,
+            .exec-btn:active {
+                transform: scale(0.95);
+            }
+
+            .modal-content {
+                animation: slideUpMobile 0.3s ease;
+            }
+
+            @keyframes slideUpMobile {
+                from {
+                    transform: translateY(100%);
+                }
+                to {
+                    transform: translateY(0);
+                }
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="leftpage">
+            <div class="header">
+                <img src="https://raw.githubusercontent.com/minhblus/sawhub/refs/heads/main/removebg-preview.png"
+                    alt="Yummytrackstats logo, white cat with blue eyes and red nose" />
+                <span>Saw Trackstats</span>
+            </div>
+            <nav class="sidebar">
+                <a class="active" href="#"><img
+                        src="https://tr.rbxcdn.com/180DAY-a13744ce7d3374515327673ca8fe73da/256/256/Image/Webp/noFilter"
+                        alt="">Grow A Garden</a>
+            </nav>
+        </div>
+        <div class="main">
+            <div class="header">
+                <button aria-label="Toggle sidebar" class="toggle-page">
+                    <i class="fas fa-th-large">
+                    </i>
+                </button>
+                <span>
+                    Grow A Garden
+                </span>
+                <button aria-label="Toggle dark mode" class="dark-toggle">
+                    <i class="fas fa-sync-alt">
+                    </i>
+                </button>
+            </div>
+            <div class="stats-container" id="math-sum-stats">
+
+                <div class="stat-box">
+                    <div class="stat-label online">
+                        Online
+                        <span style="color:white; font-weight:400;"> / Accounts</span>
+                    </div>
+                    <div class="stat-value online" id="account-online">0
+                        <span style="font-weight:400; color:white; font-size:1rem;" id="total-account">/1</span>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="stats-container">
+                <input type="text" placeholder="Tìm kiếm..."
+                    style="width: 60%; padding: 8px; border-radius: 4px; border: 1px solid #222222; background-color: #121212; color: white; font-size: 14px">
+                <button aria-label="List view" class="list-button" id="list-view">
+                    <i class="fas fa-list"></i>
+                    List View
+                </button>
+                <button aria-label="Grid view" class="list-button" id="grid-view">
+                    <i class="fas fa-th"></i>
+                    Grid View
+                </button>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="status" value="all" checked>
+                        All
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="status" value="online">
+                        Online
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="status" value="offline">
+                        Offline
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button aria-label="Toggle dark mode" class="script-open">
+                        <i class="fa-solid fa-scroll"></i>
+                    </button>
+                    <button aria-label="Toggle dark mode" class="exec-btn" onclick="executeScript()">
+                        exec
+                    </button>
+                    <button aria-label="Toggle dark mode" class="exec-btn" onclick="getjobid()">
+                        Job Id
+                    </button>
+                    <button aria-label="Toggle dark mode" class="exec-btn" onclick="remove_account()">
+                        Del
+                    </button>
+                </div>
+            </div>
+            <div class="stats-container" id="editor-parent">
+                <div class="fancy-textbox-container" id="editor"></div>
+            </div>
+            <div class="stats-container" id="list-view">
+                <table class="stats-table">
+                    <thead>
+                        <tr id="stats-table-header">
+                            <th class="center">
+                                <input aria-label="Select all" class="center" type="checkbox" />
+                            </th>
+                            <th class="center">Account</th>
+                            <!-- <th class="center">Money</th>
+                            <th class="center">Plants</th>
+                            <th class="center">Pets</th>
+                            <th class="center">Mythical</th>
+                            <th class="center">Divine</th>
+                            <th class="center">Inventory</th> -->
+                        </tr>
+                    </thead>
+                    <tbody id="stats-table-body">
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="grid" id="grid"></div>
+        </div>
+    </div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Chi tiết item</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <ul id="accountList" class="account-list"></ul>
+            </div>
+        </div>
+    </div>
+    <div id="popup" class="item-box hidden">
+        <ul id="popup-content">
+        </ul>
+    </div>
+    <script>
+        const rarityColors = {
+            Common: '#9ca3af',      // Gray
+            Uncommon: '#10b981',    // Green  
+            Rare: '#3b82f6',        // Blue
+            Epic: '#8b5cf6',        // Purple
+            Legendary: '#f59e0b',   // Orange
+            Mythical: '#ef4444',    // Red
+            Divine: '#ec4899',      // Pink
+            Prismatic: '#06b6d4'       // Cyan
+        };
+      const data = {{ data || tojson}}
+        const tonghop = {};
+
+        Object.values(data).forEach(userItems => {
+            Object.entries(userItems).forEach(([key, val]) => {
+                if (key === "username" || key === "last_online") return;
+
+                if ('value' in val) {
+                    // Trường hợp item là 1 object có 'value', ví dụ Money
+                    if (!tonghop[key]) tonghop[key] = { ...val };
+                    else tonghop[key].value += val.value;
+                } else if (typeof val === 'object') {
+                    // Trường hợp item là object chứa nhiều item con, ví dụ Pets
+                    Object.entries(val).forEach(([subKey, subVal]) => {
+                        if (!tonghop[subKey]) tonghop[subKey] = { ...subVal };
+                        else tonghop[subKey].value += subVal.value;
+                    });
+                }
+            });
+        });
+
+
+
+        const grid = document.getElementById('grid');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const accountList = document.getElementById('accountList');
+        const closeBtn = document.querySelector('.close');
+
+        function renderGrid(data) {
+            grid.innerHTML = '';
+
+            for (const [itemName, itemData] of Object.entries(data)) {
+                if (itemName === 'last_online' || itemName === 'username') continue;
+                if (!itemData || itemData.value <= 0) continue;
+
+                if ("value" in itemData && itemData.value != undefined && itemData.value != NaN) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.setAttribute('data-label', itemName);
+
+                    // Set border color based on rarity
+                    const rarityColor = rarityColors[itemData.rarity] || rarityColors.Common;
+                    cell.style.borderColor = rarityColor;
+                    cell.style.boxShadow = `0 8px 25px rgba(0, 0, 0, 0.4), 0 0 0 1px ${rarityColor}40`;
+
+                    const img = document.createElement('img');
+                    img.src = itemData.id;
+                    img.alt = itemName;
+
+                    const quantity = document.createElement('div');
+                    quantity.classList.add('quantity');
+                    console.log(itemData)
+                    quantity.textContent = 'x' + itemData.value.toLocaleString();
+                    quantity.style.background = rarityColor;
+                    quantity.style.boxShadow = `0 4px 15px ${rarityColor}40`;
+
+                    const label = document.createElement('div');
+                    label.classList.add('label');
+                    label.textContent = itemName;
+
+                    cell.appendChild(img);
+                    cell.appendChild(quantity);
+                    cell.appendChild(label);
+
+                    // Add click event
+                    cell.addEventListener('click', () => showModal(itemName, itemData.rarity));
+
+                    grid.appendChild(cell);
+
+                }
+            }
+        }
+
+
+        function findAllWithItem(data, itemName) {
+            const accounts = [];
+
+            Object.entries(data).forEach(([username, userData]) => {
+                const descendants = getDescendants(userData);
+                descendants.forEach(entry => {
+                    if (entry[itemName] && typeof entry[itemName] === "object" && "value" in entry[itemName]) {
+                        accounts.push({
+                            name: username,
+                            quantity: entry[itemName].value
+                        });
+                    }
+                });
+            });
+
+            return accounts;
+        }
+
+        function getDescendants(obj) {
+            const result = [];
+
+            function recurse(current) {
+                if (typeof current === "object" && current !== null) {
+                    result.push(current);
+                    Object.values(current).forEach(child => recurse(child));
+                }
+            }
+
+            recurse(obj);
+            return result;
+        }
+
+
+        function showModal(itemName, rarity) {
+            const rarityColor = rarityColors[rarity] || rarityColors.Common;
+            modalTitle.innerHTML = `<span style="color: ${rarityColor};">📦 ${itemName}</span> <small style="color: ${rarityColor}; opacity: 0.8;">(${rarity})</small>`;
+
+            // Get accounts with this item and sort by quantity (descending)
+            const accounts = findAllWithItem(data, itemName);
+
+            // Sort by quantity descending
+            accounts.sort((a, b) => b.quantity - a.quantity);
+
+            // Clear and populate account list
+            accountList.innerHTML = '';
+            accounts.forEach((account, index) => {
+                const li = document.createElement('li');
+                li.classList.add('account-item2');
+
+                const nameSpan = document.createElement('span');
+                nameSpan.classList.add('account-name2');
+                nameSpan.textContent = `${index + 1}. ${account.name}`;
+
+                const quantitySpan = document.createElement('span');
+                quantitySpan.classList.add('account-quantity');
+                quantitySpan.textContent = `x${account.quantity}`;
+                quantitySpan.style.background = rarityColor;
+                quantitySpan.style.boxShadow = `0 2px 10px ${rarityColor}40`;
+
+                li.appendChild(nameSpan);
+                li.appendChild(quantitySpan);
+                accountList.appendChild(li);
+            });
+
+            modal.classList.add('show');
+        }
+
+        function hideModal() {
+            modal.classList.remove('show');
+        }
+
+        // Event listeners
+        closeBtn.addEventListener('click', hideModal);
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hideModal();
+            }
+        });
+
+        // Initial render
+        renderGrid(tonghop);
+
+
+        let start_create = false;
+        const stats_table_headers = document.getElementById("stats-table-header")
+        const stats_table_body = document.getElementById("stats-table-body")
+        const stats_conter = document.getElementById('math-sum-stats');
+        const popup_content = document.getElementById("popup-content")
+
+        function isEmptyObject(obj) {
+            let out = false;
+            Object.entries(obj).forEach(([_, hehe]) => {
+                if (Object.prototype.toString.call(hehe) === "[object Object]") {
+                    out = true;
+                    return true;
+                }
+            })
+            if ((Object.prototype.toString.call(obj) == "[object Object]" && Object.keys(obj).length === 0) || Array.isArray(obj)) {
+                out = true;
+            }
+            return out;
+        }
+
+        function formatAgo(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(seconds / 3600);
+            const days = Math.floor(seconds / 86400);
+
+            if (seconds < 60) return `${seconds}s ago`;
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return `${days}d ago`;
+        }
+
+        function formatNumber(num) {
+            if (num >= 1e9) {
+                return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+            }
+            if (num >= 1e6) {
+                return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+            }
+            if (num >= 1e3) {
+                return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+            }
+            return num.toString();
+        }
+        function parseFormattedNumber(str) {
+            if (str.endsWith('K')) {
+                return parseFloat(str) * 1e3;
+            } else if (str.endsWith('M')) {
+                return parseFloat(str) * 1e6;
+            } else if (str.endsWith('B')) {
+                return parseFloat(str) * 1e9;
+            } else {
+                return parseFloat(str);
+            }
+        }
+
+
+        let accountOnline = 0;
+
+        Object.entries(data).forEach(([username, userdata]) => {
+            if (!start_create) {
+                Object.entries(userdata).forEach(([tdname, _]) => {
+                    if (tdname === 'last_online' || tdname === 'username') {
+                        return;
+                    }
+                    const th = document.createElement('th');
+                    th.className = 'center';
+                    th.textContent = tdname;
+                    stats_table_headers.appendChild(th);
+
+                    stats_conter.innerHTML += `
+                                        <div class="stat-box">
+                                            <div class="stat-label">${tdname}</div>
+                                            <div class="stat-value normal" id="${tdname + "_value"}">0</div>
+                                        </div>`
+                });
+                start_create = true;
+            }
+
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-username', username);
+
+            const tdCheckbox = document.createElement('td');
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.setAttribute('aria-label', `Select account ${username}`);
+            tdCheckbox.appendChild(input);
+            tr.appendChild(tdCheckbox);
+
+
+
+            const tdInfo = document.createElement('td');
+            const divInfo = document.createElement('div');
+            divInfo.className = 'account-info';
+
+            const spanStatus = document.createElement('span');
+            const utcTimestamp = Math.floor(Date.now() / 1000);
+            console.log(utcTimestamp - userdata.last_online)
+            if (userdata.last_online && utcTimestamp - userdata.last_online <= 180) {
+                spanStatus.className = 'status-circle green';
+                accountOnline++;
+            } else {
+                spanStatus.className = 'status-circle red';
+            }
+
+            const spanName = document.createElement('span');
+            spanName.className = 'account-name';
+            spanName.textContent = username;
+
+            divInfo.appendChild(spanStatus);
+            divInfo.appendChild(spanName);
+
+            const divUpdated = document.createElement('div');
+            divUpdated.className = 'account-updated';
+
+            if (userdata.last_online) {
+                const lastOnline = utcTimestamp - userdata.last_online;
+                divUpdated.innerHTML = `Last updated <span>${formatAgo(lastOnline)}</span>`;
+            } else {
+                divUpdated.innerHTML = `Last updated <span>Never</span>`;
+            }
+
+            tdInfo.appendChild(divInfo);
+            tdInfo.appendChild(divUpdated);
+            tr.appendChild(tdInfo);
+
+            Object.entries(userdata).forEach(([_, newdata]) => {
+                if (_ === 'last_online' || _ === 'username') {
+                    return;
+                }
+                const td = document.createElement('td');
+                td.className = 'center';
+                let allcount = 0;
+                if (isEmptyObject(newdata)) {
+                    let count = 0;
+                    Object.entries(newdata).forEach(([_, value]) => {
+                        count += value.value;
+                    });
+                    allcount += count;
+
+                    const btn = document.createElement('button');
+                    btn.className = 'pill-button';
+                    btn.innerHTML = `Show <span>${count}</span>`;
+                    btn.onclick = function () {
+                        showPopup(this, newdata);
+                    };
+
+
+                    td.appendChild(btn);
+
+                } else {
+                    const divNumber = document.createElement('div');
+                    divNumber.className = 'money-box';
+                    divNumber.textContent = formatNumber(newdata.value);
+                    td.appendChild(divNumber);
+                    console.log(newdata.value)
+                    allcount += newdata.value;
+                }
+
+                const statValueElem = document.getElementById(_ + "_value");
+                if (statValueElem) {
+                    const currentValue = parseFormattedNumber(statValueElem.textContent) || 0;
+                    const newValue = currentValue + allcount;
+                    statValueElem.textContent = formatNumber(newValue);
+                } else {
+                    console.warn(`Element with ID ${_ + "_value"} not found.`);
+                }
+
+
+                tr.appendChild(td);
+            });
+
+            stats_table_body.appendChild(tr);
+        });
+
+
+        const accountOnlineElem = document.getElementById('account-online');
+        const totalAccountElem = document.getElementById('total-account');
+
+        accountOnlineElem.childNodes[0].nodeValue = accountOnline;
+
+        totalAccountElem.textContent = "/" + Object.keys(data).length;
+
+
+        function showPopup(button, datanew) {
+            const popup = document.getElementById('popup');
+            const rect = button.getBoundingClientRect();
+
+            popup_content.innerHTML = '';
+            Object.entries(datanew).forEach(([itemName, itemData]) => {
+                const li = document.createElement('li');
+                li.textContent = `${itemName} [${itemData.value}] [${itemData.rarity}]`;
+                popup_content.appendChild(li);
+            });
+
+            popup.style.left = rect.left + 'px';
+            popup.style.top = rect.bottom + window.scrollY + 'px';
+            if (popup.classList.contains('hidden')) {
+                popup.classList.remove('hidden');
+            } else {
+                popup.classList.add('hidden');
+            }
+        }
+
+        // Ẩn popup khi click bên ngoài
+        document.addEventListener('click', function (e) {
+            const popup = document.getElementById('popup');
+            if (!popup.contains(e.target) && !e.target.matches('button')) {
+                popup.classList.add('hidden');
+            }
+        });
+
+    </script>
+    <script>
+        const selectAllCheckbox = document.querySelector('.stats-table th input[type="checkbox"]');
+        const rowCheckboxes = document.querySelectorAll('.stats-table td input[type="checkbox"]');
+
+        // Select all functionality
+        selectAllCheckbox.addEventListener('change', function () {
+            rowCheckboxes.forEach(cb => cb.checked = this.checked);
+        });
+
+        // Individual checkbox functionality
+        rowCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const checkedCount = document.querySelectorAll('.stats-table td input[type="checkbox"]:checked').length;
+                const totalCount = rowCheckboxes.length;
+
+                if (checkedCount === totalCount) {
+                    selectAllCheckbox.checked = true;
+                    selectAllCheckbox.indeterminate = false;
+                } else if (checkedCount === 0) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                } else {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = true;
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+    <script>
+        function executeScript() {
+            const editor = monaco.editor.getModels()[0];
+            const script = editor.getValue();
+
+            if (script.trim() === "") {
+                alert("Vui lòng nhập mã Lua trước khi thực thi.");
+                return;
+            }
+
+            const alluser = [];
+            const listaccounts = document.querySelectorAll('.stats-table tbody tr');
+            console.log(listaccounts);
+            listaccounts.forEach((row) => {
+                const accountName = row.querySelector('.account-name').textContent.trim();
+                console.log(accountName);
+                if (row.querySelector('td input[type="checkbox"]').checked) {
+                    alluser.push(accountName);
+                }
+            });
+            fetch("/execute_script", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    script: script,
+                    accounts: alluser
+                })
+            })
+        }
+
+        function getjobid() {
+            const alluser = [];
+            const editor = monaco.editor.getModels()[0];
+            const listaccounts = document.querySelectorAll('.stats-table tbody tr');
+            console.log(listaccounts);
+            listaccounts.forEach((row) => {
+                const accountName = row.querySelector('.account-name').textContent.trim();
+                console.log(accountName);
+                if (row.querySelector('td input[type="checkbox"]').checked) {
+                    alluser.push(accountName);
+                }
+            });
+            if (alluser.length === 0) {
+                alert("Vui lòng chọn ít nhất một tài khoản.");
+                return;
+            }
+            fetch("/getjobid", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    accounts: alluser
+                })
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Lỗi khi lấy job ID.");
+                }
+            }).then(data => {
+                if (data) {
+                    editor.setValue(data.text);
+                } else {
+                    alert("Không tìm thấy job ID.");
+                }
+            }).catch(error => {
+                console.error("Lỗi:", error);
+                alert("Đã xảy ra lỗi khi lấy job ID.");
+            });
+        }
+
+                function remove_account() {
+            const alluser = [];
+            const editor = monaco.editor.getModels()[0];
+            const listaccounts = document.querySelectorAll('.stats-table tbody tr');
+            console.log(listaccounts);
+            listaccounts.forEach((row) => {
+                const accountName = row.querySelector('.account-name').textContent.trim();
+                console.log(accountName);
+                if (row.querySelector('td input[type="checkbox"]').checked) {
+                    alluser.push(accountName);
+                }
+            });
+            if (alluser.length === 0) {
+                alert("Vui lòng chọn ít nhất một tài khoản.");
+                return;
+            }
+            if (confirm("Chắc chắn xóa không?")) {
+                fetch("/remove_account", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        accounts: alluser
+                    })
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error("Lỗi khi xóa.");
+                    }
+                }).then(data => {
+                    if (data.message=="ok") {
+                        location.reload();
+                    } else {
+                        alert("Không tìm thấy.");
+                    }
+                }).catch(error => {
+                    console.error("Lỗi:", error);
+                    alert("Đã xảy ra lỗi .");
+                });
+            }
+        }
+
+
+        function openTextbox() {
+            const container = document.querySelector('.fancy-textbox-container');
+            const containerparent = document.querySelector('#editor-parent');
+            containerparent.style.height = '30px';
+            container.style.height = '10px';
+
+
+            container.style.width = '0px';
+
+            setTimeout(() => {
+                container.style.width = 'calc(100% - 20px)';
+
+            }, 100);
+
+            setTimeout(() => {
+                container.style.height = '300px';
+                containerparent.style.marginTop = "10px";
+                containerparent.style.height = '300px';
+            }, 500);
+        }
+        function closeTextbox() {
+            const container = document.querySelector('.fancy-textbox-container');
+            const containerparent = document.querySelector('#editor-parent');
+
+            containerparent.style.marginTop = "0px";
+            container.style.height = '10px';
+            containerparent.style.height = '30px';
+
+            setTimeout(() => {
+                // Thu hẹp chiều ngang xuống 0
+                container.style.width = '0px';
+            }, 500);
+
+            setTimeout(() => {
+                // Thu nhỏ chiều cao containerparent và container về ban đầu
+                containerparent.style.height = '0px';
+                container.style.height = '0px';
+            }, 1000);
+        }
+
+        let opendScript = false;
+        document.querySelector('.script-open').addEventListener('click', function () {
+            if (opendScript) {
+                closeTextbox();
+            } else {
+                openTextbox();
+            }
+            opendScript = !opendScript;
+        });
+        require.config({ paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs" } });
+        require(["vs/editor/editor.main"], function () {
+            monaco.editor.create(document.getElementById("editor"), {
+                value: "", // chị có thể để gì đó mặc định ở đây
+                language: "lua", // không highlight
+                theme: "vs", // nền trắng như textarea
+                fontSize: 14,
+                lineNumbers: "off",      // tắt số dòng
+                minimap: { enabled: false }, // tắt minimap
+                scrollbar: {
+                    vertical: "hidden",
+                    horizontal: "hidden"
+                },
+                overviewRulerLanes: 0,
+                folding: false,
+                lineDecorationsWidth: 0,
+                lineNumbersMinChars: 0,
+                glyphMargin: false,
+                renderLineHighlight: "none",
+                renderIndentGuides: false,
+                automaticLayout: true,
+                wordWrap: "on"
+            });
+            monaco.editor.defineTheme('custom-dark', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [],
+                colors: {
+                    'editor.background': '#121212',
+                    'editor.lineHighlightBackground': '#222222',
+                    'editorGutter.background': '#121212',
+                }
+            });
+            monaco.editor.setTheme('custom-dark');
+
+        });
+    </script>
+    <script>
+        // Thêm vào phần cuối file, trước thẻ đóng </body>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lấy các phần tử
+            const searchInput = document.querySelector('input[type="text"]');
+            const gridView = document.getElementById('grid');
+            const listView = document.querySelector('.stats-container#list-view');
+            const gridViewBtn = document.getElementById('grid-view');
+            const listViewBtn = document.getElementById('list-view');
+
+            // Ẩn grid view mặc định
+            if (gridView) gridView.style.display = 'none';
+
+            // Xử lý chuyển đổi view
+            if (gridViewBtn) {
+                gridViewBtn.addEventListener('click', function() {
+                    if (gridView) gridView.style.display = 'grid';
+                    if (listView) listView.style.display = 'none';
+                    this.classList.add('active');
+                    if (listViewBtn) listViewBtn.classList.remove('active');
+                });
+            }
+
+            if (listViewBtn) {
+                listViewBtn.addEventListener('click', function() {
+                    if (gridView) gridView.style.display = 'none';
+                    if (listView) listView.style.display = 'block';
+                    this.classList.add('active');
+                    if (gridViewBtn) gridViewBtn.classList.remove('active');
+                });
+            }
+
+            // Xử lý search
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    
+                    // Search trong grid view
+                    if (gridView) {
+                        const gridItems = gridView.querySelectorAll('.cell');
+                        gridItems.forEach(item => {
+                            const label = item.querySelector('.label').textContent.toLowerCase();
+                            if (label.includes(searchTerm)) {
+                                item.style.display = 'block';
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    // Search trong list view
+                    if (listView) {
+                        const listRows = listView.querySelectorAll('tbody tr');
+                        listRows.forEach(row => {
+                            const accountName = row.querySelector('.account-name').textContent.toLowerCase();
+                            const cells = row.querySelectorAll('td');
+                            let found = false;
+
+                            cells.forEach(cell => {
+                                const cellText = cell.textContent.toLowerCase();
+                                if (cellText.includes(searchTerm)) {
+                                    found = true;
+                                }
+                            });
+
+                            if (found || accountName.includes(searchTerm)) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Xử lý filter online/offline
+            function filterByStatus(status) {
+                if (!listView) return;
+
+                const rows = listView.querySelectorAll('tbody tr');
+                const utcTimestamp = Math.floor(Date.now() / 1000);
+
+                rows.forEach(row => {
+                    const statusCircle = row.querySelector('.status-circle');
+                    if (!statusCircle) return;
+
+                    const isOnline = statusCircle.classList.contains('green');
+
+                    if (status === 'all') {
+                        row.style.display = '';
+                    } else if (status === 'online' && isOnline) {
+                        row.style.display = '';
+                    } else if (status === 'offline' && !isOnline) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Áp dụng filter cho grid view
+                if (gridView) {
+                    const gridItems = gridView.querySelectorAll('.cell');
+                    gridItems.forEach(item => {
+                        const itemData = item.getAttribute('data-label');
+                        if (!itemData) return;
+
+                        const accounts = findAllWithItem(data, itemData);
+                        let shouldShow = false;
+
+                        accounts.forEach(account => {
+                            const accountRow = listView.querySelector(`tr[data-username="${account.name}"]`);
+                            if (accountRow) {
+                                const isOnline = accountRow.querySelector('.status-circle').classList.contains('green');
+                                if (status === 'all' || 
+                                    (status === 'online' && isOnline) || 
+                                    (status === 'offline' && !isOnline)) {
+                                    shouldShow = true;
+                                }
+                            }
+                        });
+
+                        item.style.display = shouldShow ? 'block' : 'none';
+                    });
+                }
+            }
+
+            // Thêm event listeners cho radio buttons
+            document.querySelectorAll('input[name="status"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    filterByStatus(this.value);
+                });
+            });
+
+            // Thêm active state cho buttons
+            const buttons = document.querySelectorAll('.list-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Thêm style cho active state
+            const style = document.createElement('style');
+            style.textContent = `
+                .list-button.active {
+                    background: var(--gradient-primary);
+                    color: var(--text-color);
+                    transform: translateY(-2px);
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+
+</html>
