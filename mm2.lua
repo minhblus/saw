@@ -2156,13 +2156,13 @@ local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 local HomeTab=Sawhub:CreatePage({title="Home"})
 
 local SettingSec=HomeTab:CreateSection({title="Setting"})
-SettingSec:CreateLabel({title="Snow Token: "})
+local snowtokencheck=SettingSec:CreateLabel({title="Snow Token: "})
 spawn(function()
 	local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
 
 	while wait(1) do
 		pcall(function()
-			SettingSec:Set("Snow Token: "..module_upvr_6.Materials.Owned["SnowTokens2025"])
+			snowtokencheck:Set("Snow Token: "..module_upvr_6.Materials.Owned["SnowTokens2025"])
 		end)
 
 	end
