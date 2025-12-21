@@ -2068,13 +2068,16 @@ function SawUI:CreateWindow(windowconfig)
 	return pagefunc
 end
 
-repeat wait()
-	if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DeviceSelect") then
-		for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.DeviceSelect.Container.Phone.Button.MouseButton1Click)) do
-			v.Function()
+spawn(function()
+	while wait(1) do
+		if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DeviceSelect") then
+			for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.DeviceSelect.Container.Phone.Button.MouseButton1Click)) do
+				v.Function()
+			end
+			break
 		end
-	end
-until not game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DeviceSelect")
+	end 
+end)
 
 if not getgenv().Config then
 	getgenv().Config={}
@@ -2186,7 +2189,7 @@ SettingSec:CreateToggle({title="Helicoper",default=getgenv().Config.Helicoper,ca
     end)
 end})
 
-SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=30,Precise=15,callback=function(v)
+SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=30,Precise=18,callback=function(v)
     getgenv().Config.TweenSpeed=v
 end})
 local EventSec=HomeTab:CreateSection({title="Event"})
