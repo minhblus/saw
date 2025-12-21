@@ -2091,7 +2091,7 @@ function getMap()
 end
 
 function GetCoin()
-    local maxdis = math.huge
+    local maxdis = 1000
     local closestCoin = nil
     local map = getMap()
 
@@ -2137,6 +2137,13 @@ function TweenFloat(a)
 	end
 end 
 
+function GetLive()
+    if LP.Character and LP.Character:FindFirstChild("Humanoid") and LP.Character.Humanoid.Health > 0 and LP.Character:FindFirstChild("HumanoidRootPart") then
+        return true
+    end
+    return false
+end
+
 local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 local HomeTab=Sawhub:CreatePage({title="Home"})
 
@@ -2169,7 +2176,7 @@ EventSec:CreateToggle({title="Auto Reset",default=getgenv().Config.AutoReset,cal
     getgenv().Config.AutoReset=v 
     task.spawn(function()
         while task.wait() and getgenv().Config.AutoReset do
-            if game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Game.CoinBags.Container.Candy.Visible and game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Game.CoinBags.Container.Candy.Full.Visible then
+            if game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Game.CoinBags.Container.SnowToken.Visible and game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Game.CoinBags.Container.SnowToken.Full.Visible then
                 pcall(function()
                     game:GetService("Players").LocalPlayer.Character.Humanoid.Health=0
                 end)
@@ -2187,8 +2194,8 @@ EventSec:CreateToggle({title="Auto Collect Coin",default=getgenv().Config.AutoCo
                     repeat task.wait()
                         TweenFloat(true)
                         Tween(coin.CFrame)
-                    until not coin.Parent or not coin or not coin:FindFirstChild("CoinVisual") or  coin.CoinVisual:GetAttribute("Collected")
-                    TweenFloat(false)
+                    until not coin.Parent or not coin or not coin:FindFirstChild("CoinVisual") or not GetLive() or coin.CoinVisual:GetAttribute("Collected") or  (coin.Position-plr.Character.HumanoidRootPart.Position).magnitude>1000
+
                 end
             end
         end
