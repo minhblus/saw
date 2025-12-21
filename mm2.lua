@@ -2195,11 +2195,22 @@ EventSec:CreateToggle({title="Auto Reset",default=getgenv().Config.AutoReset,cal
     getgenv().Config.AutoReset=v 
     task.spawn(function()
         while task.wait() and getgenv().Config.AutoReset do
-            if game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Lobby.Dock.CoinBags.Container.SnowToken.Visible and game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Lobby.Dock.CoinBags.Container.SnowToken.Full.Visible then
+			pcall(function()
+				            if game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Lobby.Dock.CoinBags.Container.SnowToken.Visible and game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Lobby.Dock.CoinBags.Container.SnowToken.Full.Visible then
                 pcall(function()
                     game:GetService("Players").LocalPlayer.Character.Humanoid.Health=0
                 end)
             end
+			end)
+
+			pcall(function()
+				            if game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Game.CoinBags.Container.SnowToken.Visible and game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Game.CoinBags.Container.SnowToken.Full.Visible then
+                pcall(function()
+                    game:GetService("Players").LocalPlayer.Character.Humanoid.Health=0
+                end)
+            end
+			end)
+
         end
     end)
 end})
