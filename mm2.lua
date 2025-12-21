@@ -2068,6 +2068,14 @@ function SawUI:CreateWindow(windowconfig)
 	return pagefunc
 end
 
+repeat wait()
+	if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DeviceSelect") then
+		for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.PlayerGui.DeviceSelect.Container.Phone.Button.MouseButton1Click)) do
+			v.Function()
+		end
+	end
+until not game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DeviceSelect")
+
 if not getgenv().Config then
 	getgenv().Config={}
 end
@@ -2148,6 +2156,17 @@ local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 local HomeTab=Sawhub:CreatePage({title="Home"})
 
 local SettingSec=HomeTab:CreateSection({title="Setting"})
+SettingSec:CreateLabel({title="Snow Token: "})
+spawn(function()
+	local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
+
+	while wait(1) do
+		pcall(function()
+			SettingSec:Set("Snow Token: "..module_upvr_6.Materials.Owned["SnowTokens2025"])
+		end)
+
+	end
+end)
 SettingSec:CreateToggle({title="Noclip",default=getgenv().Config.Noclip,callback=function(v)
 	getgenv().Config.Noclip=v
 end})
@@ -2176,7 +2195,7 @@ EventSec:CreateToggle({title="Auto Reset",default=getgenv().Config.AutoReset,cal
     getgenv().Config.AutoReset=v 
     task.spawn(function()
         while task.wait() and getgenv().Config.AutoReset do
-            if game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Game.CoinBags.Container.SnowToken.Visible and game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Game.CoinBags.Container.SnowToken.Full.Visible then
+            if game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Lobby.Dock.CoinBags.Container.SnowToken.Visible and game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Lobby.Dock.CoinBags.Container.SnowToken.Full.Visible then
                 pcall(function()
                     game:GetService("Players").LocalPlayer.Character.Humanoid.Health=0
                 end)
