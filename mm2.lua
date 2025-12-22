@@ -2189,7 +2189,7 @@ SettingSec:CreateToggle({title="Helicoper",default=getgenv().Config.Helicoper,ca
     end)
 end})
 
-SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=30,Precise=18,callback=function(v)
+SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=350,Precise=50,callback=function(v)
     getgenv().Config.TweenSpeed=v
 end})
 local EventSec=HomeTab:CreateSection({title="Event"})
@@ -2221,14 +2221,23 @@ EventSec:CreateToggle({title="Auto Collect Coin",default=getgenv().Config.AutoCo
 	getgenv().Config.AutoCollectCoin=v
     task.spawn(function()
         while wait() and getgenv().Config.AutoCollectCoin do
-            if plr:GetAttribute("Alive") then
+            if GetLive() then
                 local coin = GetCoin()
+				
                 if coin then
-                    repeat task.wait()
-                        TweenFloat(true)
-                        Tween(coin.CFrame)
-                    until not coin.Parent or not coin or not coin:FindFirstChild("CoinVisual") or not GetLive() or coin.CoinVisual:GetAttribute("Collected") or  (coin.Position-plr.Character.HumanoidRootPart.Position).magnitude>1000
-
+					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = coin.CFrame
+					--bypassTP(child.CFrame)
+					wait(2.9)
+					-- if (coin.Position-plr.Character.HumanoidRootPart.Position).magnitude<=10 then
+					-- 	task.wait(.2)
+					-- else
+					-- 	task.wait(.7)
+					-- end
+                    -- repeat task.wait()
+                    --     TweenFloat(true)
+                    --     Tween(coin.CFrame)
+                    -- until not coin.Parent or not coin or not coin:FindFirstChild("CoinVisual") or not GetLive() or coin.CoinVisual:GetAttribute("Collected") or  (coin.Position-plr.Character.HumanoidRootPart.Position).magnitude>1000
+					
                 end
             end
         end
