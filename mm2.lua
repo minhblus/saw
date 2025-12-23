@@ -2067,7 +2067,7 @@ function SawUI:CreateWindow(windowconfig)
 	end
 	return pagefunc
 end
-
+wait(3)
 spawn(function()
 	while wait(1) do
 		if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DeviceSelect") then
@@ -2078,6 +2078,50 @@ spawn(function()
 		end
 	end 
 end)
+
+
+local itemdata=game:GetService("ReplicatedStorage").Remotes.Extras.GetItemData:InvokeServer()
+
+function Webhook(itemname)
+	local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
+	local msg2 = "**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Rewards**\n"
+    msg2=msg2.."-"..itemname.." ("..itemdata[itemname]["Rarity"]..")"
+    msg2=msg2.."\n**Info**\n-Snow Coins: "..module_upvr_6.Materials.Owned["SnowTokens2025"] or "Failed"..""
+    local a=request({
+        Url ="https://thumbnails.roblox.com/v1/assets?assetIds="..itemdata[itemname]["ItemID"].."&size=420x420&format=Png&isCircular=false",
+        Method = "GET",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        }
+    })
+
+	local b=game:GetService("HttpService"):JSONDecode(a.Body).data[1].imageUrl
+	
+    local msg = {
+        ["username"]= "Saw Notify",
+
+        ["embeds"] = {{
+            ["title"] = "Murder Mystery 2",
+            ["description"]=msg2,
+            ["thumbnail"] = {
+                ["url"] = b
+            },
+            ["type"] = "rich",
+            ["color"] = tonumber(47103),
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
+    
+    request({
+        Url =getgenv().Config.Webhook,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = game:GetService("HttpService"):JSONEncode(msg)
+    })
+end
+
 
 if not getgenv().Config then
 	getgenv().Config={}
@@ -2189,7 +2233,7 @@ SettingSec:CreateToggle({title="Helicoper",default=getgenv().Config.Helicoper,ca
     end)
 end})
 
-SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=350,Precise=22,callback=function(v)
+SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=350,Precise=19,callback=function(v)
     getgenv().Config.TweenSpeed=v
 end})
 local EventSec=HomeTab:CreateSection({title="Event"})
@@ -2238,6 +2282,21 @@ EventSec:CreateToggle({title="Auto Collect Coin",default=getgenv().Config.AutoCo
             end
         end
         TweenFloat(false)
+    end)
+end})
+
+local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
+
+EventSec:CreateToggle({title="Auto Open Chest",default=getgenv().Config.AutoOpenChest,callback=function(v)
+	getgenv().Config.AutoOpenChest=v
+    task.spawn(function()
+        while wait() and getgenv().Config.AutoOpenChest do
+            if GetLive() and module_upvr_6.Materials.Owned["SnowTokens2025"]>=600 then
+				local itemname=game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Shop"):WaitForChild("OpenCrate"):InvokeServer("Christmas2025Box","MysteryBox","SnowTokens2025")
+				Webhook(itemname)
+            end
+        end
+
     end)
 end})
 
