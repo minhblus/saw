@@ -2097,7 +2097,12 @@ function Webhook(itemname)
 	local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
 	local msg2 = "**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Rewards**\n"
     msg2=msg2.."-"..itemdata[itemname]["ItemName"].." ("..itemdata[itemname]["Rarity"]..")"
-    msg2=msg2.."\n**Info**\n-Snow Coins: "..module_upvr_6.Materials.Owned["SnowTokens2025"] or "Failed"..""
+    local success, result = pcall(function()
+		msg2=msg2.."\n**Info**\n-Snow Coins: "..module_upvr_6.Materials.Owned["SnowTokens2025"] or "Failed"..""
+	end)
+    if not success then
+		msg2=msg2.."\n**Info**\n-Snow Coins: Failed"
+	end
     local a=request({
         Url ="https://thumbnails.roblox.com/v1/assets?assetIds="..itemdata[itemname]["ItemID"].."&size=420x420&format=Png&isCircular=false",
         Method = "GET",
