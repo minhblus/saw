@@ -2083,9 +2083,20 @@ end)
 local itemdata=game:GetService("ReplicatedStorage").Remotes.Extras.GetItemData:InvokeServer()
 
 function Webhook(itemname)
+	local RarityColors = {
+        ["Unique"]    = 16753920, -- Orange (Cam)
+        ["Ancient"]   = 8388736,  -- Purple (Tím)
+        ["Godly"]     = 16716947, -- Pink (Hồng đậm)
+        ["Legendary"] = 16711680, -- Red (Đỏ)
+        ["Rare"]      = 65280,    -- Green (Xanh lá)
+        ["Uncommon"]  = 255,      -- Blue (Xanh dương)
+        ["Common"]    = 9807270,  -- Gray (Xám)
+        ["Vintage"]   = 16776960  -- Yellow (Vàng)
+    }
+
 	local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
 	local msg2 = "**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Rewards**\n"
-    msg2=msg2.."-"..itemname.." ("..itemdata[itemname]["Rarity"]..")"
+    msg2=msg2.."-"..itemdata[itemname]["ItemName"].." ("..itemdata[itemname]["Rarity"]..")"
     msg2=msg2.."\n**Info**\n-Snow Coins: "..module_upvr_6.Materials.Owned["SnowTokens2025"] or "Failed"..""
     local a=request({
         Url ="https://thumbnails.roblox.com/v1/assets?assetIds="..itemdata[itemname]["ItemID"].."&size=420x420&format=Png&isCircular=false",
@@ -2096,7 +2107,7 @@ function Webhook(itemname)
     })
 
 	local b=game:GetService("HttpService"):JSONDecode(a.Body).data[1].imageUrl
-	
+	local embedColor = RarityColors[itemdata[itemname]["Rarity"]] or 47103
     local msg = {
         ["username"]= "Saw Notify",
 
@@ -2107,7 +2118,7 @@ function Webhook(itemname)
                 ["url"] = b
             },
             ["type"] = "rich",
-            ["color"] = tonumber(47103),
+            ["color"] = tonumber(embedColor),
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }}
     }
