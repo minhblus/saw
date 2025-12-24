@@ -2081,7 +2081,13 @@ end)
 
 
 local itemdata=game:GetService("ReplicatedStorage").Remotes.Extras.GetItemData:InvokeServer()
-
+function getsnowcoin()
+	local suc,result=pcall(function()
+		return game:GetService("ReplicatedStorage").Remotes.Inventory.GetProfileData:InvokeServer()
+	end)
+	if not suc then return 0 end
+	return result.Materials.Owned["SnowTokens2025"]
+end
 function Webhook(itemname)
 	local RarityColors = {
         ["Unique"]    = 16753920, -- Orange (Cam)
@@ -2094,11 +2100,10 @@ function Webhook(itemname)
         ["Vintage"]   = 16776960  -- Yellow (Vàng)
     }
 
-	local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
 	local msg2 = "**Account**\n||"..game.Players.LocalPlayer.Name.."||\n**Rewards**\n"
     msg2=msg2.."-"..itemdata[itemname]["ItemName"].." ("..itemdata[itemname]["Rarity"]..")"
     local success, result = pcall(function()
-		msg2=msg2.."\n**Info**\n-Snow Coins: "..module_upvr_6.Materials.Owned["SnowTokens2025"] or "Failed"..""
+		msg2=msg2.."\n**Info**\n-Snow Coins: "..getsnowcoin()..""
 	end)
     if not success then
 		msg2=msg2.."\n**Info**\n-Snow Coins: Failed"
@@ -2144,12 +2149,53 @@ if not getgenv().Config then
 end
 
 
+
+game.CoreGui.DescendantAdded:Connect(function()
+	pcall(function()
+		if game.CoreGui.RobloxPromptGui.promptOverlay:FindFirstChild("ErrorPrompt") then
+            if getgenv().Config.AutoRejoin then
+                while wait() do
+                    game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+                    wait(5)
+                end
+            end
+		end
+	end)
+end)
+
+game:GetService("Players").LocalPlayer.Idled:connect(function()
+    if getgenv().Config.AntiAfk then
+        game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        wait(1)
+        game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    end
+end)
+
+game:GetService('RunService').Stepped:Connect(function()
+    if getgenv().Config.Noclip then
+        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') then
+            for k,v in next,game.Players.LocalPlayer.Character:GetChildren() do
+                if v:IsA('BasePart') then
+                    v.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+
+
 function Tween(cf)
     if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health > 0 then
         local speed=getgenv().Config.TweenSpeed or 15
         local time = (plr.Character.HumanoidRootPart.Position - cf.Position).Magnitude / speed
         local tween = TS:Create(plr.Character.HumanoidRootPart, TweenInfo.new(time, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {CFrame = CFrame.new(cf.Position)})
         tween:Play()
+
+		if (plr.Character.HumanoidRootPart.Position - cf.Position).magnitude<=7 then
+			tween:Cancel()
+			plr.Character.HumanoidRootPart.CFrame=cf
+		end
     end
 end
 
@@ -2171,7 +2217,7 @@ function GetCoin()
     end
 
     for i, v in pairs(map.CoinContainer:GetChildren()) do
-        if v.Name == "Coin_Server" and v:IsA("BasePart") and v:FindFirstChild("CoinVisual") and not v.CoinVisual:GetAttribute("Collected") and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        if v.Name == "Coin_Server" and v:IsA("BasePart") and v:FindFirstChild("CoinVisual") and v.CoinVisual.Transparency==0 and not v.CoinVisual:GetAttribute("Collected") and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
             local dis = (plr.Character.HumanoidRootPart.Position - v.Position).Magnitude
             if dis < maxdis then
                 maxdis = dis
@@ -2215,17 +2261,18 @@ function GetLive()
     return false
 end
 
+
+
 local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 local HomeTab=Sawhub:CreatePage({title="Home"})
 
 local SettingSec=HomeTab:CreateSection({title="Setting"})
 local snowtokencheck=SettingSec:CreateLabel({title="Snow Token: "})
 spawn(function()
-	local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
 
-	while wait(1) do
+	while wait(5) do
 		pcall(function()
-			snowtokencheck:Set("Snow Token: "..module_upvr_6.Materials.Owned["SnowTokens2025"])
+			snowtokencheck:Set("Snow Token: "..getsnowcoin())
 		end)
 
 	end
@@ -2249,7 +2296,7 @@ SettingSec:CreateToggle({title="Helicoper",default=getgenv().Config.Helicoper,ca
     end)
 end})
 
-SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=350,Precise=19,callback=function(v)
+SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=350,Precise=17,callback=function(v)
     getgenv().Config.TweenSpeed=v
 end})
 local EventSec=HomeTab:CreateSection({title="Event"})
@@ -2292,7 +2339,8 @@ EventSec:CreateToggle({title="Auto Collect Coin",default=getgenv().Config.AutoCo
                     repeat task.wait()
                         TweenFloat(true)
                         Tween(coin.CFrame)
-                    until not coin.Parent or not coin or not coin:FindFirstChild("CoinVisual") or not GetLive() or coin.CoinVisual:GetAttribute("Collected") or (coin.Position-plr.Character.HumanoidRootPart.Position).magnitude<=2 or  (coin.Position-plr.Character.HumanoidRootPart.Position).magnitude>1000
+						firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart,coin,0)
+                    until not coin.Parent or not coin or not coin:FindFirstChild("CoinVisual") or coin.CoinVisual.Transparency~=0 or not GetLive() or coin.CoinVisual:GetAttribute("Collected") or (coin.Position-plr.Character.HumanoidRootPart.Position).magnitude<=2 or  (coin.Position-plr.Character.HumanoidRootPart.Position).magnitude>1000
 					
                 end
             end
@@ -2301,13 +2349,11 @@ EventSec:CreateToggle({title="Auto Collect Coin",default=getgenv().Config.AutoCo
     end)
 end})
 
-local module_upvr_6 = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("ProfileData"))
-
 EventSec:CreateToggle({title="Auto Open Chest",default=getgenv().Config.AutoOpenChest,callback=function(v)
 	getgenv().Config.AutoOpenChest=v
     task.spawn(function()
-        while wait() and getgenv().Config.AutoOpenChest do
-            if GetLive() and module_upvr_6.Materials.Owned["SnowTokens2025"]>=600 then
+        while wait(5) and getgenv().Config.AutoOpenChest do
+            if GetLive() and getsnowcoin()>=600 then
 				local itemname=game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Shop"):WaitForChild("OpenCrate"):InvokeServer("Christmas2025Box","MysteryBox","SnowTokens2025")
 				Webhook(itemname)
             end
@@ -2334,38 +2380,6 @@ end})
 task.spawn(function()
     while wait(1) do 
         setfpscap(getgenv().Config.FpsCap or 120)
-    end
-end)
-
-game.CoreGui.DescendantAdded:Connect(function()
-	pcall(function()
-		if game.CoreGui.RobloxPromptGui.promptOverlay:FindFirstChild("ErrorPrompt") then
-            if getgenv().Config.AutoRejoin then
-                while wait() do
-                    game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
-                    wait(5)
-                end
-            end
-		end
-	end)
-end)
-
-game:GetService("Players").LocalPlayer.Idled:connect(function()
-    if getgenv().Config.AntiAfk then
-        game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-        wait(1)
-        game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-    end
-end)
-game:GetService('RunService').Stepped:Connect(function()
-    if getgenv().Config.Noclip then
-        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') then
-            for k,v in next,game.Players.LocalPlayer.Character:GetChildren() do
-                if v:IsA('BasePart') then
-                    v.CanCollide = false
-                end
-            end
-        end
     end
 end)
 
