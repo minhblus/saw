@@ -2296,7 +2296,7 @@ SettingSec:CreateToggle({title="Helicoper",default=getgenv().Config.Helicoper,ca
     end)
 end})
 
-SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=350,Precise=17,callback=function(v)
+SettingSec:CreateSlider({title="Tp Speed",Min=10,default=getgenv().Config.TweenSpeed,Max=350,Precise=getgenv().Config.TweenSpeed or 17,callback=function(v)
     getgenv().Config.TweenSpeed=v
 end})
 local EventSec=HomeTab:CreateSection({title="Event"})
@@ -2372,7 +2372,7 @@ AFKsec:CreateToggle({title="Auto Rejoin",default=getgenv().Config.AutoRejoin or 
     getgenv().Config.AutoRejoin=v
 end})
 
-AFKsec:CreateSlider({title="Set Fps",Min=2,default=getgenv().Config.FpsCap or 120,Max=9999,Precise=120,callback=function(v)
+AFKsec:CreateSlider({title="Set Fps",Min=2,default=getgenv().Config.FpsCap or 120,Max=9999,Precise=getgenv().Config.FpsCap or 120,callback=function(v)
     getgenv().Config.FpsCap=v
     setfpscap(v)
 end})
