@@ -4,6 +4,9 @@
 if game.PlaceId==3978370137 then
     repeat wait()
     until game:IsLoaded()
+    repeat wait()
+    until game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
     wait(10)
     getgenv().Config={
         AutoFish = true,
