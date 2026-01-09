@@ -232,15 +232,11 @@ if game.PlaceId==3978370137 then
         }
     }
 
-    local cam = workspace.CurrentCamera
-
-    task.spawn(function()
-        while true do
-            if cam then
-                cam.CFrame = cam.CFrame * CFrame.Angles(0, math.rad(0.5), 0)
-            end
-            task.wait(180)
-        end
+    LocalPlayer.Idled:Connect(function()
+        local VIM = cloneref(Instance.new("VirtualInputManager"))
+        VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+        task.wait(1)
+        VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
     end)
 
     function SellFish(dontneedmax)
@@ -347,7 +343,7 @@ if game.PlaceId==3978370137 then
 
                 ActionRemote:InvokeServer(unpack(args))
 
-                task.wait(RandomSoThuc(1.5, 2))
+                task.wait(RandomSoThuc(2, 2.5))
                 local args = {
                     [1] = {
                         ["Action"] = "Landed"
@@ -360,6 +356,7 @@ if game.PlaceId==3978370137 then
                 task.wait(0.1)
                 local hookName = LocalPlayer.Name .. "'s hook"
 
+                local timer = 0
                 while true do
                     local currentBait = tonumber(CheckInven("Common Fish Bait")) or 0
                     local hookExists = workspace.Effects:FindFirstChild(hookName)
@@ -372,7 +369,7 @@ if game.PlaceId==3978370137 then
                     task.wait(0.5)
                 end
 
-                task.wait(RandomSoThuc(9, 11))
+                task.wait(RandomSoThuc(11, 13))
                 local args = {
                     [1] = {
                         ["Action"] = "Reel"
