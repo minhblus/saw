@@ -21,6 +21,7 @@ if game.PlaceId==3978370137 then
 
     local posfish=CFrame.new(-1331.32605, 4.12502337, -4958.8667, -0.999929011, -2.90768991e-08, 0.0119130174, -2.89806596e-08, 1, 8.25119972e-09, -0.0119130174, 7.90536703e-09, -0.999929011)
     local posbuy=CFrame.new(-1342.987548828125, 4.125025272369385, -4982.90087890625)
+    local craftfishpos=CFrame.new(-1377.7511, 4.12502527, -5063.57471, 0.0288339388, 5.5892162e-08, 0.999584198, 4.52749269e-08, 1, -5.72214098e-08, -0.999584198, 4.69060204e-08, 0.0288339388)
     local possell=CFrame.new(-1327.6944580078125, 4.125023365020752, -4977.693359375)
 
     local Players = game:GetService("Players")
@@ -44,6 +45,7 @@ if game.PlaceId==3978370137 then
         end
         return 0
     end
+
 
 
     local v1 = Random.new(workspace:GetAttribute("RNGSeed"))
@@ -232,6 +234,48 @@ if game.PlaceId==3978370137 then
         }
     }
 
+    
+    function RandomSoThuc(minn,maxx)
+        return minn+(math.random()*(maxx-minn))
+    end
+
+    function CheckFishRare()
+        local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
+        for k,v in pairs(cac) do 
+            if v2[k] and v2[k].Rare=="Rare" and v2[k].Type=="Fish" then
+                return true
+            end
+        end
+        return false
+    end
+
+    function CraftBait()
+       if tonumber(CheckInven("Rare Fish Bait")) < 1 and CheckFishRare() then 
+            TweenTo(craftfishpos)
+            wait(.5)
+            local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
+            for k,v in pairs(cac) do 
+                if v2[k] and v2[k].Rare=="Rare" and v2[k].Type=="Fish" then
+                    for c=1,v do 
+                       local args = {
+                            [1] = {
+                                ["BlueprintItem"] = "Rare Fish Bait",
+                                ["Method"] = "Craft",
+                                ["ExtraData"] = {
+                                    ["Rare Fish"] = k
+                                }
+                            }
+                        }
+
+                        game:GetService("ReplicatedStorage"):WaitForChild("CraftingRemote"):InvokeServer(unpack(args))
+                        task.wait(RandomSoThuc(0.3,0.5))
+                    end
+                end
+            end
+           
+       end 
+    end
+    
     LocalPlayer.Idled:Connect(function()
         local VIM = cloneref(Instance.new("VirtualInputManager"))
         VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
@@ -284,9 +328,8 @@ if game.PlaceId==3978370137 then
     end
 
 
-    function RandomSoThuc(minn,maxx)
-        return minn+(math.random()*(maxx-minn))
-    end
+
+
 
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
     local ActionRemote = ReplicatedStorage:WaitForChild("Fishing"):WaitForChild("Remotes"):WaitForChild("Action")
@@ -298,20 +341,34 @@ if game.PlaceId==3978370137 then
     end
 
     function GetRodName()
-        local tier1="Rare Fishing Rod"
-        local tier2="Fishing Rod"
-        if LocalPlayer.Backpack:FindFirstChild(tier1) then
-            return tier1
+
+        local tiers={
+
+            [1]="Merchants Banana Rod",
+            [2]="Rare Fishing Rod",
+            [3]="Fishing Rod"
+        }
+        for i=1,3 do 
+            if LocalPlayer.Backpack:FindFirstChild(tiers[i]) then
+                return tiers[i]
+            end
+            if LocalPlayer.Character:FindFirstChild(tiers[i]) then
+                return tiers[i]
+            end
         end
-        if LocalPlayer.Character:FindFirstChild(tier1) then
-            return tier1
+        return "Fishing Rod"
+    end
+
+    function GetBaitName()
+        local rarebait=CheckInven("Rare Fish Bait")
+        if tonumber(rarebait) > 0 then
+            return "Rare Fish Bait"
         end
-        if LocalPlayer.Backpack:FindFirstChild(tier2) then
-            return tier2
+        local commonbait=CheckInven("Common Fish Bait")
+        if tonumber(commonbait) > 0 then
+            return "Common Fish Bait"
         end
-        if LocalPlayer.Character:FindFirstChild(tier2) then
-            return tier2
-        end
+        return "Common Fish Bait"
     end
 
     while getgenv().Config.AutoFish and task.wait() do
@@ -322,22 +379,28 @@ if game.PlaceId==3978370137 then
             if rod then
 
                 BuyBait()
-                if getgenv().Config.AutoSell then
+                if data.Stats.Peli.Value < 1000000 then
                     SellFish()
+                end
+                
+                if data.Stats.Peli.Value >= 1000000 then
+                    CraftBait()
                 end
 
                 if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 2 then
                     TweenTo(posfish)
                     wait(.1)
                 end
+
+                local baituse=GetBaitName()
             
-                local lastbait=tonumber(CheckInven("Common Fish Bait")) or 0
+                local lastbait=tonumber(CheckInven(baituse)) or 0
 
                 local args = {
                     [1] = {
                         ["Goal"] = Vector3.new(RandomSoThuc(-1339, -1330), RandomSoThuc(-99, -19), RandomSoThuc(-4946, -4772)),
                         ["Action"] = "Throw",
-                        ["Bait"] = "Common Fish Bait"
+                        ["Bait"] = baituse
                     }
                 }
 
@@ -358,7 +421,7 @@ if game.PlaceId==3978370137 then
 
                 local timer = 0
                 while true do
-                    local currentBait = tonumber(CheckInven("Common Fish Bait")) or 0
+                    local currentBait = tonumber(CheckInven(baituse)) or 0
                     local hookExists = workspace.Effects:FindFirstChild(hookName)
                     
                     if not hookExists then break end
