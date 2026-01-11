@@ -272,11 +272,14 @@ end
 
 function CraftBait()
     if tonumber(CheckInven("Rare Fish Bait")) < 1 and CheckFishRare() then 
-        TweenTo(craftfishpos)
-        wait(.5)
+
         local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
         for k,v in pairs(cac) do 
             if v2[k] and v2[k].Rare=="Rare" and v2[k].Type=="Fish" and v >= v2[k].Max then
+                if (LocalPlayer.Character.HumanoidRootPart.Position-craftfishpos.Position).Magnitude > 5 then
+                    TweenTo(craftfishpos)
+                    wait(.5)
+                end
                 for c=1,v do 
                     local args = {
                         [1] = {
