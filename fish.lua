@@ -433,17 +433,15 @@ while getgenv().Config.AutoFish and task.wait() do
                         local tolerance = 0.05 -- Vùng an toàn
 
                         if predictedY > goalY + tolerance then
-                            -- Dự đoán sẽ rơi quá sâu -> Kéo lên
-                            rod:Activate()
+                            VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
                         elseif predictedY < goalY - tolerance then
-                            -- Dự đoán sẽ bay quá cao -> Thả ra
-                            rod:Deactivate()
+                            VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
                         else
                             -- Đang ở vùng an toàn, dùng "phanh" để giữ vị trí
                             if velocity > 0.01 then 
-                                rod:Activate() -- Đang rơi nhanh -> Hãm lại
+                                VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1) -- Đang rơi nhanh -> Hãm lại
                             elseif velocity < -0.01 then
-                                rod:Deactivate() -- Đang bay lên nhanh -> Hãm lại
+                                VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1) -- Đang bay lên nhanh -> Hãm lại
                             end
                         end
                         
