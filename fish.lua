@@ -1,240 +1,287 @@
--- game:GetService("Players").LocalPlayer.PlayerGui.FishingUIBill.Frame.Player
--- game:GetService("Players").LocalPlayer.PlayerGui.FishingUIBill.Frame.Goal
--- game:GetService("Players").LocalPlayer.PlayerGui.FishingUIBill
-if game.PlaceId==3978370137 then
+if game.PlaceId==1730877806 then
+    repeat wait()
+    until game:IsLoaded()
+    repeat wait() until game:GetService("ReplicatedStorage").Events:FindFirstChild("reserved")
+    wait(2)
+    while wait(3) do
+        game:GetService("ReplicatedStorage").Events.playgame:FireServer("Main Game")
+    end
+    
+
+elseif game.PlaceId==3978370137 then
     repeat wait()
     until game:IsLoaded()
     repeat wait()
     until game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    repeat wait(.25)
+    until game:GetService("Players").LocalPlayer:FindFirstChild("Loaded")
+end
+getgenv().Config={
+    AutoFish = true,
+    AutoSell = {
+        Enable=true,
+        Rarity={"Common","Rare"}
+    },
+    AutoBuy = false,
+    Rod="Fishing Rod",
+    Bait="Common Fish Bait",
+}
 
-    wait(10)
-    getgenv().Config={
-        AutoFish = true,
-        AutoSell = {
-            Enable=true,
-            Rarity={"Common","Rare"}
-        },
-        AutoBuy = false,
-        Rod="Rare Fishing Rod",
-        Bait="Common Fish Bait",
-    }
+local posfish=CFrame.new(-1331.32605, 4.12502337, -4958.8667, -0.999929011, -2.90768991e-08, 0.0119130174, -2.89806596e-08, 1, 8.25119972e-09, -0.0119130174, 7.90536703e-09, -0.999929011)
+local posbuy=CFrame.new(-1342.987548828125, 4.125025272369385, -4982.90087890625)
+local craftfishpos=CFrame.new(-1377.7511, 4.12502527, -5063.57471, 0.0288339388, 5.5892162e-08, 0.999584198, 4.52749269e-08, 1, -5.72214098e-08, -0.999584198, 4.69060204e-08, 0.0288339388)
+local possell=CFrame.new(-1327.6944580078125, 4.125023365020752, -4977.693359375)
 
-    local posfish=CFrame.new(-1331.32605, 4.12502337, -4958.8667, -0.999929011, -2.90768991e-08, 0.0119130174, -2.89806596e-08, 1, 8.25119972e-09, -0.0119130174, 7.90536703e-09, -0.999929011)
-    local posbuy=CFrame.new(-1342.987548828125, 4.125025272369385, -4982.90087890625)
-    local craftfishpos=CFrame.new(-1377.7511, 4.12502527, -5063.57471, 0.0288339388, 5.5892162e-08, 0.999584198, 4.52749269e-08, 1, -5.72214098e-08, -0.999584198, 4.69060204e-08, 0.0288339388)
-    local possell=CFrame.new(-1327.6944580078125, 4.125023365020752, -4977.693359375)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
+function TweenTo(cf)
+    local dist=(cf.Position-LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local tween = game:GetService("TweenService"):Create(LocalPlayer.Character.HumanoidRootPart,TweenInfo.new(dist/15,Enum.EasingStyle.Linear),{CFrame=cf})
+    tween:Play()
+    tween.Completed:Wait()
+end
 
-    function TweenTo(cf)
-        local dist=(cf.Position-LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-        local tween = game:GetService("TweenService"):Create(LocalPlayer.Character.HumanoidRootPart,TweenInfo.new(dist/15,Enum.EasingStyle.Linear),{CFrame=cf})
-        tween:Play()
-        tween.Completed:Wait()
+local data=game.ReplicatedStorage:WaitForChild("Stats"..game:GetService("Players").LocalPlayer.Name)
+
+function CheckInven(item) 
+    local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
+    for k,v in pairs(cac) do 
+        if k==item then 
+            return v
+        end
     end
+    return 0
+end
 
-    local data=game.ReplicatedStorage:WaitForChild("Stats"..game:GetService("Players").LocalPlayer.Name)
+    local VIM = cloneref(Instance.new("VirtualInputManager"))
+    LocalPlayer.Idled:Connect(function()
 
-    function CheckInven(item) 
+        VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+        task.wait(1)
+        VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+    end)
+
+local v1 = Random.new(workspace:GetAttribute("RNGSeed"))
+local v2 = {
+    ["Basic Fish Luck Brew"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Uncommon",
+        ["Desc"] = "Contains a strange liquid which attracts rarer fishes within the area until it fades. <Color=Yellow>1.2x Luck multiplier<Color=/> <Color=Red>does not stack with other brews. <Color=/>Lasts <Color=Blue>1 Min<Color=/>",
+        ["Max"] = 5,
+        ["Type"] = "Drink"
+    },
+    ["Rare Fish Luck Brew"] = {
+        ["tradeLevel"] = 75,
+        ["Rare"] = "Rare",
+        ["Desc"] = "Contains a strange liquid which attracts rarer fishes within the area until it fades. <Color=Yellow>1.275x Luck multiplier<Color=/> <Color=Red>does not stack with other brews. <Color=/>Lasts <Color=Blue>2 Mins<Color=/>",
+        ["Max"] = 5,
+        ["Type"] = "Drink"
+    },
+    ["Tigerfin"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Common",
+        ["Desc"] = "A common fish with tiger-like stripes.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Common Fish",
+        ["Price"] = v1:NextInteger(0, 250)
+    },
+    ["Exotic Tigerfin"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Rare",
+        ["Desc"] = "A rare variation of the striped Tigerfin.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Rare Fish",
+        ["Price"] = v1:NextInteger(1000, 3000)
+    },
+    ["Golden Tigerfin"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Legendary",
+        ["Desc"] = "A legendary Tigerfin with gleaming golden scales.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Legendary Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Zebra Ribbon Angelfish"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Rare",
+        ["Desc"] = "A rare angelfish with zebra-like ribbons.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Rare Fish",
+        ["Price"] = v1:NextInteger(1000, 3000)
+    },
+    ["Golden Ribbon Angelfish"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Legendary",
+        ["Desc"] = "A golden angelfish adorned with elegant ribbon patterns.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Legendary Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Crimson Polka Puffer"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Rare",
+        ["Desc"] = "A rare pufferfish with crimson polka dots.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Rare Fish",
+        ["Price"] = v1:NextInteger(1000, 3000)
+    },
+    ["Golden Polka Puffer"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Legendary",
+        ["Desc"] = "A legendary pufferfish with shimmering golden spots.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Legendary Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Blue-Lip Grouper"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Common",
+        ["Desc"] = "A common grouper with a distinct blue-lipped appearance.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Common Fish",
+        ["Price"] = v1:NextInteger(0, 250)
+    },
+    ["Crimson Snapper"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Rare",
+        ["Desc"] = "A rare snapper fish with a crimson tint.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Rare Fish",
+        ["Price"] = v1:NextInteger(1000, 3000)
+    },
+    ["Fangfish"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Rare",
+        ["Desc"] = "A rare fish with sharp, fang-like teeth.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Rare Fish",
+        ["Price"] = v1:NextInteger(1000, 3000)
+    },
+    ["Anglerfish"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Legendary",
+        ["Desc"] = "A legendary deep-sea fish with an eerie glow.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Legendary Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Swordfish"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Legendary",
+        ["Desc"] = "A legendary fish with a sword-like bill.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Legendary Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Candy Corn Squid"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Rare",
+        ["Desc"] = "A squid-like creature with bright orange, white, and yellow colors, resembling a piece of candy corn. Exclusive to the Halloween event.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Rare Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Jack-O\'-Bite"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Legendary",
+        ["Desc"] = "A fierce, pumpkin-shaped fish with glowing green eyes and a jagged grin. Exclusive to the Halloween event.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Legendary Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Dark Skeletal Shark"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Legendary",
+        ["Desc"] = "A fearsome black skeletal shark with glowing blue eyes, haunting the deep. Exclusive to the Halloween event.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Legendary Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Skeletal Shark"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Epic",
+        ["Desc"] = "A massive skeletal shark with a stone-like appearance, eerie green eyes, and an ancient, haunting aura. Exclusive to the Halloween event.",
+        ["Max"] = 40,
+        ["Type"] = "Fish",
+        ["BaseItem"] = "Rare Fish",
+        ["Price"] = v1:NextInteger(10000, 15000)
+    },
+    ["Common Fish Bait"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Common",
+        ["Desc"] = "Standard bait used for catching common fish.",
+        ["Max"] = 300,
+        ["Type"] = "Display",
+        ["isFishBait"] = true
+    },
+    ["Rare Fish Bait"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Rare",
+        ["Desc"] = "Special bait for attracting rare fish.",
+        ["Max"] = 300,
+        ["Type"] = "Display",
+        ["isFishBait"] = true
+    },
+    ["Legendary Fish Bait"] = {
+        ["tradeLevel"] = 1,
+        ["Rare"] = "Legendary",
+        ["Desc"] = "Premium bait designed for catching legendary fish.",
+        ["Max"] = 300,
+        ["Type"] = "Display",
+        ["isFishBait"] = true
+    }
+}
+
+    function SellFish(dontneedmax)
         local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
         for k,v in pairs(cac) do 
-            if k==item then 
-                return v
+            if v2[k] and (dontneedmax or tonumber(v) >= v2[k]["Max"]) and table.find(getgenv().Config.AutoSell.Rarity, v2[k]["Rare"]) and v2[k]["Type"] == "Fish" then 
+                if (LocalPlayer.Character.HumanoidRootPart.Position-possell.Position).Magnitude >= 2 then
+                TweenTo(possell)
+                wait(.5) 
+                end
+                local args = {
+                    [1] = {
+                        ["Fish"] = k,
+                        ["All"] = true,
+                        ["Method"] = "SellFish"
+                    }
+                }
+
+                game:GetService("ReplicatedStorage"):WaitForChild("FishingShopRemote"):InvokeServer(unpack(args))
+                wait(math.random(1,2))
             end
         end
-        return 0
     end
 
+    game.CoreGui.DescendantAdded:Connect(function()
+        pcall(function()
+            if game.CoreGui.RobloxPromptGui.promptOverlay:FindFirstChild("ErrorPrompt") then
+                while wait() do
+                    game:GetService("TeleportService"):Teleport(1730877806, game.Players.LocalPlayer)
+                    wait(5)
+                end
+            end
+        end)
+    end)
 
-
-    local v1 = Random.new(workspace:GetAttribute("RNGSeed"))
-    local v2 = {
-        ["Basic Fish Luck Brew"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Uncommon",
-            ["Desc"] = "Contains a strange liquid which attracts rarer fishes within the area until it fades. <Color=Yellow>1.2x Luck multiplier<Color=/> <Color=Red>does not stack with other brews. <Color=/>Lasts <Color=Blue>1 Min<Color=/>",
-            ["Max"] = 5,
-            ["Type"] = "Drink"
-        },
-        ["Rare Fish Luck Brew"] = {
-            ["tradeLevel"] = 75,
-            ["Rare"] = "Rare",
-            ["Desc"] = "Contains a strange liquid which attracts rarer fishes within the area until it fades. <Color=Yellow>1.275x Luck multiplier<Color=/> <Color=Red>does not stack with other brews. <Color=/>Lasts <Color=Blue>2 Mins<Color=/>",
-            ["Max"] = 5,
-            ["Type"] = "Drink"
-        },
-        ["Tigerfin"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Common",
-            ["Desc"] = "A common fish with tiger-like stripes.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Common Fish",
-            ["Price"] = v1:NextInteger(0, 250)
-        },
-        ["Exotic Tigerfin"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Rare",
-            ["Desc"] = "A rare variation of the striped Tigerfin.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Rare Fish",
-            ["Price"] = v1:NextInteger(1000, 3000)
-        },
-        ["Golden Tigerfin"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Legendary",
-            ["Desc"] = "A legendary Tigerfin with gleaming golden scales.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Legendary Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Zebra Ribbon Angelfish"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Rare",
-            ["Desc"] = "A rare angelfish with zebra-like ribbons.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Rare Fish",
-            ["Price"] = v1:NextInteger(1000, 3000)
-        },
-        ["Golden Ribbon Angelfish"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Legendary",
-            ["Desc"] = "A golden angelfish adorned with elegant ribbon patterns.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Legendary Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Crimson Polka Puffer"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Rare",
-            ["Desc"] = "A rare pufferfish with crimson polka dots.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Rare Fish",
-            ["Price"] = v1:NextInteger(1000, 3000)
-        },
-        ["Golden Polka Puffer"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Legendary",
-            ["Desc"] = "A legendary pufferfish with shimmering golden spots.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Legendary Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Blue-Lip Grouper"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Common",
-            ["Desc"] = "A common grouper with a distinct blue-lipped appearance.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Common Fish",
-            ["Price"] = v1:NextInteger(0, 250)
-        },
-        ["Crimson Snapper"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Rare",
-            ["Desc"] = "A rare snapper fish with a crimson tint.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Rare Fish",
-            ["Price"] = v1:NextInteger(1000, 3000)
-        },
-        ["Fangfish"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Rare",
-            ["Desc"] = "A rare fish with sharp, fang-like teeth.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Rare Fish",
-            ["Price"] = v1:NextInteger(1000, 3000)
-        },
-        ["Anglerfish"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Legendary",
-            ["Desc"] = "A legendary deep-sea fish with an eerie glow.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Legendary Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Swordfish"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Legendary",
-            ["Desc"] = "A legendary fish with a sword-like bill.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Legendary Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Candy Corn Squid"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Rare",
-            ["Desc"] = "A squid-like creature with bright orange, white, and yellow colors, resembling a piece of candy corn. Exclusive to the Halloween event.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Rare Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Jack-O\'-Bite"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Legendary",
-            ["Desc"] = "A fierce, pumpkin-shaped fish with glowing green eyes and a jagged grin. Exclusive to the Halloween event.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Legendary Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Dark Skeletal Shark"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Legendary",
-            ["Desc"] = "A fearsome black skeletal shark with glowing blue eyes, haunting the deep. Exclusive to the Halloween event.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Legendary Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Skeletal Shark"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Epic",
-            ["Desc"] = "A massive skeletal shark with a stone-like appearance, eerie green eyes, and an ancient, haunting aura. Exclusive to the Halloween event.",
-            ["Max"] = 40,
-            ["Type"] = "Fish",
-            ["BaseItem"] = "Rare Fish",
-            ["Price"] = v1:NextInteger(10000, 15000)
-        },
-        ["Common Fish Bait"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Common",
-            ["Desc"] = "Standard bait used for catching common fish.",
-            ["Max"] = 300,
-            ["Type"] = "Display",
-            ["isFishBait"] = true
-        },
-        ["Rare Fish Bait"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Rare",
-            ["Desc"] = "Special bait for attracting rare fish.",
-            ["Max"] = 300,
-            ["Type"] = "Display",
-            ["isFishBait"] = true
-        },
-        ["Legendary Fish Bait"] = {
-            ["tradeLevel"] = 1,
-            ["Rare"] = "Legendary",
-            ["Desc"] = "Premium bait designed for catching legendary fish.",
-            ["Max"] = 300,
-            ["Type"] = "Display",
-            ["isFishBait"] = true
-        }
-    }
-
-    
+        
     function RandomSoThuc(minn,maxx)
         return minn+(math.random()*(maxx-minn))
     end
@@ -272,39 +319,11 @@ if game.PlaceId==3978370137 then
                     end
                 end
             end
+            wait(.5)
            
        end 
     end
     
-    LocalPlayer.Idled:Connect(function()
-        local VIM = cloneref(Instance.new("VirtualInputManager"))
-        VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-        task.wait(1)
-        VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-    end)
-
-    function SellFish(dontneedmax)
-        local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
-        for k,v in pairs(cac) do 
-            if v2[k] and (dontneedmax or tonumber(v) >= v2[k]["Max"]) and table.find(getgenv().Config.AutoSell.Rarity, v2[k]["Rare"]) and v2[k]["Type"] == "Fish" then 
-                if (LocalPlayer.Character.HumanoidRootPart.Position-possell.Position).Magnitude >= 2 then
-                TweenTo(possell)
-                wait(.5) 
-                end
-                local args = {
-                    [1] = {
-                        ["Fish"] = k,
-                        ["All"] = true,
-                        ["Method"] = "SellFish"
-                    }
-                }
-
-                game:GetService("ReplicatedStorage"):WaitForChild("FishingShopRemote"):InvokeServer(unpack(args))
-                wait(math.random(1,2))
-            end
-        end
-    end
-
     function BuyBait()
         local baitstill=tonumber(CheckInven(getgenv().Config.Bait)) or 0
         if baitstill < 1 then
@@ -326,9 +345,6 @@ if game.PlaceId==3978370137 then
             
         end
     end
-
-
-
 
 
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -371,14 +387,72 @@ if game.PlaceId==3978370137 then
         return "Common Fish Bait"
     end
 
-    while getgenv().Config.AutoFish and task.wait() do
+    spawn(function()
+        local timekick = math.random(3600,5400)
+        while task.wait(timekick) do
+            LocalPlayer:Kick("gpo gay")
+        end
+    end)
+local RunService = game:GetService("RunService")
+    spawn(function()
+        RunService.RenderStepped:Connect(function()
+           getrenv()._G.MouseCF=CFrame.new(RandomSoThuc(-1339, -1330), RandomSoThuc(-99, -19), RandomSoThuc(-4946, -4772)) 
+        end)
+    end)
 
-        local character = LocalPlayer.Character
-        if character then
-            local rod = character:FindFirstChild(GetRodName())
-            if rod then
 
-                BuyBait()
+local InertiaFactor = 20.0
+
+while getgenv().Config.AutoFish and task.wait() do
+    local gui = LocalPlayer.PlayerGui:FindFirstChild("FishingUIBill")
+    local character = LocalPlayer.Character
+    if character then
+        local rod = character:FindFirstChild(GetRodName())
+        if rod then
+            if gui and gui:FindFirstChild("Frame") then
+                local playerBar = gui.Frame:FindFirstChild("Player")
+                local goalBar = gui.Frame:FindFirstChild("Goal")
+                
+                if playerBar and goalBar then
+                    -- Khởi tạo biến vật lý
+                    local lastPlayerY = playerBar.Position.Y.Scale
+                    
+                    -- Vòng lặp Minigame (Chạy theo Frame máy để siêu mượt)
+                    while gui and gui.Parent and playerBar and goalBar do
+                        local playerY = playerBar.Position.Y.Scale
+                        local goalY = goalBar.Position.Y.Scale
+
+                        -- 1. Tính vận tốc hiện tại (Velocity)
+                        local velocity = playerY - lastPlayerY
+                        lastPlayerY = playerY -- Cập nhật cho vòng sau
+
+                        -- 2. Dự đoán vị trí tương lai dựa trên quán tính
+                        local predictedY = playerY + (velocity * InertiaFactor)
+
+                        -- 3. Xử lý click (Scale 0 là đỉnh, Scale 1 là đáy)
+                        local tolerance = 0.05 -- Vùng an toàn
+
+                        if predictedY > goalY + tolerance then
+                            -- Dự đoán sẽ rơi quá sâu -> Kéo lên
+                            rod:Activate()
+                        elseif predictedY < goalY - tolerance then
+                            -- Dự đoán sẽ bay quá cao -> Thả ra
+                            rod:Deactivate()
+                        else
+                            -- Đang ở vùng an toàn, dùng "phanh" để giữ vị trí
+                            if velocity > 0.01 then 
+                                rod:Activate() -- Đang rơi nhanh -> Hãm lại
+                            elseif velocity < -0.01 then
+                                rod:Deactivate() -- Đang bay lên nhanh -> Hãm lại
+                            end
+                        end
+                        
+                        RunService.RenderStepped:Wait()
+                    end
+                end
+
+            elseif not workspace.Effects:FindFirstChild(LocalPlayer.Name.."'s hook") then
+
                 if data.Stats.Peli.Value < 1000000 then
                     SellFish()
                 end
@@ -387,82 +461,33 @@ if game.PlaceId==3978370137 then
                     CraftBait()
                 end
 
-                if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 2 then
+                BuyBait()
+
+                if LocalPlayer.PlayerGui:FindFirstChild("FishingBaitGui") then
+                    local bait=GetBaitName()
+                    for i,v in pairs(LocalPlayer.PlayerGui.FishingBaitGui.Main.List:GetChildren()) do
+                        if v.Name == bait and v:FindFirstChild("backGroundSelect") and not v.backGroundSelect.Visible then
+                            for k, v in pairs(getconnections(v.MouseButton1Click)) do
+                                v:Fire()
+                            end
+                            wait(.1)
+                        end
+                    end
+                end
+
+                if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 5 then
                     TweenTo(posfish)
                     wait(.1)
                 end
 
-                local baituse=GetBaitName()
-            
-                local lastbait=tonumber(CheckInven(baituse)) or 0
-
-                local args = {
-                    [1] = {
-                        ["Goal"] = Vector3.new(RandomSoThuc(-1339, -1330), RandomSoThuc(-99, -19), RandomSoThuc(-4946, -4772)),
-                        ["Action"] = "Throw",
-                        ["Bait"] = baituse
-                    }
-                }
-
-                ActionRemote:InvokeServer(unpack(args))
-
-                task.wait(RandomSoThuc(2, 2.5))
-                local args = {
-                    [1] = {
-                        ["Action"] = "Landed"
-                    }
-                }
-
-                ActionRemote:InvokeServer(unpack(args))
-
-
-                task.wait(0.1)
-                local hookName = LocalPlayer.Name .. "'s hook"
-
-                local timer = 0
-                while true do
-                    local currentBait = tonumber(CheckInven(baituse)) or 0
-                    local hookExists = workspace.Effects:FindFirstChild(hookName)
-                    
-                    if not hookExists then break end
-                    if currentBait < lastbait then break end
-                    
-                    timer = timer + 0.5
-                    if timer > 25 then break end 
-                    task.wait(0.5)
-                end
-
-                task.wait(RandomSoThuc(11, 13))
-                local args = {
-                    [1] = {
-                        ["Action"] = "Reel"
-                    }
-                }
-
-                ActionRemote:InvokeServer(unpack(args))
-
-                task.wait()
-                local args = {
-                    [1] = {
-                        ["Action"] = "HookReturning"
-                    }
-                }
-
-                ActionRemote:InvokeServer(unpack(args))
-                task.wait()
-                local args = {
-                    [1] = {
-                        ["Action"] = "Cancel"
-                    }
-                }
-
-                ActionRemote:InvokeServer(unpack(args))
-                task.wait(RandomSoThuc(1, 2))
-            else
-                local rod = LocalPlayer.Backpack:FindFirstChild(GetRodName())
-                if rod then
-                    rod.Parent = LocalPlayer.Character
-                end
+                rod:Activate()
+                task.wait(RandomSoThuc(2,2.5))
+                rod:Deactivate()     
+            end
+        else
+            local rod = LocalPlayer.Backpack:FindFirstChild(GetRodName())
+            if rod then
+                rod.Parent = LocalPlayer.Character
             end
         end
     end
