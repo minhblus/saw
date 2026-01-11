@@ -568,7 +568,7 @@ elseif game.PlaceId==3978370137 then
 
                 BuyBait()
 
-                if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 2 then
+                if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 5 then
                     TweenTo(posfish)
                     wait(.1)
                 end
