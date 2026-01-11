@@ -401,8 +401,16 @@ local RunService = game:GetService("RunService")
     end)
 
 
-local InertiaFactor = 20.0
+local InertiaFactor = 0
 game:GetService("RunService"):Set3dRenderingEnabled(false)
+
+spawn(function()
+    setfpscap(10)
+    while task.wait(120) do
+        setfpscap(10)
+    end
+end)
+
 while getgenv().Config.AutoFish and task.wait() do
     local gui = LocalPlayer.PlayerGui:FindFirstChild("FishingUIBill")
     local character = LocalPlayer.Character
