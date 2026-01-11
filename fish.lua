@@ -1,13 +1,23 @@
 -- game:GetService("Players").LocalPlayer.PlayerGui.FishingUIBill.Frame.Player
 -- game:GetService("Players").LocalPlayer.PlayerGui.FishingUIBill.Frame.Goal
 -- game:GetService("Players").LocalPlayer.PlayerGui.FishingUIBill
-if game.PlaceId==3978370137 then
+if game.PlaceId==1730877806 then
+    repeat wait()
+    until game:IsLoaded()
+    repeat wait() until game:GetService("ReplicatedStorage").Events:FindFirstChild("reserved")
+    wait(2)
+    while wait(3) do
+        game:GetService("ReplicatedStorage").Events.playgame:FireServer("Main Game")
+    end
+
+elseif game.PlaceId==3978370137 then
     repeat wait()
     until game:IsLoaded()
     repeat wait()
     until game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-
-    wait(10)
+    repeat wait(.25)
+    until game:GetService("Players").LocalPlayer:FindFirstChild("Loaded")
+ 
     getgenv().Config={
         AutoFish = true,
         AutoSell = {
@@ -27,11 +37,61 @@ if game.PlaceId==3978370137 then
     local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
 
-    function TweenTo(cf)
-        local dist=(cf.Position-LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-        local tween = game:GetService("TweenService"):Create(LocalPlayer.Character.HumanoidRootPart,TweenInfo.new(dist/15,Enum.EasingStyle.Linear),{CFrame=cf})
-        tween:Play()
-        tween.Completed:Wait()
+    -- function TweenTo(cf)
+    --     local dist=(cf.Position-LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    --     local tween = game:GetService("TweenService"):Create(LocalPlayer.Character.HumanoidRootPart,TweenInfo.new(dist/15,Enum.EasingStyle.Linear),{CFrame=cf})
+    --     tween:Play()
+    --     tween.Completed:Wait()
+    -- end
+
+    local PathfindingService = game:GetService("PathfindingService")
+
+    function TweenTo(targetCFrame)
+        local character = LocalPlayer.Character
+        if not character then return end
+
+        local humanoid = character:WaitForChild("Humanoid")
+        local rootPart = character:WaitForChild("HumanoidRootPart")
+
+        local path = PathfindingService:CreatePath({
+            AgentRadius = 2,
+            AgentHeight = 5,
+            AgentCanJump = true,
+            WaypointSpacing = 4
+        })
+
+        local success, errorMessage = pcall(function()
+            path:ComputeAsync(rootPart.Position, targetCFrame.Position)
+        end)
+
+        if success and path.Status == Enum.PathStatus.Success then
+            local waypoints = path:GetWaypoints()
+
+            for _, waypoint in ipairs(waypoints) do
+                if waypoint.Action == Enum.PathWaypointAction.Jump then
+                    humanoid.Jump = true
+                end
+
+                if character:FindFirstChildOfClass("Tool") then
+                    character:FindFirstChildOfClass("Tool").Parent=LocalPlayer.Backpack
+                end
+
+                humanoid:MoveTo(waypoint.Position)
+                
+                local finished = humanoid.MoveToFinished:Wait()
+                
+                if not finished then
+                    break 
+                end
+                
+                if (rootPart.Position - waypoints[#waypoints].Position).Magnitude < 3 then
+                    break
+                end
+            end
+        else
+            humanoid:MoveTo(targetCFrame.Position)
+        end
+        task.wait(.5)
     end
 
     local data=game.ReplicatedStorage:WaitForChild("Stats"..game:GetService("Players").LocalPlayer.Name)
@@ -272,12 +332,14 @@ if game.PlaceId==3978370137 then
                     end
                 end
             end
+            wait(.5)
            
        end 
     end
     
+    local VIM = cloneref(Instance.new("VirtualInputManager"))
     LocalPlayer.Idled:Connect(function()
-        local VIM = cloneref(Instance.new("VirtualInputManager"))
+
         VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
         task.wait(1)
         VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
@@ -305,6 +367,17 @@ if game.PlaceId==3978370137 then
         end
     end
 
+    game.CoreGui.DescendantAdded:Connect(function()
+        pcall(function()
+            if game.CoreGui.RobloxPromptGui.promptOverlay:FindFirstChild("ErrorPrompt") then
+                while wait() do
+                    game:GetService("TeleportService"):Teleport(1730877806, game.Players.LocalPlayer)
+                    wait(5)
+                end
+            end
+        end)
+    end)
+
     function BuyBait()
         local baitstill=tonumber(CheckInven(getgenv().Config.Bait)) or 0
         if baitstill < 1 then
@@ -326,9 +399,6 @@ if game.PlaceId==3978370137 then
             
         end
     end
-
-
-
 
 
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -371,30 +441,42 @@ if game.PlaceId==3978370137 then
         return "Common Fish Bait"
     end
 
-    while getgenv().Config.AutoFish and task.wait() do
+    spawn(function()
+        local timekick = math.random(3600,5400)
+        while task.wait(timekick) do
+            LocalPlayer:Kick("gpo gay")
+        end
+    end)
 
+    local v33 = LocalPlayer.Character.Humanoid.Animator
+    local anims = {}
+    for _, anim in game:GetService("ReplicatedStorage").Fishing.Assets.Animations:GetChildren() do
+        anims[anim.Name] = v33:LoadAnimation(anim)
+    end
+
+    function AttachFish()
         local character = LocalPlayer.Character
         if character then
             local rod = character:FindFirstChild(GetRodName())
-            if rod then
-
-                BuyBait()
-                if data.Stats.Peli.Value < 1000000 then
-                    SellFish()
+            if not rod then
+                local rod = LocalPlayer.Backpack:FindFirstChild(GetRodName())
+                if rod then
+                    rod.Parent = LocalPlayer.Character
+                else
+                    return
                 end
-                
-                if data.Stats.Peli.Value >= 1000000 then
-                    CraftBait()
-                end
-
-                if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 2 then
-                    TweenTo(posfish)
-                    wait(.1)
-                end
-
+            end
+            local hookName = LocalPlayer.Name .. "'s hook"
+            if not workspace.Effects:FindFirstChild(hookName) then
                 local baituse=GetBaitName()
             
                 local lastbait=tonumber(CheckInven(baituse)) or 0
+
+                anims["Throw"]:Play()
+                task.wait(0.83)
+                anims["Throw"]:Stop()
+
+                task.wait(.1)
 
                 local args = {
                     [1] = {
@@ -406,7 +488,7 @@ if game.PlaceId==3978370137 then
 
                 ActionRemote:InvokeServer(unpack(args))
 
-                task.wait(RandomSoThuc(2, 2.5))
+                task.wait(RandomSoThuc(1.5, 2))
                 local args = {
                     [1] = {
                         ["Action"] = "Landed"
@@ -415,9 +497,7 @@ if game.PlaceId==3978370137 then
 
                 ActionRemote:InvokeServer(unpack(args))
 
-
                 task.wait(0.1)
-                local hookName = LocalPlayer.Name .. "'s hook"
 
                 local timer = 0
                 while true do
@@ -432,6 +512,7 @@ if game.PlaceId==3978370137 then
                     task.wait(0.5)
                 end
 
+                anims["Reel"]:Play()
                 task.wait(RandomSoThuc(11, 13))
                 local args = {
                     [1] = {
@@ -442,6 +523,9 @@ if game.PlaceId==3978370137 then
                 ActionRemote:InvokeServer(unpack(args))
 
                 task.wait()
+                anims["Throw"]:Stop()
+                anims["Reel"]:Stop()
+                anims["Catch"]:Play()
                 local args = {
                     [1] = {
                         ["Action"] = "HookReturning"
@@ -457,7 +541,41 @@ if game.PlaceId==3978370137 then
                 }
 
                 ActionRemote:InvokeServer(unpack(args))
-                task.wait(RandomSoThuc(1, 2))
+                task.wait(.5)
+                anims["Catch"]:Stop()
+                task.wait(RandomSoThuc(0.5, 1.5))
+            end
+        end
+    end
+
+
+
+    while getgenv().Config.AutoFish and task.wait() do
+
+        local character = LocalPlayer.Character
+        if character then
+            local rod = character:FindFirstChild(GetRodName())
+            if rod then
+
+                
+                if data.Stats.Peli.Value < 1000000 then
+                    SellFish()
+                end
+                
+                if data.Stats.Peli.Value >= 1000000 then
+                    CraftBait()
+                end
+
+                BuyBait()
+
+                if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 2 then
+                    TweenTo(posfish)
+                    wait(.1)
+                end
+
+                AttachFish()
+
+
             else
                 local rod = LocalPlayer.Backpack:FindFirstChild(GetRodName())
                 if rod then
