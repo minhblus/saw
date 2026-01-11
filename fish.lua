@@ -276,7 +276,7 @@ function CraftBait()
         wait(.5)
         local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
         for k,v in pairs(cac) do 
-            if v2[k] and v2[k].Rare=="Rare" and v2[k].Type=="Fish" then
+            if v2[k] and v2[k].Rare=="Rare" and v2[k].Type=="Fish" and v >= v2[k].Max then
                 for c=1,v do 
                     local args = {
                         [1] = {
