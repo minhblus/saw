@@ -2,7 +2,7 @@ if game.PlaceId==1730877806 then
     repeat wait()
     until game:IsLoaded()
     repeat wait() until game:GetService("ReplicatedStorage").Events:FindFirstChild("reserved")
-    wait(2)
+    wait(5)
     while wait(3) do
         game:GetService("ReplicatedStorage").Events.playgame:FireServer("Main Game")
     end
@@ -15,7 +15,9 @@ elseif game.PlaceId==3978370137 then
     until game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     repeat wait(.25)
     until game:GetService("Players").LocalPlayer:FindFirstChild("Loaded")
+    wait(2)
 end
+
 getgenv().Config={
     AutoFish = true,
     AutoSell = {
@@ -23,7 +25,7 @@ getgenv().Config={
         Rarity={"Common","Rare"}
     },
     AutoBuy = false,
-    Rod="Fishing Rod",
+    Rod="Rare Fishing Rod",
     Bait="Common Fish Bait",
 }
 
@@ -54,13 +56,7 @@ function CheckInven(item)
     return 0
 end
 
-    local VIM = cloneref(Instance.new("VirtualInputManager"))
-    LocalPlayer.Idled:Connect(function()
 
-        VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-        task.wait(1)
-        VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-    end)
 
 local v1 = Random.new(workspace:GetAttribute("RNGSeed"))
 local v2 = {
@@ -248,247 +244,270 @@ local v2 = {
     }
 }
 
-    function SellFish(dontneedmax)
-        local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
-        for k,v in pairs(cac) do 
-            if v2[k] and (dontneedmax or tonumber(v) >= v2[k]["Max"]) and table.find(getgenv().Config.AutoSell.Rarity, v2[k]["Rare"]) and v2[k]["Type"] == "Fish" then 
-                if (LocalPlayer.Character.HumanoidRootPart.Position-possell.Position).Magnitude >= 2 then
-                TweenTo(possell)
-                wait(.5) 
-                end
-                local args = {
-                    [1] = {
-                        ["Fish"] = k,
-                        ["All"] = true,
-                        ["Method"] = "SellFish"
-                    }
-                }
 
-                game:GetService("ReplicatedStorage"):WaitForChild("FishingShopRemote"):InvokeServer(unpack(args))
-                wait(math.random(1,2))
-            end
+function RandomSoThuc(minn,maxx)
+    return minn+(math.random()*(maxx-minn))
+end
+
+function CheckFishRare()
+    local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
+    for k,v in pairs(cac) do 
+        if v2[k] and v2[k].Rare=="Rare" and v2[k].Type=="Fish" then
+            return true
         end
     end
+    return false
+end
 
-    game.CoreGui.DescendantAdded:Connect(function()
-        pcall(function()
-            if game.CoreGui.RobloxPromptGui.promptOverlay:FindFirstChild("ErrorPrompt") then
-                while wait() do
-                    game:GetService("TeleportService"):Teleport(1730877806, game.Players.LocalPlayer)
-                    wait(5)
-                end
-            end
-        end)
-    end)
 
-        
-    function RandomSoThuc(minn,maxx)
-        return minn+(math.random()*(maxx-minn))
+function CheckBait()
+    local cac=game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
+    for k,v in pairs(cac) do 
+        if v2[k] and v2[k].Type=="Display" and v2[k].isFishBait then
+            return true
+        end
     end
+    return false
+end
 
-    function CheckFishRare()
+function CraftBait()
+    if tonumber(CheckInven("Rare Fish Bait")) < 1 and CheckFishRare() then 
+        TweenTo(craftfishpos)
+        wait(.5)
         local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
         for k,v in pairs(cac) do 
             if v2[k] and v2[k].Rare=="Rare" and v2[k].Type=="Fish" then
-                return true
-            end
-        end
-        return false
-    end
-
-    function CraftBait()
-       if tonumber(CheckInven("Rare Fish Bait")) < 1 and CheckFishRare() then 
-            TweenTo(craftfishpos)
-            wait(.5)
-            local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
-            for k,v in pairs(cac) do 
-                if v2[k] and v2[k].Rare=="Rare" and v2[k].Type=="Fish" then
-                    for c=1,v do 
-                       local args = {
-                            [1] = {
-                                ["BlueprintItem"] = "Rare Fish Bait",
-                                ["Method"] = "Craft",
-                                ["ExtraData"] = {
-                                    ["Rare Fish"] = k
-                                }
+                for c=1,v do 
+                    local args = {
+                        [1] = {
+                            ["BlueprintItem"] = "Rare Fish Bait",
+                            ["Method"] = "Craft",
+                            ["ExtraData"] = {
+                                ["Rare Fish"] = k
                             }
                         }
+                    }
 
-                        game:GetService("ReplicatedStorage"):WaitForChild("CraftingRemote"):InvokeServer(unpack(args))
-                        task.wait(RandomSoThuc(0.3,0.5))
-                    end
+                    game:GetService("ReplicatedStorage"):WaitForChild("CraftingRemote"):InvokeServer(unpack(args))
+                    task.wait(RandomSoThuc(0.3,0.5))
                 end
             end
-            wait(.5)
-           
-       end 
-    end
-    
-    function BuyBait()
-        local baitstill=tonumber(CheckInven(getgenv().Config.Bait)) or 0
-        if baitstill < 1 then
-            local canbuybait = math.min(math.floor(data.Stats.Peli.Value/45),300-baitstill)
-            if canbuybait < 1 then 
-                SellFish(true)
-                wait(.5) 
-                return
-            end
-            TweenTo(posbuy)
-            wait(.1)
-            local args = {
-                [1] = workspace:WaitForChild("BuyableItems"):WaitForChild("Common Fish Bait"),
-                [2] = canbuybait
-            }
-
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Shop"):InvokeServer(unpack(args))
-            wait(.5)
-            
         end
-    end
+        
+    end 
+end
 
-
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local ActionRemote = ReplicatedStorage:WaitForChild("Fishing"):WaitForChild("Remotes"):WaitForChild("Action")
-    local RunService = game:GetService("RunService")
-
-
-    local function GuiTinHieu(data)
-        ActionRemote:InvokeServer({ [1] = data })
-    end
-
-    function GetRodName()
-
-        local tiers={
-
-            [1]="Merchants Banana Rod",
-            [2]="Rare Fishing Rod",
-            [3]="Fishing Rod"
-        }
-        for i=1,3 do 
-            if LocalPlayer.Backpack:FindFirstChild(tiers[i]) then
-                return tiers[i]
-            end
-            if LocalPlayer.Character:FindFirstChild(tiers[i]) then
-                return tiers[i]
-            end
-        end
-        return "Fishing Rod"
-    end
-
-    function GetBaitName()
-        local rarebait=CheckInven("Rare Fish Bait")
-        if tonumber(rarebait) > 0 then
-            return "Rare Fish Bait"
-        end
-        local commonbait=CheckInven("Common Fish Bait")
-        if tonumber(commonbait) > 0 then
-            return "Common Fish Bait"
-        end
-        return "Common Fish Bait"
-    end
-
-    spawn(function()
-        local timekick = math.random(3600,5400)
-        while task.wait(timekick) do
-            LocalPlayer:Kick("gpo gay")
-        end
-    end)
-local RunService = game:GetService("RunService")
-    spawn(function()
-        RunService.RenderStepped:Connect(function()
-           getrenv()._G.MouseCF=CFrame.new(RandomSoThuc(-1339, -1330), RandomSoThuc(-99, -19), RandomSoThuc(-4946, -4772)) 
-        end)
-    end)
-
-
-local InertiaFactor = 0
-game:GetService("RunService"):Set3dRenderingEnabled(false)
+LocalPlayer.Idled:Connect(function()
+    local VIM = cloneref(Instance.new("VirtualInputManager"))
+    VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+    task.wait(1)
+    VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+end)
 
 spawn(function()
-    setfpscap(10)
-    while task.wait(120) do
-        setfpscap(10)
+    local timekick = math.random(3600,5400)
+    while task.wait(timekick) do
+        LocalPlayer:Kick("gpo gay")
     end
 end)
 
+
+game.CoreGui.DescendantAdded:Connect(function()
+    pcall(function()
+        if game.CoreGui.RobloxPromptGui.promptOverlay:FindFirstChild("ErrorPrompt") then
+            while wait() do
+                game:GetService("TeleportService"):Teleport(1730877806, game.Players.LocalPlayer)
+                wait(5)
+            end
+        end
+    end)
+end)
+
+function SellFish(dontneedmax)
+    local cac = game:GetService("HttpService"):JSONDecode(data.Inventory.Inventory.Value)
+    for k,v in pairs(cac) do 
+        if v2[k] and (dontneedmax or tonumber(v) >= v2[k]["Max"]) and table.find(getgenv().Config.AutoSell.Rarity, v2[k]["Rare"]) and v2[k]["Type"] == "Fish" then 
+            if (LocalPlayer.Character.HumanoidRootPart.Position-possell.Position).Magnitude >= 2 then
+            TweenTo(possell)
+            wait(.5) 
+            end
+            local args = {
+                [1] = {
+                    ["Fish"] = k,
+                    ["All"] = true,
+                    ["Method"] = "SellFish"
+                }
+            }
+
+            game:GetService("ReplicatedStorage"):WaitForChild("FishingShopRemote"):InvokeServer(unpack(args))
+            wait(math.random(1,2))
+        end
+    end
+end
+
+function BuyBait()
+    local baitstill=tonumber(CheckInven(getgenv().Config.Bait)) or 0
+    if baitstill < 1 then
+        local canbuybait = math.min(math.floor(data.Stats.Peli.Value/45),300-baitstill)
+        if canbuybait < 1 then 
+            SellFish(true)
+            wait(.5) 
+            return
+        end
+        TweenTo(posbuy)
+        wait(.1)
+        local args = {
+            [1] = workspace:WaitForChild("BuyableItems"):WaitForChild("Common Fish Bait"),
+            [2] = canbuybait
+        }
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Shop"):InvokeServer(unpack(args))
+        wait(.5)
+        
+    end
+end
+
+
+
+
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ActionRemote = ReplicatedStorage:WaitForChild("Fishing"):WaitForChild("Remotes"):WaitForChild("Action")
+local RunService = game:GetService("RunService")
+
+
+local function GuiTinHieu(data)
+    ActionRemote:InvokeServer({ [1] = data })
+end
+
+function GetRodName()
+
+    local tiers={
+
+        [1]="Merchants Banana Rod",
+        [2]="Rare Fishing Rod",
+        [3]="Fishing Rod"
+    }
+    for i=1,3 do 
+        if LocalPlayer.Backpack:FindFirstChild(tiers[i]) then
+            return tiers[i]
+        end
+        if LocalPlayer.Character:FindFirstChild(tiers[i]) then
+            return tiers[i]
+        end
+    end
+    return "Fishing Rod"
+end
+
+function GetBaitName()
+    local rarebait=CheckInven("Rare Fish Bait")
+    if tonumber(rarebait) > 0 then
+        return "Rare Fish Bait"
+    end
+    local commonbait=CheckInven("Common Fish Bait")
+    if tonumber(commonbait) > 0 then
+        return "Common Fish Bait"
+    end
+    return "Common Fish Bait"
+end
+
 while getgenv().Config.AutoFish and task.wait() do
-    local gui = LocalPlayer.PlayerGui:FindFirstChild("FishingUIBill")
+
     local character = LocalPlayer.Character
     if character then
         local rod = character:FindFirstChild(GetRodName())
         if rod then
-            if gui and gui:FindFirstChild("Frame") then
-                local playerBar = gui.Frame:FindFirstChild("Player")
-                local goalBar = gui.Frame:FindFirstChild("Goal")
-                
-                if playerBar and goalBar then
-                    -- Khởi tạo biến vật lý
-                    local lastPlayerY = playerBar.Position.Y.Scale
-                    
-                    -- Vòng lặp Minigame (Chạy theo Frame máy để siêu mượt)
-                    while gui and gui.Parent and playerBar and goalBar do
-                        local playerY = playerBar.Position.Y.Scale
-                        local goalY = goalBar.Position.Y.Scale
 
-                        -- 1. Tính vận tốc hiện tại (Velocity)
-                        local velocity = playerY - lastPlayerY
-                        lastPlayerY = playerY -- Cập nhật cho vòng sau
+            BuyBait()
+            if data.Stats.Peli.Value < 1000000 then
+                SellFish()
+            end
+            
+            if data.Stats.Peli.Value >= 1000000 then
+                CraftBait()
+            end
 
-                        -- 2. Dự đoán vị trí tương lai dựa trên quán tính
-                        local predictedY = playerY + (velocity * InertiaFactor)
+            if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 2 then
+                TweenTo(posfish)
+                wait(.1)
+            end
 
-                        -- 3. Xử lý click (Scale 0 là đỉnh, Scale 1 là đáy)
-                        local tolerance = 0.05 -- Vùng an toàn
-
-                        if predictedY > goalY + tolerance then
-                            VIM:SendTouchEvent(0, 0, 0, 0)
-                        elseif predictedY < goalY - tolerance then
-                            VIM:SendTouchEvent(0, 2, 0, 0)
-                        else
-                            -- Đang ở vùng an toàn, dùng "phanh" để giữ vị trí
-                            if velocity > 0.01 then 
-                                VIM:SendTouchEvent(0, 0, 0, 0) -- Đang rơi nhanh -> Hãm lại
-                            elseif velocity < -0.01 then
-                                VIM:SendTouchEvent(0, 2, 0, 0) -- Đang bay lên nhanh -> Hãm lại
-                            end
-                        end
-                        
-                        RunService.RenderStepped:Wait()
-                    end
-                end
-
-            elseif not workspace.Effects:FindFirstChild(LocalPlayer.Name.."'s hook") then
-
-                if data.Stats.Peli.Value < 1000000 then
-                    SellFish()
-                end
-                
-                if data.Stats.Peli.Value >= 1000000 then
-                    CraftBait()
-                end
-
+            if not CheckBait() then
                 BuyBait()
+                continue
+            end
+        
+            local baituse=GetBaitName()
+            local lastbait=tonumber(CheckInven(baituse)) or 0
 
-                if LocalPlayer.PlayerGui:FindFirstChild("FishingBaitGui") then
-                    local bait=GetBaitName()
-                    for i,v in pairs(LocalPlayer.PlayerGui.FishingBaitGui.Main.List:GetChildren()) do
-                        if v.Name == bait and v:FindFirstChild("backGroundSelect") and not v.backGroundSelect.Visible then
-                            for k, v in pairs(getconnections(v.MouseButton1Click)) do
-                                v:Fire()
-                            end
-                            wait(.1)
-                        end
-                    end
+            local args = {
+                [1] = {
+                    ["Goal"] = Vector3.new(RandomSoThuc(-1339, -1330), RandomSoThuc(-99, -19), RandomSoThuc(-4946, -4772)),
+                    ["Action"] = "Throw",
+                    ["Bait"] = baituse
+                }
+            }
+
+            local out=ActionRemote:InvokeServer(unpack(args))
+
+
+            if out then
+                task.wait(.1)
+                local args = {
+                    [1] = {
+                        ["Action"] = "Landed"
+                    }
+                }
+
+                local out2=ActionRemote:InvokeServer(unpack(args))
+
+
+                
+                task.wait(0.1)
+                local hookName = LocalPlayer.Name .. "'s hook"
+
+                local timer = 0
+                while true do
+                    local currentBait = tonumber(CheckInven(baituse)) or 0
+                    local hookExists = workspace.Effects:FindFirstChild(hookName)
+                    
+                    if not hookExists then break end
+                    if currentBait < lastbait then break end
+                    
+                    timer = timer + 0.5
+                    if timer > 25 then break end 
+                    task.wait(0.5)
                 end
 
-                if (LocalPlayer.Character.HumanoidRootPart.CFrame.Position - posfish.Position).magnitude >= 5 then
-                    TweenTo(posfish)
-                    wait(.1)
-                end
+                task.wait(RandomSoThuc(11, 13))
+                local args = {
+                    [1] = {
+                        ["Action"] = "Reel"
+                    }
+                }
 
-                rod:Activate()
-                task.wait(RandomSoThuc(2,2.5))
-                rod:Deactivate()     
+                local out3=ActionRemote:InvokeServer(unpack(args))
+
+                if out3 and workspace.Effects:FindFirstChild(hookName) then
+                    task.wait()
+                    local args = {
+                        [1] = {
+                            ["Action"] = "HookReturning"
+                        }
+                    }
+
+                    ActionRemote:InvokeServer(unpack(args))
+                    task.wait()
+                    local args = {
+                        [1] = {
+                            ["Action"] = "Cancel"
+                        }
+                    }
+
+                    ActionRemote:InvokeServer(unpack(args))
+                    task.wait(RandomSoThuc(1, 2))
+                    
+                end
             end
         else
             local rod = LocalPlayer.Backpack:FindFirstChild(GetRodName())
@@ -498,3 +517,4 @@ while getgenv().Config.AutoFish and task.wait() do
         end
     end
 end
+
