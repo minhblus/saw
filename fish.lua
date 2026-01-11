@@ -310,7 +310,7 @@ end)
 spawn(function()
     local timekick = math.random(3600,5400)
     while task.wait(timekick) do
-        LocalPlayer:Kick("gpo gay")
+        game:GetService("TeleportService"):Teleport(1730877806, game.Players.LocalPlayer)
     end
 end)
 
