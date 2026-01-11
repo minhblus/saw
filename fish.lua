@@ -433,15 +433,15 @@ while getgenv().Config.AutoFish and task.wait() do
                         local tolerance = 0.05 -- Vùng an toàn
 
                         if predictedY > goalY + tolerance then
-                            VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                            VIM:SendTouchEvent(0, 0, 0, 0)
                         elseif predictedY < goalY - tolerance then
-                            VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+                            VIM:SendTouchEvent(0, 2, 0, 0)
                         else
                             -- Đang ở vùng an toàn, dùng "phanh" để giữ vị trí
                             if velocity > 0.01 then 
-                                VIM:SendMouseButtonEvent(0, 0, 0, true, game, 1) -- Đang rơi nhanh -> Hãm lại
+                                VIM:SendTouchEvent(0, 0, 0, 0) -- Đang rơi nhanh -> Hãm lại
                             elseif velocity < -0.01 then
-                                VIM:SendMouseButtonEvent(0, 0, 0, false, game, 1) -- Đang bay lên nhanh -> Hãm lại
+                                VIM:SendTouchEvent(0, 2, 0, 0) -- Đang bay lên nhanh -> Hãm lại
                             end
                         end
                         
