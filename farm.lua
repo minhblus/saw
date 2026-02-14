@@ -1391,9 +1391,9 @@ function SawUI:CreateWindow(windowconfig)
 	local UI = InstanceItem("ScreenGui", {
 		["ResetOnSpawn"] = true,
 		["IgnoreGuiInset"] = true,
-		["Name"] = "Window",
+		["Name"] = "UI",
 		["DisplayOrder"] = 0
-	}, game:GetService("CoreGui").RobloxGui or game:GetService("CoreGui"))
+	}, game:GetService("CoreGui"))
 
 
 	local Menu = InstanceItem("ImageButton", {
@@ -2068,1044 +2068,360 @@ function SawUI:CreateWindow(windowconfig)
 	return pagefunc
 end
 
-
-local PathfindingService = game:GetService("PathfindingService")
-
-function MoveTo2(targetPart)
-	local character = plr.Character
-	if not character or not character:FindFirstChild("HumanoidRootPart") or not character:FindFirstChild("Humanoid") then
-		return
-	end
-
-	local humanoid = character:FindFirstChild("Humanoid")
-	local hrp = character:FindFirstChild("HumanoidRootPart")
-
-	-- Tạo đường đi
-	local path = PathfindingService:CreatePath({
-		AgentHeight = 5,
-		AgentRadius = 2,
-		AgentCanJump = true
-	})
-	path:ComputeAsync(hrp.Position, targetPart.Position)
-
-	if path.Status == Enum.PathStatus.Success then
-		local waypoints = path:GetWaypoints()
-		for _, waypoint in ipairs(waypoints) do
-			humanoid:MoveTo(waypoint.Position)
-			humanoid.MoveToFinished:Wait()
-		end
-	else
-		-- Nếu path bị lỗi thì MoveTo thẳng luôn
-		humanoid:MoveTo(targetPart.Position)
-	end
-end
-function MoveTo(targetPart)
-    local character = plr.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") or not character:FindFirstChild("Humanoid") then
-        return
-    end
-
-    if not CheckInMid() then
-        MoveToMiddle()
-    end
-
-    local humanoid = character:FindFirstChild("Humanoid")
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-
-    humanoid:MoveTo(targetPart.Position)
-end
-function CheckInMid()
-    local carpet = workspace.Map.Carpet
-
-    local root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-
-    if root then
-        local pos = root.Position
-        local cpos = carpet.Position
-        local size = carpet.Size / 2
-
-        -- Kiểm tra theo X và Z (bỏ qua Y)
-        local insideXZ =
-            pos.X >= cpos.X - size.X and pos.X <= cpos.X + size.X and
-            pos.Z >= cpos.Z - size.Z and pos.Z <= cpos.Z + size.Z
-
-        if insideXZ then
-           return true
-        end
-    end
-    return false
-end
-
-function MoveToMiddle()
-    local middle = workspace.Map.Carpet
-    MoveTo2(middle)
-end
-
-local DataGame=require(game:GetService("ReplicatedStorage").Packages.Synchronizer)
-local tem000 = require(game:GetService("ReplicatedStorage").Datas.Mutations)
-local getmutations={}
-
-for i,v in pairs(tem000) do
-    getmutations[i]=v.Modifier
-end
-
 if not getgenv().Config then
-    getgenv().Config = {}
-end
-local Animals=require(game:GetService("ReplicatedStorage").Datas.Animals)
-local Rebirths=require(game:GetService("ReplicatedStorage").Datas.Rebirth)
-local TS = game:GetService("TweenService")
-local plr = game:GetService("Players").LocalPlayer
-local Mouse = plr:GetMouse()
-local UIS = game:GetService("UserInputService")
-local Tweeninfo = TweenInfo.new
-local vim = game:service('VirtualInputManager')
-local TweenService = game:GetService("TweenService")
-local plr = game.Players.LocalPlayer
-function GetMyBase()
-    for i,v in pairs(workspace.Plots:GetChildren()) do
-        if v:FindFirstChild("PlotSign") and v.PlotSign.YourBase.Enabled == true then
-            return v
-        end
-    end
-end
-
-
-function LayConNhoNhat()
-    local nhonhat=math.huge
-    local charpet
-    local petcantsell=Rebirths[plr.leaderstats.Rebirths.Value+1].Requirements.RequiredCharacters
-    local pethave={}
-	local petkothesell=getgenv().Config.PetChoose or {}
-
-    for index,tab in pairs(DataGame:Get(game.Players.LocalPlayer):Get("AnimalPodiums")) do
-		if tab~="Empty" then
-			
-			local animalname=tab.Index
-			if table.find(petcantsell,animalname) and not pethave[animalname] then
-				pethave[animalname]=true
-				continue
-			end
-			if table.find(petkothesell,animalname) then
-				continue
-			end
-			local animalValue=Animals[animalname].Generation
-			if tab.Mutation then
-				animalValue=animalValue+(animalValue*getmutations[tab.Mutation])
-			end
-			if animalValue<=nhonhat then
-				nhonhat=animalValue
-				charpet=GetMyBase().AnimalPodiums:FindFirstChild(index)
-			end
-			
-		end
-    end
-    if not charpet then
-        return 0,nil
-    end
-
-    return nhonhat,charpet
-end
-
-function LayConLonNhat()
-    local lonnhat=0
-    local charpet
-    for index,tab in pairs(DataGame:Get(game.Players.LocalPlayer):Get("AnimalPodiums")) do
-		if tab~="Empty" then
-            local animalname=tab.Index
-            local animalValue=Animals[animalname].Generation
-            if tab.Mutation then
-                animalValue=animalValue+(animalValue*getmutations[tab.Mutation])
-            end
-            if lonnhat==0 or animalValue>lonnhat then
-                lonnhat=animalValue
-                charpet=GetMyBase().AnimalPodiums:FindFirstChild(index)
-            end
-        end
-    end
-    return lonnhat,v
-end
-
-function LaySoLuong()
-    local nhonhat=0
-    for index,tab in pairs(DataGame:Get(game.Players.LocalPlayer):Get("AnimalPodiums")) do
-		if tab~="Empty" then
-            nhonhat=nhonhat+1
-        end
-    end
-    return nhonhat
-end
-
-function LayAllPetCo()
-    local pethave={}
-    for i,v in pairs(GetMyBase().AnimalPodiums:GetChildren()) do
-        if v.Base.Spawn:FindFirstChild("Attachment") then
-            table.insert(pethave,v.Base.Spawn.Attachment.AnimalOverhead.DisplayName.Text)
-        end
-    end
-    return pethave
-end
-
-function SellNhonhat()
-    local nhonhat,charpet=LayConNhoNhat()
-
-    if charpet==nil then
-        return
-    end
-	pcall(function()
-		local namepet=charpet.Base.Spawn.Attachment.AnimalOverhead.DisplayName.Text
-		local mutation=nil
-		if charpet.Base.Spawn.Attachment.AnimalOverhead.Mutation.Visible then
-			mutation=charpet.Base.Spawn.Attachment.AnimalOverhead.Mutation.Text
-		end
-		
-	end)
-
-	local args = {
-		[1] = tonumber(charpet.Name)
-	}
-
-	game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/PlotService/Sell"):FireServer(unpack(args))
-end
-
-function GetPetDaChon()
-    local petneed=getgenv().Config.PetChoose or {}
-
-    local CashValue=plr.leaderstats.Cash.Value
-
-    for i,v in pairs(workspace:GetChildren()) do
-        if v:GetAttribute("Index") and table.find(petneed,v:GetAttribute("Index")) and plr.leaderstats.Cash.Value >= Animals[v:GetAttribute("Index")].Price then
-			if getgenv().Config.MutationChoose and #getgenv().Config.MutationChoose>0 then
-				if v:GetAttribute("Mutation") and table.find(getgenv().Config.MutationChoose,v:GetAttribute("Mutation")) then
-					return v
-				elseif not v:GetAttribute("Mutation") and table.find(getgenv().Config.MutationChoose,"Normal") then
-					return v
-				end
-			else
-				return v
-			end
-		end
-	end
-	return false
-end
-
-function MuaPetDaChon()
-    while wait() do
-		local v=GetPetDaChon()
-		if v and v:FindFirstChild("HumanoidRootPart") and plr.leaderstats.Cash.Value >= Animals[v:GetAttribute("Index")].Price then
-			if LaySoLuong() >= #GetMyBase().AnimalPodiums:GetChildren() then
-				SellNhonhat()
-
-			end
-			MoveTo(v.HumanoidRootPart)
-			local prompt=v.Part.PromptAttachment.ProximityPrompt
-			prompt:InputHoldBegin()
-			wait(prompt.HoldDuration+0.1)
-			prompt:InputHoldEnd()
-			wait(0.1)
-			if not v or v.HumanoidRootPart.PromptAttachment.ProximityPrompt:GetAttribute("TargetPlayer") == plr.UserId then
-				
-				break
-			end
-		else
-			break
-		end
-	end
---	MoveTo(GetMyBase().AnimalTarget)
-end
-
-function GetPetRebirth()
-    local petneed=Rebirths[plr.leaderstats.Rebirths.Value+1].Requirements.RequiredCharacters
-
-    local pethave=LayAllPetCo()
-
-    local CashValue=plr.leaderstats.Cash.Value
-
-    for i,v in pairs(workspace:GetChildren()) do
-        if v:GetAttribute("Index") and table.find(petneed,v:GetAttribute("Index")) and not table.find(pethave,v:GetAttribute("Index")) and plr.leaderstats.Cash.Value >= Animals[v:GetAttribute("Index")].Price then
-			return v
-		end
-	end
-	return false
-end
-
-function MuaPetRebirth()
-    while wait() do
-		if not getgenv().Config.AutoBuyPetRebirth then
-			break
-		end
-		local v=GetPetRebirth()
-		if v and v:FindFirstChild("Part") and plr.leaderstats.Cash.Value >= Animals[v:GetAttribute("Index")].Price  and v.Part.PromptAttachment.ProximityPrompt:GetAttribute("TargetPlayer") ~= plr.UserId then
-			if LaySoLuong() >= #GetMyBase().AnimalPodiums:GetChildren() then
-				SellNhonhat()
-
-			end
-			MoveTo(v.Part)
-			local prompt=v.Part.PromptAttachment.ProximityPrompt
-			prompt:InputHoldBegin()
-			wait(prompt.HoldDuration+0.1)
-			prompt:InputHoldEnd()
-			wait(0.1)
-			
-		else
-			break
-		end
-	end
---	MoveTo(GetMyBase().AnimalTarget)
-end
-
-function GetConManhHon()
-    local CashValue=plr.leaderstats.Cash.Value
-    local conlonnhat,charpet1=LayConLonNhat()
-    local connhonhat,charpet2=LayConNhoNhat()
-
-    local consechon
-    local speedgen=connhonhat
-
-    for i,v in pairs(workspace:GetChildren()) do
-        if not v:GetAttribute("Index") or not v:FindFirstChild("Part") or v.Part.PromptAttachment.ProximityPrompt:GetAttribute("TargetPlayer") == plr.UserId  then
-            continue
-        end
-        local animalvalue = Animals[v:GetAttribute("Index")].Generation
-        local animalcash=Animals[v:GetAttribute("Index")].Price
-        if v:GetAttribute("Mutation") and false then
-            animalvalue = animalvalue + (animalvalue * getmutations[v:GetAttribute("Mutation")])
-        end
-
-        if animalvalue>=speedgen and CashValue >= animalcash then
-            consechon=v
-            speedgen=animalvalue
-        end
-    end
-
-   
-
-    if not consechon then
-        return false
-    end
-
-	if connhonhat==speedgen and LaySoLuong() < #GetMyBase().AnimalPodiums:GetChildren() then
-		return consechon
-	end
-
-	return consechon
-end
-
-function MuaConManhHon()
-	local consechon=GetConManhHon()
-	if not consechon then
-		return
-	end
-
-    if LaySoLuong() >= #GetMyBase().AnimalPodiums:GetChildren() then
-        SellNhonhat()
-    end
-
-
-    while wait() do
-        if consechon and consechon:FindFirstChild("Part") and plr.leaderstats.Cash.Value >= Animals[consechon:GetAttribute("Index")].Price and consechon.Part.PromptAttachment.ProximityPrompt:GetAttribute("TargetPlayer") ~= plr.UserId then
-            if LaySoLuong() >= #GetMyBase().AnimalPodiums:GetChildren() then
-                SellNhonhat()
-                wait(0.5)
-            end
-            MoveTo(consechon.Part)
-			local prompt=consechon.Part.PromptAttachment.ProximityPrompt
-            prompt:InputHoldBegin()
-			wait(prompt.HoldDuration+0.1)
-			prompt:InputHoldEnd()
-            wait(0.1)
-            
-        else
-            break
-        end
-    end
-    -- MoveTo(GetMyBase().AnimalTarget)
-end
-
-function GetPetDaChon()
-    local petneed=getgenv().Config.PetChoose or {}
-
-    local CashValue=plr.leaderstats.Cash.Value
-
-    for i,v in pairs(workspace:GetChildren()) do
-        if v:GetAttribute("Index") and table.find(petneed,v:GetAttribute("Index")) and plr.leaderstats.Cash.Value >= Animals[v:GetAttribute("Index")].Price and v.Part.PromptAttachment.ProximityPrompt:GetAttribute("TargetPlayer") ~= plr.UserId then
-			return v
-		end
-	end
-	return false
-end
-
-function MuaPetDaChon()
-    while wait() do
-		if not getgenv().Config.AutoBuyPet then
-			break
-		end
-		local v=GetPetDaChon()
-		if v and v:FindFirstChild("Part") and plr.leaderstats.Cash.Value >= Animals[v:GetAttribute("Index")].Price and v.Part.PromptAttachment.ProximityPrompt:GetAttribute("TargetPlayer") ~= plr.UserId then
-			if LaySoLuong() >= #GetMyBase().AnimalPodiums:GetChildren() then
-				SellNhonhat()
-
-			end
-			MoveTo(v.Part)
-			local prompt=v.Part.PromptAttachment.ProximityPrompt
-			prompt:InputHoldBegin()
-			wait(prompt.HoldDuration+0.1)
-			prompt:InputHoldEnd()
-			wait(0.1)
-			if not v or v.Part.PromptAttachment.ProximityPrompt:GetAttribute("TargetPlayer") == plr.UserId then
-				
-				break
-			end
-		else
-			break
-		end
-	end
---	MoveTo(GetMyBase().AnimalTarget)
-end
-
-
--- local conmanhhon = GetConManhHon()
--- if conmanhhon and conmanhhon:FindFirstChild("Part") then
--- 	print("Đang đi tới:", conmanhhon:GetAttribute("Index"))
--- 	MoveTo(conmanhhon.Part)
---     local prompt = workspace.Part.ProximityPrompt
--- prompt:InputHoldBegin()
--- wait(prompt.HoldDuration+0.1)
--- prompt:InputHoldEnd()
-
--- else
--- 	print("Không tìm thấy con mạnh hơn nào.")
--- end
-local md5 = {}
-local hmac = {}
-local base64 = {}
-
-do
-	do
-		local T = {
-			0xd76aa478,
-			0xe8c7b756,
-			0x242070db,
-			0xc1bdceee,
-			0xf57c0faf,
-			0x4787c62a,
-			0xa8304613,
-			0xfd469501,
-			0x698098d8,
-			0x8b44f7af,
-			0xffff5bb1,
-			0x895cd7be,
-			0x6b901122,
-			0xfd987193,
-			0xa679438e,
-			0x49b40821,
-			0xf61e2562,
-			0xc040b340,
-			0x265e5a51,
-			0xe9b6c7aa,
-			0xd62f105d,
-			0x02441453,
-			0xd8a1e681,
-			0xe7d3fbc8,
-			0x21e1cde6,
-			0xc33707d6,
-			0xf4d50d87,
-			0x455a14ed,
-			0xa9e3e905,
-			0xfcefa3f8,
-			0x676f02d9,
-			0x8d2a4c8a,
-			0xfffa3942,
-			0x8771f681,
-			0x6d9d6122,
-			0xfde5380c,
-			0xa4beea44,
-			0x4bdecfa9,
-			0xf6bb4b60,
-			0xbebfbc70,
-			0x289b7ec6,
-			0xeaa127fa,
-			0xd4ef3085,
-			0x04881d05,
-			0xd9d4d039,
-			0xe6db99e5,
-			0x1fa27cf8,
-			0xc4ac5665,
-			0xf4292244,
-			0x432aff97,
-			0xab9423a7,
-			0xfc93a039,
-			0x655b59c3,
-			0x8f0ccc92,
-			0xffeff47d,
-			0x85845dd1,
-			0x6fa87e4f,
-			0xfe2ce6e0,
-			0xa3014314,
-			0x4e0811a1,
-			0xf7537e82,
-			0xbd3af235,
-			0x2ad7d2bb,
-			0xeb86d391,
-		}
-
-		local function add(a, b)
-			local lsw = bit32.band(a, 0xFFFF) + bit32.band(b, 0xFFFF)
-			local msw = bit32.rshift(a, 16) + bit32.rshift(b, 16) + bit32.rshift(lsw, 16)
-			return bit32.bor(bit32.lshift(msw, 16), bit32.band(lsw, 0xFFFF))
-		end
-
-		local function rol(x, n)
-			return bit32.bor(bit32.lshift(x, n), bit32.rshift(x, 32 - n))
-		end
-
-		local function F(x, y, z)
-			return bit32.bor(bit32.band(x, y), bit32.band(bit32.bnot(x), z))
-		end
-		local function G(x, y, z)
-			return bit32.bor(bit32.band(x, z), bit32.band(y, bit32.bnot(z)))
-		end
-		local function H(x, y, z)
-			return bit32.bxor(x, bit32.bxor(y, z))
-		end
-		local function I(x, y, z)
-			return bit32.bxor(y, bit32.bor(x, bit32.bnot(z)))
-		end
-
-		function md5.sum(message)
-			local a, b, c, d = 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476
-
-			local message_len = #message
-			local padded_message = message .. "\128"
-			while #padded_message % 64 ~= 56 do
-				padded_message = padded_message .. "\0"
-			end
-
-			local len_bytes = ""
-			local len_bits = message_len * 8
-			for i = 0, 7 do
-				len_bytes = len_bytes .. string.char(bit32.band(bit32.rshift(len_bits, i * 8), 0xFF))
-			end
-			padded_message = padded_message .. len_bytes
-
-			for i = 1, #padded_message, 64 do
-				local chunk = padded_message:sub(i, i + 63)
-				local X = {}
-				for j = 0, 15 do
-					local b1, b2, b3, b4 = chunk:byte(j * 4 + 1, j * 4 + 4)
-					X[j] = bit32.bor(b1, bit32.lshift(b2, 8), bit32.lshift(b3, 16), bit32.lshift(b4, 24))
-				end
-
-				local aa, bb, cc, dd = a, b, c, d
-
-				local s = { 7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21 }
-
-				for j = 0, 63 do
-					local f, k, shift_index
-					if j < 16 then
-						f = F(b, c, d)
-						k = j
-						shift_index = j % 4
-					elseif j < 32 then
-						f = G(b, c, d)
-						k = (1 + 5 * j) % 16
-						shift_index = 4 + (j % 4)
-					elseif j < 48 then
-						f = H(b, c, d)
-						k = (5 + 3 * j) % 16
-						shift_index = 8 + (j % 4)
-					else
-						f = I(b, c, d)
-						k = (7 * j) % 16
-						shift_index = 12 + (j % 4)
-					end
-
-					local temp = add(a, f)
-					temp = add(temp, X[k])
-					temp = add(temp, T[j + 1])
-					temp = rol(temp, s[shift_index + 1])
-
-					local new_b = add(b, temp)
-					a, b, c, d = d, new_b, b, c
-				end
-
-				a = add(a, aa)
-				b = add(b, bb)
-				c = add(c, cc)
-				d = add(d, dd)
-			end
-
-			local function to_le_hex(n)
-				local s = ""
-				for i = 0, 3 do
-					s = s .. string.char(bit32.band(bit32.rshift(n, i * 8), 0xFF))
-				end
-				return s
-			end
-
-			return to_le_hex(a) .. to_le_hex(b) .. to_le_hex(c) .. to_le_hex(d)
-		end
-	end
-
-	do
-		function hmac.new(key, msg, hash_func)
-			if #key > 64 then
-				key = hash_func(key)
-			end
-
-			local o_key_pad = ""
-			local i_key_pad = ""
-			for i = 1, 64 do
-				local byte = (i <= #key and string.byte(key, i)) or 0
-				o_key_pad = o_key_pad .. string.char(bit32.bxor(byte, 0x5C))
-				i_key_pad = i_key_pad .. string.char(bit32.bxor(byte, 0x36))
-			end
-
-			return hash_func(o_key_pad .. hash_func(i_key_pad .. msg))
-		end
-	end
-
-	do
-		local b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-
-		function base64.encode(data)
-			return (
-				(data:gsub(".", function(x)
-					local r, b_val = "", x:byte()
-					for i = 8, 1, -1 do
-						r = r .. (b_val % 2 ^ i - b_val % 2 ^ (i - 1) > 0 and "1" or "0")
-					end
-					return r
-				end) .. "0000"):gsub("%d%d%d?%d?%d?%d?", function(x)
-					if #x < 6 then
-						return ""
-					end
-					local c = 0
-					for i = 1, 6 do
-						c = c + (x:sub(i, i) == "1" and 2 ^ (6 - i) or 0)
-					end
-					return b:sub(c + 1, c + 1)
-				end) .. ({ "", "==", "=" })[#data % 3 + 1]
-			)
-		end
-	end
-end
-
-local function GenerateReservedServerCode(placeId)
-	local uuid = {}
-	for i = 1, 16 do
-		uuid[i] = math.random(0, 255)
-	end
-
-	uuid[7] = bit32.bor(bit32.band(uuid[7], 0x0F), 0x40) -- v4
-	uuid[9] = bit32.bor(bit32.band(uuid[9], 0x3F), 0x80) -- RFC 4122
-
-	local firstBytes = ""
-	for i = 1, 16 do
-		firstBytes = firstBytes .. string.char(uuid[i])
-	end
-
-	local gameCode =
-		string.format("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x", table.unpack(uuid))
-
-	local placeIdBytes = ""
-	local pIdRec = placeId
-	for _ = 1, 8 do
-		placeIdBytes = placeIdBytes .. string.char(pIdRec % 256)
-		pIdRec = math.floor(pIdRec / 256)
-	end
-
-	local content = firstBytes .. placeIdBytes
-
-	local SUPERDUPERSECRETROBLOXKEYTHATTHEYDIDNTCHANGEEVERSINCEFOREVER = "e4Yn8ckbCJtw2sv7qmbg" -- legacy leaked key from ages ago that still works due to roblox being roblox.
-	local signature = hmac.new(SUPERDUPERSECRETROBLOXKEYTHATTHEYDIDNTCHANGEEVERSINCEFOREVER, content, md5.sum)
-
-	local accessCodeBytes = signature .. content
-
-	local accessCode = base64.encode(accessCodeBytes)
-	accessCode = accessCode:gsub("+", "-"):gsub("/", "_")
-
-	local pdding = 0
-	accessCode, _ = accessCode:gsub("=", function()
-		pdding = pdding + 1
-		return ""
-	end)
-
-	accessCode = accessCode .. tostring(pdding)
-
-	return accessCode, gameCode
+	getgenv().Config={}
 end
 
 
 local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 local HomeTab=Sawhub:CreatePage({title="Home"})
-local StatusSec=HomeTab:CreateSection({title="Auto Buy"})
-StatusSec:CreateLabel({title="Version Place: "..game.PlaceVersion})
-local AutoTabBuy=HomeTab:CreateSection({title="Auto Buy"})
 
-local temptemp={}
-for i,v in pairs(Animals) do
-	table.insert(temptemp,i)
-end
+local VoidSec=HomeTab:CreateSection({title="Void"})
+VoidSec:CreateButton({title="Get Y",callback=function()
+	local y = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Y or 999
+	Sawhub:Notify("Y: "..y)
+end})
 
-local PetChooseDrop=AutoTabBuy:CreateDropdown({
-	title="Select Brainrot",
-	default=getgenv().Config.PetChoose or {},
-	list=temptemp,
-	multi=true,
-	callback=function(v)
-		getgenv().Config.PetChoose=v
+VoidSec:CreateTextbox({title="Set Y",default=getgenv().Config.SetY,callback=function(v)
+	getgenv().Config.SetY=v
+
+end})
+
+ VoidSec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,callback=function(v)
+	getgenv().Config.AntiVoid=v
+	task.spawn(function()
+		if getgenv().Config.AntiVoid then
+			local part = Instance.new("Part")
+
+				part.Name="AntiVVV"
+				part.Size=Vector3.new(2024,5,2024)
+				part.Anchored=true
+				part.Position = Vector3.new(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.X,game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Y-10,game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Z)
+				part.Parent=workspace
+			
+		else
+			local part = workspace:FindFirstChild("AntiVVV")
+			if part then
+				part:Destroy()
+			end
+		end
+	end)
+end})
+
+local BlockSec=HomeTab:CreateSection({title="Block"})
+BlockSec:CreateToggle({title="Fast Break",default=getgenv().Config.FastBreak,callback=function(v)
+	getgenv().Config.FastBreak=v
+end})
+local autoblock = BlockSec:CreateToggle({title="Auto Block",default=getgenv().Config.AutoBlock,callback=function(v)
+	getgenv().Config.AutoBlock=v
+end})
+
+local Defense=HomeTab:CreateSection({title="Defense"})
+
+Defense:CreateToggle({title="Boost Speed Jump",default=getgenv().Config.BoostSpeed,callback=function(v)
+	getgenv().Config.BoostSpeed=v
+	task.spawn(function()
+		while wait() and getgenv().Config.BoostSpeed do
+			pcall(function()
+				game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = 20
+				game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = 400
+				game:GetService("Players").LocalPlayer.Character.Humanoid.JumpHeight = 40
+			end)
+		end
+	end)
+	
+end})
+
+Defense:CreateToggle({title="Auto Collect",default=getgenv().Config.AutoCollect,callback=function(v)
+	getgenv().Config.AutoCollect=v
+	
+end})
+
+
+Defense:CreateToggle({title="Auto Attack",default=getgenv().Config.AutoAttack,callback=function(v)
+	getgenv().Config.AutoAttack=v
+
+end})
+
+Defense:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,callback=function(v)
+	getgenv().Config.AntiFall=v
+end})
+
+local VisualTab=Sawhub:CreatePage({title="Visual"})
+local EspSec=VisualTab:CreateSection({title="Esp"})
+
+EspSec:CreateToggle({title="Highlight Players",default=getgenv().Config.HighlightPlayers,callback=function(v)
+	getgenv().Config.HighlightPlayers=v
+end})
+
+EspSec:CreateToggle({title="Esp Bee",default=getgenv().Config.EspBee,callback=function(v)
+	getgenv().Config.EspBee=v
+	task.spawn(function()
+		while wait() and getgenv().Config.EspBee do
+			pcall(function()
+				for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
+					if v.Name=="Bee" and not v:FindFirstChild("EspHl") then
+						local hl = Instance.new("Highlight")
+						hl.Name = "EspHl"
+						hl.Parent = v
+						hl.FillColor = Color3.new(1, 0, 0)
+						hl.Adornee = v
+						if v:FindFirstChild("Root") and v.Root:FindFirstChild("ProximityPrompt") then
+							v.Root.ProximityPrompt.MaxActivationDistance = 100
+						end
+					end
+				end
+			end)
+		end
+	end)
+end})
+
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.Q then
+		getgenv().Config.AutoBlock=not getgenv().Config.AutoBlock
+		autoblock:Set(getgenv().Config.AutoBlock)
 	end
-})
+end)
 
+local player = game.Players.LocalPlayer
 
-AutoTabBuy:CreateToggle({
-	title="Auto Buy Brainrot",
-	default=getgenv().Config.AutoBuyPet,
-	callback=function(v)
-		getgenv().Config.AutoBuyPet=v
-		if v then
-            spawn(function()
-                while wait() and getgenv().Config.AutoBuyPet do
-                    MuaPetDaChon()
-                end
-            end)
-        end
-	end
-})
+local function setupAntiFall(character)
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:WaitForChild("Humanoid")
 
+    -- Tạo lực nâng ảo
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(0, 0, 0) 
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.Parent = hrp
 
-AutoTabBuy:CreateToggle({
-    title="Auto Buy Pet Rebirth",
-    default=getgenv().Config.AutoBuyPetRebirth,
-    callback=function(v)
-        getgenv().Config.AutoBuyPetRebirth=v
-        if v then
-            spawn(function()
-                while wait() and getgenv().Config.AutoBuyPetRebirth do
-                    MuaPetRebirth()
-                end
-            end)
-        end
-    end
-})
-
-AutoTabBuy:CreateToggle({
-    title="Auto Upgrade Pet",
-    default=getgenv().Config.AutoUpgradePet,
-    callback=function(v)
-        getgenv().Config.AutoUpgradePet=v
-        if v then
-            spawn(function()
-                while wait() and getgenv().Config.AutoUpgradePet do
-                    MuaConManhHon()
-                end
-            end)
-        end
-    end
-})
-
-do
-    local OthersTab=Sawhub:CreatePage({title="Plot"})
-    local plots={}
-    for index=1,30 do
-        local v=GetMyBase().AnimalPodiums:FindFirstChild(tostring(index))
-        if not v then continue end
-        local indexplot = OthersTab:CreateSection({title="Plot "..index})
-        local titleplot = indexplot:CreateLabel({title="Empty"})
-        local generateplot = indexplot:CreateLabel({title="Empty"})
-        local sellbutton = indexplot:CreateButton({title="Sell",callback=function()
-            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/PlotService/Sell"):FireServer(index)
-        end})
-        plots[index]={
-            title=titleplot,
-            generate=generateplot,
-            section=indexplot
-        }
-    end
-
-    task.spawn(function()
-        while wait(.5) do
-            for i,v in pairs(GetMyBase().AnimalPodiums:GetChildren()) do
-
-                plots[tonumber(v.Name)].title:Set("Pet: "..(v.Base.Spawn:FindFirstChild("Attachment") and v.Base.Spawn.Attachment.AnimalOverhead.DisplayName.Text or "Empty"))
-                plots[tonumber(v.Name)].generate:Set("Generation: "..(v.Base.Spawn:FindFirstChild("Attachment") and v.Base.Spawn.Attachment.AnimalOverhead.Generation.Text or "Empty"))
+    humanoid.StateChanged:Connect(function(_, newState)
+        if getgenv().Config.AntiFall then 
+            if newState == Enum.HumanoidStateType.Freefall then
+                bodyVelocity.MaxForce = Vector3.new(0, 5000, 0) 
+                bodyVelocity.Velocity = Vector3.new(0, -30, 0) 
+            elseif newState == Enum.HumanoidStateType.Landed then
+                bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
             end
         end
     end)
-
 end
 
-local OthersTab=Sawhub:CreatePage({title="Others"})
-local ServerTab=OthersTab:CreateSection({title="Servers"})
-ServerTab:CreateButton({title="Join Private Server",callback=function()
-    local accessCode, _ = GenerateReservedServerCode(game.PlaceId)
-    game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(game.PlaceId, "", accessCode)
-	wait(10)
-	queue_on_teleport([[
-		local md5 = {}
-local hmac = {}
-local base64 = {}
 
-do
-	do
-		local T = {
-			0xd76aa478,
-			0xe8c7b756,
-			0x242070db,
-			0xc1bdceee,
-			0xf57c0faf,
-			0x4787c62a,
-			0xa8304613,
-			0xfd469501,
-			0x698098d8,
-			0x8b44f7af,
-			0xffff5bb1,
-			0x895cd7be,
-			0x6b901122,
-			0xfd987193,
-			0xa679438e,
-			0x49b40821,
-			0xf61e2562,
-			0xc040b340,
-			0x265e5a51,
-			0xe9b6c7aa,
-			0xd62f105d,
-			0x02441453,
-			0xd8a1e681,
-			0xe7d3fbc8,
-			0x21e1cde6,
-			0xc33707d6,
-			0xf4d50d87,
-			0x455a14ed,
-			0xa9e3e905,
-			0xfcefa3f8,
-			0x676f02d9,
-			0x8d2a4c8a,
-			0xfffa3942,
-			0x8771f681,
-			0x6d9d6122,
-			0xfde5380c,
-			0xa4beea44,
-			0x4bdecfa9,
-			0xf6bb4b60,
-			0xbebfbc70,
-			0x289b7ec6,
-			0xeaa127fa,
-			0xd4ef3085,
-			0x04881d05,
-			0xd9d4d039,
-			0xe6db99e5,
-			0x1fa27cf8,
-			0xc4ac5665,
-			0xf4292244,
-			0x432aff97,
-			0xab9423a7,
-			0xfc93a039,
-			0x655b59c3,
-			0x8f0ccc92,
-			0xffeff47d,
-			0x85845dd1,
-			0x6fa87e4f,
-			0xfe2ce6e0,
-			0xa3014314,
-			0x4e0811a1,
-			0xf7537e82,
-			0xbd3af235,
-			0x2ad7d2bb,
-			0xeb86d391,
-		}
-
-		local function add(a, b)
-			local lsw = bit32.band(a, 0xFFFF) + bit32.band(b, 0xFFFF)
-			local msw = bit32.rshift(a, 16) + bit32.rshift(b, 16) + bit32.rshift(lsw, 16)
-			return bit32.bor(bit32.lshift(msw, 16), bit32.band(lsw, 0xFFFF))
-		end
-
-		local function rol(x, n)
-			return bit32.bor(bit32.lshift(x, n), bit32.rshift(x, 32 - n))
-		end
-
-		local function F(x, y, z)
-			return bit32.bor(bit32.band(x, y), bit32.band(bit32.bnot(x), z))
-		end
-		local function G(x, y, z)
-			return bit32.bor(bit32.band(x, z), bit32.band(y, bit32.bnot(z)))
-		end
-		local function H(x, y, z)
-			return bit32.bxor(x, bit32.bxor(y, z))
-		end
-		local function I(x, y, z)
-			return bit32.bxor(y, bit32.bor(x, bit32.bnot(z)))
-		end
-
-		function md5.sum(message)
-			local a, b, c, d = 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476
-
-			local message_len = #message
-			local padded_message = message .. "\128"
-			while #padded_message % 64 ~= 56 do
-				padded_message = padded_message .. "\0"
-			end
-
-			local len_bytes = ""
-			local len_bits = message_len * 8
-			for i = 0, 7 do
-				len_bytes = len_bytes .. string.char(bit32.band(bit32.rshift(len_bits, i * 8), 0xFF))
-			end
-			padded_message = padded_message .. len_bytes
-
-			for i = 1, #padded_message, 64 do
-				local chunk = padded_message:sub(i, i + 63)
-				local X = {}
-				for j = 0, 15 do
-					local b1, b2, b3, b4 = chunk:byte(j * 4 + 1, j * 4 + 4)
-					X[j] = bit32.bor(b1, bit32.lshift(b2, 8), bit32.lshift(b3, 16), bit32.lshift(b4, 24))
-				end
-
-				local aa, bb, cc, dd = a, b, c, d
-
-				local s = { 7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21 }
-
-				for j = 0, 63 do
-					local f, k, shift_index
-					if j < 16 then
-						f = F(b, c, d)
-						k = j
-						shift_index = j % 4
-					elseif j < 32 then
-						f = G(b, c, d)
-						k = (1 + 5 * j) % 16
-						shift_index = 4 + (j % 4)
-					elseif j < 48 then
-						f = H(b, c, d)
-						k = (5 + 3 * j) % 16
-						shift_index = 8 + (j % 4)
-					else
-						f = I(b, c, d)
-						k = (7 * j) % 16
-						shift_index = 12 + (j % 4)
-					end
-
-					local temp = add(a, f)
-					temp = add(temp, X[k])
-					temp = add(temp, T[j + 1])
-					temp = rol(temp, s[shift_index + 1])
-
-					local new_b = add(b, temp)
-					a, b, c, d = d, new_b, b, c
-				end
-
-				a = add(a, aa)
-				b = add(b, bb)
-				c = add(c, cc)
-				d = add(d, dd)
-			end
-
-			local function to_le_hex(n)
-				local s = ""
-				for i = 0, 3 do
-					s = s .. string.char(bit32.band(bit32.rshift(n, i * 8), 0xFF))
-				end
-				return s
-			end
-
-			return to_le_hex(a) .. to_le_hex(b) .. to_le_hex(c) .. to_le_hex(d)
-		end
-	end
-
-	do
-		function hmac.new(key, msg, hash_func)
-			if #key > 64 then
-				key = hash_func(key)
-			end
-
-			local o_key_pad = ""
-			local i_key_pad = ""
-			for i = 1, 64 do
-				local byte = (i <= #key and string.byte(key, i)) or 0
-				o_key_pad = o_key_pad .. string.char(bit32.bxor(byte, 0x5C))
-				i_key_pad = i_key_pad .. string.char(bit32.bxor(byte, 0x36))
-			end
-
-			return hash_func(o_key_pad .. hash_func(i_key_pad .. msg))
-		end
-	end
-
-	do
-		local b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-
-		function base64.encode(data)
-			return (
-				(data:gsub(".", function(x)
-					local r, b_val = "", x:byte()
-					for i = 8, 1, -1 do
-						r = r .. (b_val % 2 ^ i - b_val % 2 ^ (i - 1) > 0 and "1" or "0")
-					end
-					return r
-				end) .. "0000"):gsub("%d%d%d?%d?%d?%d?", function(x)
-					if #x < 6 then
-						return ""
-					end
-					local c = 0
-					for i = 1, 6 do
-						c = c + (x:sub(i, i) == "1" and 2 ^ (6 - i) or 0)
-					end
-					return b:sub(c + 1, c + 1)
-				end) .. ({ "", "==", "=" })[#data % 3 + 1]
-			)
-		end
-	end
+if player.Character then
+    setupAntiFall(player.Character)
 end
 
-local function GenerateReservedServerCode(placeId)
-	local uuid = {}
-	for i = 1, 16 do
-		uuid[i] = math.random(0, 255)
-	end
 
-	uuid[7] = bit32.bor(bit32.band(uuid[7], 0x0F), 0x40) -- v4
-	uuid[9] = bit32.bor(bit32.band(uuid[9], 0x3F), 0x80) -- RFC 4122
+player.CharacterAdded:Connect(setupAntiFall)
 
-	local firstBytes = ""
-	for i = 1, 16 do
-		firstBytes = firstBytes .. string.char(uuid[i])
-	end
-
-	local gameCode =
-		string.format("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x", table.unpack(uuid))
-
-	local placeIdBytes = ""
-	local pIdRec = placeId
-	for _ = 1, 8 do
-		placeIdBytes = placeIdBytes .. string.char(pIdRec % 256)
-		pIdRec = math.floor(pIdRec / 256)
-	end
-
-	local content = firstBytes .. placeIdBytes
-
-	local SUPERDUPERSECRETROBLOXKEYTHATTHEYDIDNTCHANGEEVERSINCEFOREVER = "e4Yn8ckbCJtw2sv7qmbg" -- legacy leaked key from ages ago that still works due to roblox being roblox.
-	local signature = hmac.new(SUPERDUPERSECRETROBLOXKEYTHATTHEYDIDNTCHANGEEVERSINCEFOREVER, content, md5.sum)
-
-	local accessCodeBytes = signature .. content
-
-	local accessCode = base64.encode(accessCodeBytes)
-	accessCode = accessCode:gsub("+", "-"):gsub("/", "_")
-
-	local pdding = 0
-	accessCode, _ = accessCode:gsub("=", function()
-		pdding = pdding + 1
-		return ""
-	end)
-
-	accessCode = accessCode .. tostring(pdding)
-
-	return accessCode, gameCode
+function Find2(a,b)
+    for i,v in pairs(a:GetChildren()) do
+        if string.find(v.Name,b) then
+            return v
+        end
+    end
+    return nil
 end
-		    local accessCode, _ = GenerateReservedServerCode(game.PlaceId)
-			repeat task.wait() until game:IsLoaded()
-    		game.RobloxReplicatedStorage.ContactListIrisInviteTeleport:FireServer(game.PlaceId, "", accessCode)
-	]])
-	wait()
-    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId,game.JobId, game.Players.LocalPlayer)
-end})
+
+local function normalIdToVector(normalId)
+    local vectors = {
+        [Enum.NormalId.Top] = Vector3.new(0, 1, 0),
+        [Enum.NormalId.Bottom] = Vector3.new(0, -1, 0),
+        [Enum.NormalId.Back] = Vector3.new(0, 0, 1),
+        [Enum.NormalId.Front] = Vector3.new(0, 0, -1),
+        [Enum.NormalId.Right] = Vector3.new(1, 0, 0),
+        [Enum.NormalId.Left] = Vector3.new(-1, 0, 0),
+    }
+    return vectors[normalId] or Vector3.new(0, 0, 0)
+end
+
+local Mouse=game:GetService("Players").LocalPlayer:GetMouse()
+local UIS=game:GetService("UserInputService")
+
+task.spawn(function()
+	while wait() do
+		if getgenv().Config.FastBreak then
+			if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+				if game:GetService("Players").LocalPlayer.Character then
+					local target=Mouse.Target
+					if target and target:GetAttribute("Block") then
+						local newpos = Vector3.new(math.round(target.Position.X/3),math.round(target.Position.Y/3),math.round(target.Position.Z/3))
+						local args = {
+							[1] = {
+								["blockRef"] = {
+									["blockPosition"] = newpos
+								},
+								["hitPosition"] = Mouse.Hit.Position,
+								["hitNormal"] = normalIdToVector(Mouse.TargetSurface)
+							}
+						}
+
+						game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@easy-games"):WaitForChild("block-engine"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("DamageBlock"):InvokeServer(unpack(args))
+					end
+				end
+			end
+		end
+	end
+end)
+
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if getgenv().Config.HighlightPlayers then
+            for _, v in ipairs(game:GetService("Players"):GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and v.Character then
+                    local char = v.Character
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    local hrp = char:FindFirstChild("HumanoidRootPart")
+
+                    local isEnemy = (v.Team ~= game.Players.LocalPlayer.Team)
+                    if hrp and hum and hum.Health > 0 and isEnemy then
+                        if not char:FindFirstChild("EspHl") then
+                            local hl = Instance.new("Highlight")
+                            hl.Name = "EspHl"
+                            hl.Parent = char
+                            hl.FillTransparency = 0.5 
+                            hl.OutlineTransparency = 0
+                            hl.FillColor = (v.Team and v.Team.TeamColor.Color) or Color3.new(1, 0, 0)
+                            hl.Adornee = char
+                        end
+                    end
+                end
+            end
+        else
+            for _, v in ipairs(game:GetService("Players"):GetPlayers()) do
+                if v.Character and v.Character:FindFirstChild("EspHl") then
+                    v.Character.EspHl:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait() do
+        if getgenv().Config.AutoCollect then
+            for i,v in pairs(workspace.ItemDrops:GetChildren()) do
+                if game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and (v.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 30 then
+                local args = {
+						[1] = {
+							["itemDrop"] = v
+						}
+					}
+
+					game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("PickupItemDrop"):InvokeServer(unpack(args))
+                end
+            end
+        end
+
+    end 
+end)
+
+
+task.spawn(function()
+    while task.wait() do
+        if getgenv().Config.AutoAttack then
+            for i,v in pairs(game:GetService("Players"):GetChildren()) do
+                if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Team ~= game:GetService("Players").LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Name ~= game:GetService("Players").LocalPlayer.Name then
+                    local sw=Find2(game:GetService("ReplicatedStorage").Inventories[plr.Name],"sword")
+                    if sw and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 30 then
+                        local args = {
+                            [1] = {
+                                ["chargedAttack"] = {
+                                ["chargeRatio"] = 0
+                            },
+                            ["entityInstance"] = v.Character,
+                            ["validate"] = {
+                                ["targetPosition"] = {
+                                    ["value"] = v.Character.HumanoidRootPart.Position
+                                },
+                                ["raycast"] = {
+                                    ["cameraPosition"] = {
+                                        ["value"] = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+                                    },
+                                    ["cursorDirection"] = {
+                                        ["value"] = (v.Character.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).unit
+                                    }
+                                },
+                                ["selfPosition"] = {
+                                    ["value"] = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+                                }
+                            },
+                            ["weapon"] = sw
+                        }
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("SwordHit"):FireServer(unpack(args))
+                end
+            end
+        end 
+    end
+    end
+end)
+
+
+function RayCast(origin, direction)
+    local ignored = {game:GetService("Players").LocalPlayer.Character,workspace:FindFirstChild("AntiVVV")}
+    local raycastParameters = RaycastParams.new()
+    raycastParameters.FilterDescendantsInstances = ignored
+    raycastParameters.FilterType = Enum.RaycastFilterType.Exclude
+    raycastParameters.IgnoreWater = true
+    
+    return workspace:Raycast(origin, direction, raycastParameters)
+end
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+local inventories = ReplicatedStorage:WaitForChild("Inventories")
+
+local placeBlockRemote = ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@easy-games"):WaitForChild("block-engine"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("PlaceBlock")
+
+local function placeBlock(gridPos, blockType)
+    local args = {
+        [1] = {
+            ["position"] = gridPos,
+            ["blockType"] = blockType,
+            ["blockData"] = 0,
+            ["mouseBlockInfo"] = {
+                ["placementPosition"] = gridPos
+            }
+        }
+    }
+    placeBlockRemote:InvokeServer(unpack(args))
+end
+
+task.spawn(function()
+    while task.wait() do
+        if not getgenv().Config.AutoBlock then continue end
+
+        local character = player.Character
+        if not character or not character:FindFirstChild("HumanoidRootPart") or not player.Team then continue end
+
+        local blockType = "wool_" .. string.lower(player.Team.Name)
+        local inventory = inventories:FindFirstChild(player.Name)
+
+        if inventory and inventory:FindFirstChild(blockType) then
+            local hrp = character.HumanoidRootPart
+            local velocity = hrp.AssemblyLinearVelocity
+
+            if not RayCast(hrp.Position, Vector3.new(0, -3, 0)) then
+                local posX = hrp.Position.X + (velocity.X * 0.06)
+                local posZ = hrp.Position.Z + (velocity.Z * 0.06)
+                local gridPos = Vector3.new(math.round(posX / 3), math.round((hrp.Position.Y - 4.5) / 3), math.round(posZ / 3))
+                placeBlock(gridPos, blockType)
+            end
+
+            local lookDirection = velocity.Magnitude < 0.1 and hrp.CFrame.LookVector or velocity.Unit
+            for i=1,3 do
+				local checkPos = hrp.Position + (lookDirection * (i*3))
+
+                if not RayCast(checkPos, Vector3.new(0, -3, 0)) then
+                    local gridPos = Vector3.new(math.round(checkPos.X / 3), math.round((checkPos.Y - 4.5) / 3), math.round(checkPos.Z / 3))
+                    placeBlock(gridPos, blockType)
+                end
+			end
+        end
+    end
+end)
