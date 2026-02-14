@@ -2083,7 +2083,7 @@ function load()
 		makefolder("Sawhub")
 	end
 	if isfile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json") == false then
-		writefile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json", game:GetService("HttpService"):JSONEncode(SaveSettings))
+		writefile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json", game:GetService("HttpService"):JSONEncode(getgenv().Config))
 	else
 		local Decode = game:GetService("HttpService"):JSONDecode(readfile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json"))
 		for i,v in pairs(Decode) do
