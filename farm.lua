@@ -2072,108 +2072,112 @@ if not getgenv().Config then
 	getgenv().Config={}
 end
 
-
 local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
-local HomeTab=Sawhub:CreatePage({title="Home"})
 
-local VoidSec=HomeTab:CreateSection({title="Void"})
-VoidSec:CreateButton({title="Get Y",callback=function()
-	local y = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Y or 999
-	Sawhub:Notify("Y: "..y)
-end})
+local CombatTab=Sawhub:CreatePage({title="Combat"})
+local OffenseSec=CombatTab:CreateSection({title="Offense"})
+local DefenseSec=CombatTab:CreateSection({title="Defense"})
 
-VoidSec:CreateTextbox({title="Set Y",default=getgenv().Config.SetY,callback=function(v)
-	getgenv().Config.SetY=v
+local PlayerTab=Sawhub:CreatePage({title="Player"})
+local MovementSec=PlayerTab:CreateSection({title="Movement"})
+local SafetySec=PlayerTab:CreateSection({title="Safety"})
 
-end})
-
- VoidSec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,callback=function(v)
-	getgenv().Config.AntiVoid=v
-	task.spawn(function()
-		if getgenv().Config.AntiVoid then
-			local part = Instance.new("Part")
-
-				part.Name="AntiVVV"
-				part.Size=Vector3.new(2024,5,2024)
-				part.Anchored=true
-				part.Position = Vector3.new(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.X,game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Y-10,game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Z)
-				part.Parent=workspace
-			
-		else
-			local part = workspace:FindFirstChild("AntiVVV")
-			if part then
-				part:Destroy()
-			end
-		end
-	end)
-end})
-
-local BlockSec=HomeTab:CreateSection({title="Block"})
-BlockSec:CreateToggle({title="Fast Break",default=getgenv().Config.FastBreak,callback=function(v)
-	getgenv().Config.FastBreak=v
-end})
-local autoblock = BlockSec:CreateToggle({title="Auto Block",default=getgenv().Config.AutoBlock,callback=function(v)
-	getgenv().Config.AutoBlock=v
-end})
-
-local Defense=HomeTab:CreateSection({title="Defense"})
-
-Defense:CreateToggle({title="Boost Speed Jump",default=getgenv().Config.BoostSpeed,callback=function(v)
-	getgenv().Config.BoostSpeed=v
-	task.spawn(function()
-		while wait() and getgenv().Config.BoostSpeed do
-			pcall(function()
-				game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = 20
-				game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = 400
-				game:GetService("Players").LocalPlayer.Character.Humanoid.JumpHeight = 40
-			end)
-		end
-	end)
-	
-end})
-
-Defense:CreateToggle({title="Auto Collect",default=getgenv().Config.AutoCollect,callback=function(v)
-	getgenv().Config.AutoCollect=v
-	
-end})
-
-
-Defense:CreateToggle({title="Auto Attack",default=getgenv().Config.AutoAttack,callback=function(v)
-	getgenv().Config.AutoAttack=v
-
-end})
-
-Defense:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,callback=function(v)
-	getgenv().Config.AntiFall=v
-end})
+local UtilityTab=Sawhub:CreatePage({title="Utility"})
+local BlockSec=UtilityTab:CreateSection({title="Block"})
+local MiscSec=UtilityTab:CreateSection({title="Misc"})
 
 local VisualTab=Sawhub:CreatePage({title="Visual"})
 local EspSec=VisualTab:CreateSection({title="Esp"})
 
+OffenseSec:CreateToggle({title="Auto Attack",default=getgenv().Config.AutoAttack,callback=function(v)
+    getgenv().Config.AutoAttack=v
+end})
+
+DefenseSec:CreateToggle({title="Anti Knockback",default=getgenv().Config.AntiKnockback,callback=function(v)
+    getgenv().Config.AntiKnockback=v
+end})
+
+MovementSec:CreateToggle({title="Boost Speed Jump",default=getgenv().Config.BoostSpeed,callback=function(v)
+    getgenv().Config.BoostSpeed=v
+    task.spawn(function()
+        while wait() and getgenv().Config.BoostSpeed do
+            pcall(function()
+                game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = 20
+                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = 400
+                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpHeight = 40
+            end)
+        end
+    end)
+end})
+
+SafetySec:CreateButton({title="Get Y",callback=function()
+    local y = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Y or 999
+    Sawhub:Notify("Y: "..y)
+end})
+
+SafetySec:CreateTextbox({title="Set Y",default=getgenv().Config.SetY,callback=function(v)
+    getgenv().Config.SetY=v
+end})
+
+SafetySec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,callback=function(v)
+    getgenv().Config.AntiVoid=v
+    task.spawn(function()
+        if getgenv().Config.AntiVoid then
+            local part = Instance.new("Part")
+            part.Name="AntiVVV"
+            part.Size=Vector3.new(2024,5,2024)
+            part.Anchored=true
+            part.Position = Vector3.new(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.X,game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Y-10,game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Z)
+            part.Parent=workspace
+        else
+            local part = workspace:FindFirstChild("AntiVVV")
+            if part then
+                part:Destroy()
+            end
+        end
+    end)
+end})
+
+SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,callback=function(v)
+    getgenv().Config.AntiFall=v
+end})
+
+BlockSec:CreateToggle({title="Fast Break",default=getgenv().Config.FastBreak,callback=function(v)
+    getgenv().Config.FastBreak=v
+end})
+
+BlockSec:CreateToggle({title="Auto Block",default=getgenv().Config.AutoBlock,callback=function(v)
+    getgenv().Config.AutoBlock=v
+end})
+
+MiscSec:CreateToggle({title="Auto Collect",default=getgenv().Config.AutoCollect,callback=function(v)
+    getgenv().Config.AutoCollect=v
+end})
+
 EspSec:CreateToggle({title="Highlight Players",default=getgenv().Config.HighlightPlayers,callback=function(v)
-	getgenv().Config.HighlightPlayers=v
+    getgenv().Config.HighlightPlayers=v
 end})
 
 EspSec:CreateToggle({title="Esp Bee",default=getgenv().Config.EspBee,callback=function(v)
-	getgenv().Config.EspBee=v
-	task.spawn(function()
-		while wait() and getgenv().Config.EspBee do
-			pcall(function()
-				for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
-					if v.Name=="Bee" and not v:FindFirstChild("EspHl") then
-						local hl = Instance.new("Highlight")
-						hl.Name = "EspHl"
-						hl.Parent = v
-						hl.FillColor = Color3.new(1, 0, 0)
-						hl.Adornee = v
-						if v:FindFirstChild("Root") and v.Root:FindFirstChild("ProximityPrompt") then
-							v.Root.ProximityPrompt.MaxActivationDistance = 100
-						end
-					end
-				end
-			end)
-		end
-	end)
+    getgenv().Config.EspBee=v
+    task.spawn(function()
+        while wait() and getgenv().Config.EspBee do
+            pcall(function()
+                for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
+                    if v.Name=="Bee" and not v:FindFirstChild("EspHl") then
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "EspHl"
+                        hl.Parent = v
+                        hl.FillColor = Color3.new(1, 0, 0)
+                        hl.Adornee = v
+                        if v:FindFirstChild("Root") and v.Root:FindFirstChild("ProximityPrompt") then
+                            v.Root.ProximityPrompt.MaxActivationDistance = 100
+                        end
+                    end
+                end
+            end)
+        end
+    end)
 end})
 
 game:GetService("UserInputService").InputBegan:Connect(function(input)
@@ -2214,6 +2218,24 @@ end
 
 
 player.CharacterAdded:Connect(setupAntiFall)
+
+
+local mt = getrawmetatable(game)
+local oldIndex = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = newcclosure(function(self, ...)
+    local args = {...}
+    local method = getnamecallmethod()
+    
+    if tostring(method) == "ApplyImpulse" and self.Parent == game.Players.LocalPlayer.Character and getgenv().Config.AntiKnockback then
+        return nil 
+    end
+    
+    return oldIndex(self, unpack(args))
+end)
+setreadonly(mt, true)
+
 
 function Find2(a,b)
     for i,v in pairs(a:GetChildren()) do
