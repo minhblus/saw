@@ -2069,8 +2069,65 @@ function SawUI:CreateWindow(windowconfig)
 end
 
 if not getgenv().Config then
-	getgenv().Config={}
+	getgenv().Config={
+		AutoAttack=false,
+		AntiKnockback=false,
+		BoostSpeed=false,
+		FastBreak=false,
+		AutoBlock=false,
+	}
 end
+
+function load()
+	if isfolder("Sawhub") == false then
+		makefolder("Sawhub")
+	end
+	if isfile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json") == false then
+		writefile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json", game:GetService("HttpService"):JSONEncode(SaveSettings))
+	else
+		local Decode = game:GetService("HttpService"):JSONDecode(readfile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json"))
+		for i,v in pairs(Decode) do
+			getgenv().Config[i] = v
+		end
+	end
+end
+
+function Save()
+	writefile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json", game:GetService("HttpService"):JSONEncode(getgenv().Config))
+end
+
+load()
+
+local function getOrCreateAttachment(part)
+	local att = part:FindFirstChild("BeamAttachment")
+	if not att then
+		att = Instance.new("Attachment")
+		att.Name = "BeamAttachment"
+		att.Parent = part
+	end
+	return att
+end
+
+local function createBeam(player1, player2)
+	local hrp1 = player1.Character and player1.Character:FindFirstChild("HumanoidRootPart")
+	local hrp2 = player2.Character and player2.Character:FindFirstChild("HumanoidRootPart")
+
+	if not hrp1 or not hrp2 then return end
+
+	local att1 = getOrCreateAttachment(hrp1)
+	local att2 = getOrCreateAttachment(hrp2)
+
+	local beam = Instance.new("Beam")
+	beam.Attachment0 = att1
+	beam.Attachment1 = att2
+	beam.Width0 = 0.1
+	beam.Width1 = 0.1
+	beam.Color = ColorSequence.new(player2.Team and player2.Team.TeamColor.Color or Color3.fromRGB(0, 255, 255))
+	beam.Transparency = NumberSequence.new(0)
+	beam.FaceCamera = true
+	beam.Parent = hrp1
+end
+
 
 local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 
@@ -2089,6 +2146,9 @@ local MiscSec=UtilityTab:CreateSection({title="Misc"})
 local VisualTab=Sawhub:CreatePage({title="Visual"})
 local EspSec=VisualTab:CreateSection({title="Esp"})
 
+local Config = Sawhub:CreatePage({title="Config"})
+local ConfigSec=Config:CreateSection({title="Config"})
+
 OffenseSec:CreateToggle({title="Auto Attack",default=getgenv().Config.AutoAttack,callback=function(v)
     getgenv().Config.AutoAttack=v
 end})
@@ -2097,26 +2157,25 @@ DefenseSec:CreateToggle({title="Anti Knockback",default=getgenv().Config.AntiKno
     getgenv().Config.AntiKnockback=v
 end})
 
+MovementSec:CreateSlider({title="Speed",Min=16,Max=50,Precise=20,default=getgenv().Config.Speed,callback=function(v)
+    getgenv().Config.Speed=v
+end})
+
+MovementSec:CreateSlider({title="Jump Height",Min=5,Max=100,Precise=30,default=getgenv().Config.JumpHeight,callback=function(v)
+    getgenv().Config.JumpHeight=v
+end})
+
 MovementSec:CreateToggle({title="Boost Speed Jump",default=getgenv().Config.BoostSpeed,callback=function(v)
     getgenv().Config.BoostSpeed=v
     task.spawn(function()
         while wait() and getgenv().Config.BoostSpeed do
             pcall(function()
-                game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = 20
-                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = 400
-                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpHeight = 40
+                game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = getgenv().Config.Speed
+                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = getgenv().Config.JumpHeight * 10
+                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpHeight = getgenv().Config.JumpHeight
             end)
         end
     end)
-end})
-
-SafetySec:CreateButton({title="Get Y",callback=function()
-    local y = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Y or 999
-    Sawhub:Notify("Y: "..y)
-end})
-
-SafetySec:CreateTextbox({title="Set Y",default=getgenv().Config.SetY,callback=function(v)
-    getgenv().Config.SetY=v
 end})
 
 SafetySec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,callback=function(v)
@@ -2158,6 +2217,39 @@ EspSec:CreateToggle({title="Highlight Players",default=getgenv().Config.Highligh
     getgenv().Config.HighlightPlayers=v
 end})
 
+local function clearBeams()
+	for k,c in pairs(game.Players:GetPlayers()) do
+		if c.Character then 
+			for huhu,char in pairs(c.Character:GetDescendants()) do
+				if char:IsA("Beam") then
+					char:Destroy()
+				end
+			end
+		end
+	end
+end
+
+EspSec:CreateToggle({
+	title="Tracker",
+	default=getgenv().Config.Tracker,
+	callback=function(v)
+		getgenv().Config.Tracker=v
+		task.spawn(function()
+			local myPlayer = game:GetService("Players").LocalPlayer
+			while getgenv().Config.Tracker do
+				for _, otherPlayer in ipairs(game:GetService("Players"):GetPlayers()) do
+					if otherPlayer ~= myPlayer and otherPlayer.TeamColor ~= myPlayer.TeamColor then
+						createBeam(myPlayer, otherPlayer)
+					end
+				end
+				task.wait(1)
+			end
+			clearBeams()
+		end)
+
+	end
+})
+
 EspSec:CreateToggle({title="Esp Bee",default=getgenv().Config.EspBee,callback=function(v)
     getgenv().Config.EspBee=v
     task.spawn(function()
@@ -2180,6 +2272,9 @@ EspSec:CreateToggle({title="Esp Bee",default=getgenv().Config.EspBee,callback=fu
     end)
 end})
 
+ConfigSec:CreateButton({title="Save Config",callback=Save})
+
+
 game:GetService("UserInputService").InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.Q then
 		getgenv().Config.AutoBlock=not getgenv().Config.AutoBlock
@@ -2193,7 +2288,6 @@ local function setupAntiFall(character)
     local hrp = character:WaitForChild("HumanoidRootPart")
     local humanoid = character:WaitForChild("Humanoid")
 
-    -- Tạo lực nâng ảo
     local bodyVelocity = Instance.new("BodyVelocity")
     bodyVelocity.MaxForce = Vector3.new(0, 0, 0) 
     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
@@ -2294,11 +2388,9 @@ task.spawn(function()
             for _, v in ipairs(game:GetService("Players"):GetPlayers()) do
                 if v ~= game.Players.LocalPlayer and v.Character then
                     local char = v.Character
-                    local hum = char:FindFirstChildOfClass("Humanoid")
-                    local hrp = char:FindFirstChild("HumanoidRootPart")
-
+					
                     local isEnemy = (v.Team ~= game.Players.LocalPlayer.Team)
-                    if hrp and hum and hum.Health > 0 and isEnemy then
+                    if isEnemy then
                         if not char:FindFirstChild("EspHl") then
                             local hl = Instance.new("Highlight")
                             hl.Name = "EspHl"
@@ -2306,7 +2398,6 @@ task.spawn(function()
                             hl.FillTransparency = 0.5 
                             hl.OutlineTransparency = 0
                             hl.FillColor = (v.Team and v.Team.TeamColor.Color) or Color3.new(1, 0, 0)
-                            hl.Adornee = char
                         end
                     end
                 end
@@ -2342,7 +2433,7 @@ end)
 
 
 task.spawn(function()
-    while task.wait() do
+    game:GetService("RunService").RenderStepped:Connect(function()
         if getgenv().Config.AutoAttack then
             for i,v in pairs(game:GetService("Players"):GetChildren()) do
                 if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Team ~= game:GetService("Players").LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Name ~= game:GetService("Players").LocalPlayer.Name then
@@ -2378,8 +2469,8 @@ task.spawn(function()
                 end
             end
         end 
-    end
-    end
+	end
+    end)
 end)
 
 
@@ -2415,11 +2506,11 @@ local function placeBlock(gridPos, blockType)
 end
 
 task.spawn(function()
-    while task.wait() do
-        if not getgenv().Config.AutoBlock then continue end
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if not getgenv().Config.AutoBlock then return end
 
         local character = player.Character
-        if not character or not character:FindFirstChild("HumanoidRootPart") or not player.Team then continue end
+        if not character or not character:FindFirstChild("HumanoidRootPart") or not player.Team then return end
 
         local blockType = "wool_" .. string.lower(player.Team.Name)
         local inventory = inventories:FindFirstChild(player.Name)
@@ -2445,5 +2536,5 @@ task.spawn(function()
                 end
 			end
         end
-    end
+    end)
 end)
