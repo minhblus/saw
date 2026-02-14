@@ -2146,7 +2146,7 @@ BlockSec:CreateToggle({title="Fast Break",default=getgenv().Config.FastBreak,cal
     getgenv().Config.FastBreak=v
 end})
 
-BlockSec:CreateToggle({title="Auto Block",default=getgenv().Config.AutoBlock,callback=function(v)
+local autoblock = BlockSec:CreateToggle({title="Auto Block",default=getgenv().Config.AutoBlock,callback=function(v)
     getgenv().Config.AutoBlock=v
 end})
 
