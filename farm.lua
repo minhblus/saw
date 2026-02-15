@@ -2772,6 +2772,7 @@ GroundRay.FilterType = Enum.RaycastFilterType.Include
 GroundRay.FilterDescendantsInstances = {workspace:WaitForChild("Map")}
 function firebow(pos2)
     local Pos=game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+	print(GetTools())
     for i,v in pairs(GetTools()) do
 
 		if game:GetService("Players").LocalPlayer.Character:FindFirstChild(v.Item.tool.Name) then
@@ -2796,13 +2797,18 @@ function firebow(pos2)
 end
 
 task.spawn(function()
-	while wait(.3) and getgenv().Config.AutoBow do
-		if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-			local closestPlr = getClosestToMouse()
-			if  closestPlr then
-				pcall(function()
-					firebow(closestPlr.Character)
-				end)
+	while wait(.3) do
+		if getgenv().Config.AutoBow then
+			if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+				local closestPlr = getClosestToMouse()
+				if  closestPlr then
+					local suc,err = pcall(function()
+						firebow(closestPlr.Character)
+					end)
+					if not suc then
+						warn(err)
+					end
+				end
 			end
 		end
 	end
