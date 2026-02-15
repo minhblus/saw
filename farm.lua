@@ -2528,6 +2528,11 @@ ConfigSec:CreateButton({title="Save Config",callback=Save})
 game:GetService("UserInputService").InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.Q then
 		getgenv().Config.AutoBlock=not getgenv().Config.AutoBlock
+		if getgenv().Config.AutoBlock then
+			Sawhub:Notify("Auto Block:".."Enabled",{color=Theme.Success})
+		else
+			Sawhub:Notify("Auto Block:".."Disabled",{color=Theme.Error})
+		end
 		autoblock:Set(getgenv().Config.AutoBlock)
 	end
 end)
@@ -2768,7 +2773,7 @@ GroundRay.FilterDescendantsInstances = {workspace:WaitForChild("Map")}
 function firebow(pos2)
     local Pos=game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
     for i,v in pairs(GetTools()) do
-		print(v.Item.tool.Name)
+
 		if game:GetService("Players").LocalPlayer.Character:FindFirstChild(v.Item.tool.Name) then
     
 			local ProjData = GameData.Modules.ProjMeta[v.Proj]
@@ -2794,8 +2799,10 @@ task.spawn(function()
 	while wait(.3) and getgenv().Config.AutoBow do
 		if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
 			local closestPlr = getClosestToMouse()
-			if  closestPlr and closestPlr.Character:FindFirstChild("HumanoidRootPart") and closestPlr.Character:FindFirstChild("Humanoid") and closestPlr.Character.Humanoid.Health > 0 then
-				firebow(closestPlr.Character)
+			if  closestPlr then
+				pcall(function()
+					firebow(closestPlr.Character)
+				end)
 			end
 		end
 	end
