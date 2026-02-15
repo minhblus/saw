@@ -234,11 +234,8 @@ function Boostfps1()
 			if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then 
 				v.Material = "SmoothPlastic"
 
-				v.Reflectance = 0
-			elseif v:IsA("Sound") then
-				v.Volume = 0
 			elseif v:IsA("Decal") or v:IsA("Texture") then
-				v.Transparency = 1
+				v:Destroy()
 			elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
 				v.Lifetime = NumberRange.new(0)
 			elseif v:IsA("Explosion") then
@@ -247,19 +244,7 @@ function Boostfps1()
 			elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
 				v.Enabled = false
 			elseif v:IsA("MeshPart") then
-				v.Material = "Plastic"
-				v.Transparency=1
-				v.Reflectance = 0
-				v.TextureID = 10385902758728957
-				if v:IsA("SpecialMesh") then
-					v:Destroy()
-				end
-			elseif v:IsA("SpecialMesh") then
-				v:Destroy()
-			elseif v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-				v:Destroy()
-			elseif v:IsA("Animation") or v:IsA("Animator") then
-				v:Destroy()
+				v.Material = "SmoothPlastic"
 			end
 		end
 		for i, e in pairs(l:GetChildren()) do
@@ -2078,6 +2063,172 @@ if not getgenv().Config then
 	}
 end
 
+local canDebug = getgenv().canDebug or false	
+local replicatedStorage=game:GetService("ReplicatedStorage")
+local KnitInit, Knit
+repeat
+	KnitInit, Knit = pcall(function()
+		return require(replicatedStorage.rbxts_include.node_modules['@easy-games'].knit.src).KnitClient
+	end)
+	if KnitInit then break end
+	task.wait()
+until KnitInit
+
+if canDebug and not debug.getupvalue(Knit.Start, 1) then
+	task.wait(1)
+	repeat task.wait() until debug.getupvalue(Knit.Start, 1)
+end
+
+local Flamework = require(replicatedStorage['rbxts_include']['node_modules']['@flamework'].core.out).Flamework
+local InventoryUtil = require(replicatedStorage.TS.inventory['inventory-util']).InventoryUtil
+local Client = require(replicatedStorage.TS.remotes).default.Client
+local OldGet, OldBreak = Client.Get, nil
+
+bedwars = setmetatable({
+	Flamework = Flamework,
+	NotificationController = Flamework.resolveDependency('@easy-games/game-core:client/controllers/notification-controller@NotificationController'),
+	AbilityController = Flamework.resolveDependency('@easy-games/game-core:client/controllers/ability/ability-controller@AbilityController'),
+	AnimationType = require(replicatedStorage.TS.animation['animation-type']).AnimationType,
+	AnimationUtil = require(replicatedStorage['rbxts_include']['node_modules']['@easy-games']['game-core'].out['shared'].util['animation-util']).AnimationUtil,
+	AppController = require(replicatedStorage['rbxts_include']['node_modules']['@easy-games']['game-core'].out.client.controllers['app-controller']).AppController,
+	BedBreakEffectMeta = require(replicatedStorage.TS.locker['bed-break-effect']['bed-break-effect-meta']).BedBreakEffectMeta,
+	TaliyahUtil = require(replicatedStorage.TS.games.bedwars.kit.kits.taliyah['taliyah-util']).TaliyahUtil,
+	BedwarsKitMeta = require(replicatedStorage.TS.games.bedwars.kit['bedwars-kit-meta']).BedwarsKitMeta,
+	BedwarsKitClass = require(replicatedStorage.TS.games.bedwars.kit.class['bedwars-class']).BedwarsClass,
+
+	BlockController = require(replicatedStorage['rbxts_include']['node_modules']['@easy-games']['block-engine'].out).BlockEngine,
+	
+	BowConstantsTable = canDebug and debug.getupvalue(Knit.Controllers.ProjectileController.enableBeam, 8) or {
+		RelZ = 0,
+		CameraMultiplier = 10,
+		RelX = 0.8,
+		RelY = -0.6,
+		YTargetOffset = 0.05,
+		BeamGrowthMultiplier = 0.08
+	},
+	ClickHold = require(replicatedStorage['rbxts_include']['node_modules']['@easy-games']['game-core'].out.client.ui.lib.util['click-hold']).ClickHold,
+	Client = Client,
+	ClientConstructor = require(replicatedStorage['rbxts_include']['node_modules']['@rbxts'].net.out.client),
+	ClientDamageBlock = require(replicatedStorage['rbxts_include']['node_modules']['@easy-games']['block-engine'].out.shared.remotes).BlockEngineRemotes.Client,
+	CombatConstant = require(replicatedStorage.TS.combat['combat-constant']).CombatConstant,
+	DamageIndicator = Knit.Controllers.DamageIndicatorController.spawnDamageIndicator,
+
+	EmoteType = require(replicatedStorage.TS.locker.emote['emote-type']).EmoteType,
+	EmoteImage = require(replicatedStorage.TS.locker.emote['emote-image']).EmoteImage,
+	EmoteMeta = require(replicatedStorage.TS.locker.emote['emote-meta']).EmoteMeta,
+	GamePlayer = require(replicatedStorage.TS.player['game-player']),
+	EffectUtil = require(replicatedStorage.TS.util.effect['effect-util']).EffectUtil,
+	GameAnimationUtil = require(replicatedStorage.TS.animation['animation-util']).GameAnimationUtil,
+	getIcon = function(item, showinv)
+		local itemmeta = bedwars.ItemMeta[item.itemType]
+		return itemmeta and showinv and itemmeta.image or ''
+	end,
+	getInventory = function(plr)
+		local suc, res = pcall(function()
+			return InventoryUtil.getInventory(plr)
+		end)
+		return suc and res or {
+			items = {},
+			armor = {}
+		}
+	end,
+
+	ItemMeta = require(replicatedStorage.TS.item['item-meta']).items,--debug.getupvalue(require(replicatedStorage.TS.item['item-meta']).getItemMeta, 1),
+	RecipeMeta = require(replicatedStorage.TS.recipe['recipe-meta']).recipes,-- debug.getupvalue(require(replicatedStorage.TS.recipe['recipe-meta']).getRecipeMeta, 1),
+	KillEffectMeta = require(replicatedStorage.TS.locker['kill-effect']['kill-effect-meta']).KillEffectMeta,
+
+	Knit = Knit,
+	KnockbackUtil = require(replicatedStorage.TS.damage['knockback-util']).KnockbackUtil,
+	KnockbackUtilInstance = replicatedStorage.TS.damage['knockback-util'],
+	NametagController = Knit.Controllers.NametagController,
+	MageKitUtil = require(replicatedStorage.TS.games.bedwars.kit.kits.mage['mage-kit-util']).MageKitUtil,
+	ProjectileMeta = require(replicatedStorage.TS.projectile['projectile-meta']).ProjectileMeta,
+
+	Roact = require(replicatedStorage['rbxts_include']['node_modules']['@rbxts']['roact'].src),
+	RuntimeLib = require(replicatedStorage['rbxts_include'].RuntimeLib),
+	SoundList = require(replicatedStorage.TS.sound['game-sound']).GameSound,
+	
+}, {
+	__index = function(self, ind)
+		rawset(self, ind, Knit.Controllers[ind])
+		return rawget(self, ind)
+	end
+})
+
+local GameData = {
+    Controllers = {
+        Balloon = Knit.Controllers.BalloonController,
+        BlockBreaker = Knit.Controllers.BlockBreakController.blockBreaker,
+        Chest = Knit.Controllers.ChestController,
+        Dao = Knit.Controllers.DaoController,
+        Place = Knit.Controllers.BlockPlacementController,
+        Queue = Knit.Controllers.QueueController,
+        SetInvItem = Knit.Controllers.SetInvItem,
+        SpiritAssasin = Knit.Controllers.SpiritAssassinController,
+        Sprint = Knit.Controllers.SprintController,
+        Sword = Knit.Controllers.SwordController,
+        TeamCrate = Knit.Controllers.TeamCrateController,
+        TeamUpgrades = Knit.Controllers.TeamUpgradeController,
+        ViewModel = Knit.Controllers.ViewmodelController,
+        Wind = Knit.Controllers.WindWalkerController
+    },
+    Modules = {
+        Animation = require(replicatedStorage.TS.animation["animation-util"]).GameAnimationUtil,
+        AnimationTypes = require(replicatedStorage.TS.animation["animation-type"]).AnimationType,
+        App = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["game-core"].out.client.controllers["app-controller"]).AppController,
+        ArmorSets = require(replicatedStorage.TS.games.bedwars["bedwars-armor-set"]),
+        BlockEngine = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["block-engine"].out).BlockEngine,
+       
+        BlockRemotes = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["block-engine"].out.shared.remotes).BlockEngineRemotes,
+        ChargeState = require(replicatedStorage.TS.combat["charge-state"]).ChargeState,
+        DamageType = require(replicatedStorage.TS.damage["damage-type"]).DamageType,
+        Inventory = require(replicatedStorage.TS.inventory["inventory-util"]).InventoryUtil,
+      
+        Network = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.lib.network),
+        PlayerUtil = require(replicatedStorage.TS.player["player-util"]).GamePlayerUtil,
+        
+        ProjMeta = require(replicatedStorage.TS.projectile['projectile-meta']).ProjectileMeta,
+        Promise = require(replicatedStorage.rbxts_include.node_modules["@easy-games"].knit.src.Knit.Util.Promise),
+        Remotes = require(replicatedStorage.TS.remotes).default.Client,
+        Shop = require(replicatedStorage.TS.games.bedwars.shop["bedwars-shop"]).BedwarsShop,
+        ShopPurchase = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.controllers.global.shop.api["purchase-item"]).shopPurchaseItem,
+        Sound = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["game-core"].out).SoundManager,
+        Store = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.ui.store).ClientStore,
+        SyncEvents = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS["client-sync-events"]).ClientSyncEvents,
+        TeamUpgradeMeta = require(replicatedStorage.TS.games.bedwars["team-upgrade"]["team-upgrade-meta"]),
+        UI = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["game-core"].out).UILayers
+    },
+    Remotes = {Set = replicatedStorage.rbxts_include.node_modules['@rbxts'].net.out._NetManaged.SetInvItem},
+    Events = {
+        Damage = Instance.new("BindableEvent"),
+        Death = Instance.new("BindableEvent")
+    },
+    GameEvents = {}
+}
+
+
+-- local projectileRemote = {InvokeServer = function() end}
+-- task.spawn(function()
+-- 	projectileRemote = bedwars.Client:Get(remotes.FireProjectile).instance
+-- end)
+
+-- local function launchProjectile(item, pos, proj, speed, dir)
+-- 	if not pos then return end
+
+-- 	pos = pos - dir * 0.1
+-- 	local shootPosition = (CFrame.lookAlong(pos, Vector3.new(0, -speed, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ)))
+-- 	switchItem(item.tool, 0)
+-- 	task.wait(0.1)
+-- 	bedwars.ProjectileController:createLocalProjectile(bedwars.ProjectileMeta[proj], proj, proj, shootPosition.Position, '', shootPosition.LookVector * speed, {drawDurationSeconds = 1})
+-- 	if projectileRemote:InvokeServer(item.tool, proj, proj, shootPosition.Position, pos, shootPosition.LookVector * speed, httpService:GenerateGUID(true), {shotId = httpService:GenerateGUID(false), drawDurationSec = 1}, workspace:GetServerTimeNow() - 0.045) then
+-- 		local shoot = bedwars.ItemMeta[item.itemType].projectileSource.launchSound
+-- 		shoot = shoot and shoot[math.random(1, #shoot)] or nil
+-- 		if shoot then
+-- 			bedwars.SoundManager:playSound(shoot)
+-- 		end
+-- 	end
+-- end
+
 function load()
 	if isfolder("Sawhub") == false then
 		makefolder("Sawhub")
@@ -2133,6 +2284,7 @@ local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 
 local CombatTab=Sawhub:CreatePage({title="Combat"})
 local OffenseSec=CombatTab:CreateSection({title="Offense"})
+local BowSec=CombatTab:CreateSection({title="Bow"})
 local DefenseSec=CombatTab:CreateSection({title="Defense"})
 
 local PlayerTab=Sawhub:CreatePage({title="Player"})
@@ -2149,19 +2301,69 @@ local EspSec=VisualTab:CreateSection({title="Esp"})
 local Config = Sawhub:CreatePage({title="Config"})
 local ConfigSec=Config:CreateSection({title="Config"})
 
+OffenseSec:CreateToggle({title="Click No Delay",default=getgenv().Config.NoClickDelay,callback=function(v)
+    getgenv().Config.NoClickDelay=v
+	if v then
+		old = bedwars.SwordController.isClickingTooFast
+		bedwars.SwordController.isClickingTooFast = function(self)
+			self.lastSwing = os.clock()
+			return false
+		end
+	else
+		bedwars.SwordController.isClickingTooFast = old
+	end
+end})
+
 OffenseSec:CreateToggle({title="Auto Attack",default=getgenv().Config.AutoAttack,callback=function(v)
     getgenv().Config.AutoAttack=v
 end})
+
+BowSec:CreateToggle({title="Auto Bow",default=getgenv().Config.AutoBow,callback=function(v)
+    getgenv().Config.AutoBow=v
+end})
+
+BowSec:CreateSlider({title="Fov",Min=1,Max=180,Precise=getgenv().Config.Fov or 180,callback=function(v)
+    getgenv().Config.Fov=v
+end})
+
+BowSec:CreateToggle({title="Show FOV",default=getgenv().Config.ShowFOV,callback=function(v)
+    getgenv().Config.ShowFOV=v
+end})
+
+
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness = 2
+FOVCircle.NumSides = 460
+FOVCircle.Filled = false
+FOVCircle.Transparency = 0.5
+FOVCircle.Radius = 200
+FOVCircle.Color = Color3.fromRGB(255, 0, 0)
+
+game:GetService("RunService").Stepped:Connect(function()
+    FOVCircle.Radius = getgenv().Config.Fov
+    FOVCircle.Thickness = 1
+    FOVCircle.NumSides = 11
+    FOVCircle.Position = game:GetService('UserInputService'):GetMouseLocation()
+    if getgenv().Config.ShowFOV then
+        FOVCircle.Visible = true
+    else
+        FOVCircle.Visible = false
+    end
+end)
+
+-- OffenseSec:CreateToggle({title="Auto Kill Void",default=getgenv().Config.KillVoid,callback=function(v)
+--     getgenv().Config.KillVoid=v
+-- end})
 
 DefenseSec:CreateToggle({title="Anti Knockback",default=getgenv().Config.AntiKnockback,callback=function(v)
     getgenv().Config.AntiKnockback=v
 end})
 
-MovementSec:CreateSlider({title="Speed",Min=16,Max=50,Precise=20,default=getgenv().Config.Speed,callback=function(v)
+MovementSec:CreateSlider({title="Speed",Min=16,Max=50,Precise=getgenv().Config.Speed or 20,callback=function(v)
     getgenv().Config.Speed=v
 end})
 
-MovementSec:CreateSlider({title="Jump Height",Min=5,Max=100,Precise=30,default=getgenv().Config.JumpHeight,callback=function(v)
+MovementSec:CreateSlider({title="Jump Height",Min=5,Max=100,Precise=getgenv().Config.JumpHeight or 30,callback=function(v)
     getgenv().Config.JumpHeight=v
 end})
 
@@ -2197,12 +2399,60 @@ SafetySec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,call
     end)
 end})
 
+local rayParams = RaycastParams.new()
+
 SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,callback=function(v)
     getgenv().Config.AntiFall=v
+	task.spawn(function()
+		local tracked, extraGravity, velocity = 0, 0, 0
+		local antiFall
+		antiFall = game:GetService("RunService").PreSimulation:Connect(function(dt)
+			if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				if not getgenv().Config.AntiFall then antiFall:Disconnect() return end
+				local root = plr.Character.HumanoidRootPart
+				if root.AssemblyLinearVelocity.Y < -85 then
+					rayParams.FilterDescendantsInstances = {plr.Character, workspace.CurrentCamera}
+					rayParams.CollisionGroup = root.CollisionGroup
+
+					local rootSize = root.Size.Y / 2.5 + plr.Character.Humanoid.HipHeight
+					local ray = workspace:Blockcast(root.CFrame, Vector3.new(3, 3, 3), Vector3.new(0, (tracked * 0.1) - rootSize, 0), rayParams)
+					if not ray then
+						local Failed = 100
+						local velo = root.AssemblyLinearVelocity.Y
+
+						root.AssemblyLinearVelocity = Vector3.new(root.AssemblyLinearVelocity.X, -86, root.AssemblyLinearVelocity.Z)
+						
+
+						velocity = velo
+						root.CFrame = root.CFrame + Vector3.new(0, (Failed and -extraGravity or extraGravity) * dt, 0)
+						extraGravity = extraGravity + (Failed and workspace.Gravity or -workspace.Gravity) * dt
+					else
+						velocity = root.AssemblyLinearVelocity.Y
+					end
+				else
+					extraGravity = 0
+				end
+			end
+		end)
+	end)
+end})
+
+BlockSec:CreateSlider({title="Fast Break Cooldown",Precise=getgenv().Config.FastBreakCooldown or 25,Min=0,Max=30,callback=function(v)
+    getgenv().Config.FastBreakCooldown=v
 end})
 
 BlockSec:CreateToggle({title="Fast Break",default=getgenv().Config.FastBreak,callback=function(v)
     getgenv().Config.FastBreak=v
+	task.spawn(function()
+		if getgenv().Config.FastBreak then
+			repeat
+				bedwars.BlockBreakController.blockBreaker:setCooldown(getgenv().Config.FastBreakCooldown/100)
+				task.wait(0.1)
+			until not getgenv().Config.FastBreak
+		else
+			bedwars.BlockBreakController.blockBreaker:setCooldown(0.3)
+		end
+	end)
 end})
 
 local autoblock = BlockSec:CreateToggle({title="Auto Block",default=getgenv().Config.AutoBlock,callback=function(v)
@@ -2282,36 +2532,305 @@ game:GetService("UserInputService").InputBegan:Connect(function(input)
 	end
 end)
 
-local player = game.Players.LocalPlayer
 
-local function setupAntiFall(character)
-    local hrp = character:WaitForChild("HumanoidRootPart")
-    local humanoid = character:WaitForChild("Humanoid")
+local function getClosestToMouse()
+    local mousePos = game:GetService("UserInputService"):GetMouseLocation()
+    local closestPlr, closestDist = nil, getgenv().Config.Fov
 
-    local bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(0, 0, 0) 
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.Parent = hrp
+    for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+        if p ~= plr and p.Character and p.Character:FindFirstChild("Head") and p.Team ~= plr.Team then
+            local head = p.Character.Head
+            local head3D, onScreen = workspace.CurrentCamera:WorldToViewportPoint(head.Position)
+            if onScreen then
+                local head2D = Vector2.new(head3D.X, head3D.Y)
+                local dist = (mousePos - head2D).Magnitude
 
-    humanoid.StateChanged:Connect(function(_, newState)
-        if getgenv().Config.AntiFall then 
-            if newState == Enum.HumanoidStateType.Freefall then
-                bodyVelocity.MaxForce = Vector3.new(0, 5000, 0) 
-                bodyVelocity.Velocity = Vector3.new(0, -30, 0) 
-            elseif newState == Enum.HumanoidStateType.Landed then
-                bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
+                if dist < closestDist then
+                    closestPlr = p
+                    closestDist = dist
+                end
             end
         end
-    end)
+    end
+    return closestPlr
 end
 
 
-if player.Character then
-    setupAntiFall(player.Character)
+
+local Aim = function(start, speed, gravity, pos, velo, prediction, height, params)
+    local eps = 1/1000000000
+    local getVal = function(d) return math.abs(d) < eps end
+    local getNrRoot = function(x) return x^(1/3) * (x < 0 and -1 or 1) end
+
+    local getPrediction = function(a, b, c)
+        local half_b, constant = b / (2 * a), c / a
+        local discriminant = half_b * half_b - constant
+
+        if getVal(discriminant) then
+            return -half_b
+        elseif discriminant > 0 then
+            local sqrt_discriminant = math.sqrt(discriminant)
+            return sqrt_discriminant - half_b, -sqrt_discriminant - half_b
+        end
+        return 0
+    end
+
+    local getSqrt = function(a, b, c, d)
+        local root0, root1, root2
+        local numRoots, sub
+        local A, B, C = b / a, c / a, d / a
+        local sqA = A * A
+        local p, q = (1/3) * (-(1/3) * sqA + B), 0.5 * ((2/27) * A * sqA - (1/3) * A * B + C)
+        local cbP = p * p * p
+        local discriminant = q * q + cbP
+
+        if getVal(discriminant) then
+            if getVal(q) then
+                root0, numRoots = 0, 1
+            else
+                local u = getNrRoot(-q)
+                root0, root1, numRoots = 2 * u, -u, 2
+            end
+        elseif discriminant < 0 then
+            local phi = (1/3) * math.acos(-q / math.sqrt(-cbP))
+            local t = 2 * math.sqrt(-p)
+            root0, root1, root2 = t * math.cos(phi), -t * math.cos(phi + math.pi/3), -t * math.cos(phi - math.pi/3)
+            numRoots = 3
+        else
+            local sqrtDiscriminant = math.sqrt(discriminant)
+            local u, v = getNrRoot(sqrtDiscriminant - q), -getNrRoot(sqrtDiscriminant + q)
+            root0, numRoots = u + v, 1
+        end
+
+        sub = (1/3) * A
+        if numRoots > 0 then root0 = root0 - sub end
+        if numRoots > 1 then root1 = root1 - sub end
+        if numRoots > 2 then root2 = root2 - sub end
+
+        return root0, root1, root2
+    end
+
+    local getNewPred = function(a, b, c, d, e)
+        local root0, root1, root2, root3
+        local coeffs = {}
+        local z, u, v, sub
+        local A, B, C, D = b / a, c / a, d / a, e / a
+        local sqA = A * A
+        local p, q, r = -0.375 * sqA + B, 0.125 * sqA * A - 0.5 * A * B + C, -(3/256) * sqA * sqA + 0.0625 * sqA * B - 0.25 * A * C + D
+        local numRoots
+
+        if getVal(r) then
+            coeffs[3], coeffs[2], coeffs[1], coeffs[0] = q, p, 0, 1
+            local results = {getSqrt(coeffs[0], coeffs[1], coeffs[2], coeffs[3])}
+            numRoots = #results
+            root0, root1, root2 = results[1], results[2], results[3]
+        else
+            coeffs[3], coeffs[2], coeffs[1], coeffs[0] = 0.5 * r * p - 0.125 * q * q, -r, -0.5 * p, 1
+            root0, root1, root2 = getSqrt(coeffs[0], coeffs[1], coeffs[2], coeffs[3])
+            z = root0
+
+            u, v = z * z - r, 2 * z - p
+            u = getVal(u) and 0 or (u > 0 and math.sqrt(u) or nil)
+            v = getVal(v) and 0 or (v > 0 and math.sqrt(v) or nil)
+            if not u or not v then return end
+
+            coeffs[2], coeffs[1], coeffs[0] = z - u, q < 0 and -v or v, 1
+            local results = {getPrediction(coeffs[0], coeffs[1], coeffs[2])}
+            numRoots = #results
+            root0, root1 = results[1], results[2]
+
+            coeffs[2], coeffs[1], coeffs[0] = z + u, q < 0 and v or -v, 1
+            if numRoots < 4 then
+                local results1 = {getPrediction(coeffs[0], coeffs[1], coeffs[2])}
+                if numRoots == 0 then
+                    root0, root1 = results1[1], results1[2]
+                elseif numRoots == 1 then
+                    root1, root2 = results1[1], results1[2]
+                elseif numRoots == 2 then
+                    root2, root3 = results1[1], results1[2]
+                end
+                numRoots = numRoots + #results1
+            end
+        end
+
+        sub = 0.25 * A
+        if numRoots > 0 then root0 = root0 - sub end
+        if numRoots > 1 then root1 = root1 - sub end
+        if numRoots > 2 then root2 = root2 - sub end
+        if numRoots > 3 then root3 = root3 - sub end
+
+        return {root3, root2, root1, root0}
+    end
+
+    local displacement = pos - start
+    local velX, velY, velZ = velo.X, velo.Y, velo.Z
+    local dispX, dispY, dispZ = displacement.X, displacement.Y, displacement.Z
+    local halfGravity = -0.5 * gravity
+
+    if math.abs(velY) > 0.01 and prediction and prediction > 0 then
+        local estTime = displacement.Magnitude / speed
+        for _ = 1, 100 do
+            velY = velY - (0.5 * prediction) * estTime
+            local velocity = velo * 0.016
+            local ray = workspace.Raycast(workspace, Vector3.new(pos.X, pos.Y, pos.Z), Vector3.new(velocity.X, (velY * estTime) - height, velocity.Z), params)
+            if ray then
+                local newTarget = ray.Position + Vector3.new(0, height, 0)
+                estTime = estTime - math.sqrt(((pos - newTarget).Magnitude * 2) / prediction)
+                pos = newTarget
+                dispY = (pos - start).Y
+                velY = 0
+                break
+            else
+                break
+            end
+        end
+    end
+
+    local solutions = getNewPred(
+        halfGravity * halfGravity,
+        -2 * velY * halfGravity,
+        velY * velY - 2 * dispY * halfGravity - speed * speed + velX * velX + velZ * velZ,
+        2 * dispY * velY + 2 * dispX * velX + 2 * dispZ * velZ,
+        dispY * dispY + dispX * dispX + dispZ * dispZ
+    )
+
+    if solutions then
+        local posRoots = {}
+        for _, v in next, solutions do
+            if v > 0 then
+                table.insert(posRoots, v)
+            end
+        end
+        if posRoots[1] then
+            local t = posRoots[1]
+            local d = (dispX + velX * t) / t
+            local e = (dispY + velY * t - halfGravity * t * t) / t
+            local f = (dispZ + velZ * t) / t
+            return start + Vector3.new(d, e, f)
+        end
+        return 0
+    elseif gravity == 0 then
+        local t = displacement.Magnitude / speed
+        local d = (dispX + velX * t) / t
+        local e = (dispY + velY * t - halfGravity * t * t) / t
+        local f = (dispZ + velZ * t) / t
+        return start + Vector3.new(d, e, f)
+    end
+    return 0
 end
 
+local GetInventory = function(plr: Player)
+    plr = plr or game.Players.LocalPlayer
+    return GameData.Modules.Inventory.getInventory(plr)
+end
 
-player.CharacterAdded:Connect(setupAntiFall)
+local GetAmmo = function(Check)
+    if not Check.ammoItemTypes then return nil end
+    local Inv = GetInventory().items
+    for i = 1, #Inv do
+        local Obj = Inv[i]
+        for j = 1, #Check.ammoItemTypes do
+            if Obj.itemType == Check.ammoItemTypes[j] then
+                return Check.ammoItemTypes[j]
+            end
+        end
+    end
+    return nil
+end
+
+local ProjNames = {arrow = true, snowball = true}
+local GetTools = function()
+    local Found = {}
+    local Inv = GetInventory().items
+    for i = 1, #Inv do
+        local It = Inv[i]
+
+        local Data = bedwars.ItemMeta[It.itemType]
+        local Src = Data and Data.projectileSource
+        if Src then
+            local Ammo = GetAmmo(Src)
+            if Ammo and ProjNames[Ammo] then
+                Found[#Found + 1] = {
+                    Item = It,
+                    Ammo = Ammo,
+                    Proj = Src.projectileType(Ammo),
+                    Meta = Src
+                }
+            end
+        end
+    end
+    return Found
+end
+local HttpService= game:GetService("HttpService")
+local GroundRay = RaycastParams.new()
+GroundRay.FilterType = Enum.RaycastFilterType.Include
+GroundRay.FilterDescendantsInstances = {workspace:WaitForChild("Map")}
+function firebow(pos2)
+    local Pos=game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+    for i,v in pairs(GetTools()) do
+		print(v.Item.tool.Name)
+		if game:GetService("Players").LocalPlayer.Character:FindFirstChild(v.Item.tool.Name) then
+    
+			local ProjData = GameData.Modules.ProjMeta[v.Proj]
+			local AimPos = Aim(Pos, ProjData.launchVelocity, ProjData.gravitationalAcceleration or 196.2, pos2.HumanoidRootPart.Position, pos2.HumanoidRootPart.Velocity, workspace.Gravity,pos2.Humanoid.HipHeight, GroundRay)
+			local Args = {
+				v.Item.tool,
+				v.Ammo,
+				v.Proj,
+				CFrame.new(Pos, AimPos).Position,
+				Pos,
+				(CFrame.new(Pos, AimPos)).LookVector * ProjData.launchVelocity,
+				HttpService:GenerateGUID(true),
+				{drawDurationSec = 1, shotId = HttpService:GenerateGUID(false)},
+				workspace:GetServerTimeNow() - (math.pow(10, -2) * ((50 - 5) / 2))
+			}
+
+			replicatedStorage.rbxts_include.node_modules["@rbxts"].net.out._NetManaged.ProjectileFire:InvokeServer(Args[1], Args[2], Args[3], Args[4], Args[5], Args[6], Args[7], Args[8], Args[9], Args[10])
+		end
+    end
+end
+
+task.spawn(function()
+	while wait(.3) and getgenv().Config.AutoBow do
+		if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+			local closestPlr = getClosestToMouse()
+			if  closestPlr and closestPlr.Character:FindFirstChild("HumanoidRootPart") and closestPlr.Character:FindFirstChild("Humanoid") and closestPlr.Character.Humanoid.Health > 0 then
+				firebow(closestPlr.Character)
+			end
+		end
+	end
+end)
+
+local player = game.Players.LocalPlayer
+
+-- local function setupAntiFall(character)
+--     local hrp = character:WaitForChild("HumanoidRootPart")
+--     local humanoid = character:WaitForChild("Humanoid")
+
+--     local bodyVelocity = Instance.new("BodyVelocity")
+--     bodyVelocity.MaxForce = Vector3.new(0, 0, 0) 
+--     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+--     bodyVelocity.Parent = hrp
+
+--     humanoid.StateChanged:Connect(function(_, newState)
+--         if getgenv().Config.AntiFall then 
+--             if newState == Enum.HumanoidStateType.Freefall then
+--                 bodyVelocity.MaxForce = Vector3.new(0, 5000, 0) 
+--                 bodyVelocity.Velocity = Vector3.new(0, -30, 0) 
+--             elseif newState == Enum.HumanoidStateType.Landed then
+--                 bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
+--             end
+--         end
+--     end)
+-- end
+
+
+-- if player.Character then
+--     setupAntiFall(player.Character)
+-- end
+
+
+-- player.CharacterAdded:Connect(setupAntiFall)
 
 
 local mt = getrawmetatable(game)
@@ -2340,46 +2859,10 @@ function Find2(a,b)
     return nil
 end
 
-local function normalIdToVector(normalId)
-    local vectors = {
-        [Enum.NormalId.Top] = Vector3.new(0, 1, 0),
-        [Enum.NormalId.Bottom] = Vector3.new(0, -1, 0),
-        [Enum.NormalId.Back] = Vector3.new(0, 0, 1),
-        [Enum.NormalId.Front] = Vector3.new(0, 0, -1),
-        [Enum.NormalId.Right] = Vector3.new(1, 0, 0),
-        [Enum.NormalId.Left] = Vector3.new(-1, 0, 0),
-    }
-    return vectors[normalId] or Vector3.new(0, 0, 0)
-end
+
 
 local Mouse=game:GetService("Players").LocalPlayer:GetMouse()
 local UIS=game:GetService("UserInputService")
-
-task.spawn(function()
-	while wait() do
-		if getgenv().Config.FastBreak then
-			if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-				if game:GetService("Players").LocalPlayer.Character then
-					local target=Mouse.Target
-					if target and target:GetAttribute("Block") then
-						local newpos = Vector3.new(math.round(target.Position.X/3),math.round(target.Position.Y/3),math.round(target.Position.Z/3))
-						local args = {
-							[1] = {
-								["blockRef"] = {
-									["blockPosition"] = newpos
-								},
-								["hitPosition"] = Mouse.Hit.Position,
-								["hitNormal"] = normalIdToVector(Mouse.TargetSurface)
-							}
-						}
-
-						game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@easy-games"):WaitForChild("block-engine"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("DamageBlock"):InvokeServer(unpack(args))
-					end
-				end
-			end
-		end
-	end
-end)
 
 
 task.spawn(function()
@@ -2505,6 +2988,34 @@ local function placeBlock(gridPos, blockType)
     placeBlockRemote:InvokeServer(unpack(args))
 end
 
+local ttpp={{1,0,0},{-1,0,0},{0,0,1},{0,0,-1},{1,1,0},{-1,1,0},{0,1,1},{0,1,-1}}
+
+
+
+-- task.spawn(function()
+--     game:GetService("RunService").RenderStepped:Connect(function()
+--         if not getgenv().Config.KillVoid then return end
+-- 		for i,v in pairs(game:GetService("Players"):GetPlayers()) do
+-- 			if v.Name ~= player.Name and v.Team ~= player.Team then
+-- 				local character = v.Character
+-- 				if character and character:FindFirstChild("HumanoidRootPart") and (character.HumanoidRootPart.Position-player.Character.HumanoidRootPart.Position).magnitude < 30 then
+-- 					local blockType = "wool_" .. string.lower(player.Team.Name)
+-- 					local inventory = inventories:FindFirstChild(player.Name)
+-- 					if inventory and inventory:FindFirstChild(blockType) then
+-- 						for _,cc in pairs(ttpp) do
+-- 							if RayCast(v.Character.HumanoidRootPart.Position, Vector3.new(cc[1], -3, cc[2])) then
+-- 								task.spawn(function()
+-- 									placeBlock(Vector3.new(math.round((v.Character.HumanoidRootPart.Position.X+cc[1]*3) / 3), math.round((v.Character.HumanoidRootPart.Position.Y-2+cc[3]*3) / 3), math.round((v.Character.HumanoidRootPart.Position.Z+cc[2]*3) / 3)), blockType)
+-- 								end)
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+--     end)	
+-- end)
+
 task.spawn(function()
     game:GetService("RunService").RenderStepped:Connect(function()
         if not getgenv().Config.AutoBlock then return end
@@ -2519,20 +3030,20 @@ task.spawn(function()
             local hrp = character.HumanoidRootPart
             local velocity = hrp.AssemblyLinearVelocity
 
-            if not RayCast(hrp.Position, Vector3.new(0, -3, 0)) then
+            if not RayCast(hrp.Position, Vector3.new(0, -5, 0)) then
                 local posX = hrp.Position.X + (velocity.X * 0.06)
                 local posZ = hrp.Position.Z + (velocity.Z * 0.06)
                 local gridPos = Vector3.new(math.round(posX / 3), math.round((hrp.Position.Y - 4.5) / 3), math.round(posZ / 3))
-                placeBlock(gridPos, blockType)
+                task.spawn(placeBlock, gridPos, blockType)
             end
 
             local lookDirection = velocity.Magnitude < 0.1 and hrp.CFrame.LookVector or velocity.Unit
             for i=1,3 do
 				local checkPos = hrp.Position + (lookDirection * (i*3))
 
-                if not RayCast(checkPos, Vector3.new(0, -3, 0)) then
+                if not RayCast(checkPos, Vector3.new(0, -5, 0)) then
                     local gridPos = Vector3.new(math.round(checkPos.X / 3), math.round((checkPos.Y - 4.5) / 3), math.round(checkPos.Z / 3))
-                    placeBlock(gridPos, blockType)
+                    task.spawn(placeBlock, gridPos, blockType)
                 end
 			end
         end
