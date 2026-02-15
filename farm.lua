@@ -1,11 +1,17 @@
+--[[ ═══════ 1. SERVICES & VARIABLES ═══════ ]]--
 
 local TS = game:GetService("TweenService")
-local plr = game:GetService("Players").LocalPlayer
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local plr = Players.LocalPlayer
 local Mouse = plr:GetMouse()
 local UIS = game:GetService("UserInputService")
 local Tweeninfo = TweenInfo.new
 local vim = game:service('VirtualInputManager')
-local TweenService = game:GetService("TweenService")
+local Camera = Workspace.CurrentCamera
+
+--[[ ═══════ 2. CORE UTILITIES ═══════ ]]--
 local function InstanceItem(name, prop, parent)
 	local item = assert(Instance.new(name), "Instance name invalid: " .. tostring(name))
 	for i, v in pairs(prop or {}) do
@@ -28,7 +34,7 @@ local Theme = {
 	Error = Color3.fromRGB(255, 60, 60)            -- Red for errors
 }
 function TweenObject(obj, properties, duration, ...)
-	game:GetService("TweenService"):Create(obj, Tweeninfo(duration, ...), properties):Play()
+	TS:Create(obj, Tweeninfo(duration, ...), properties):Play()
 end
 
 function DraggingEnabled(frame, parent)
@@ -77,11 +83,6 @@ function AddListCanva(uilist,needlist)
 end
 
 local ServerTime=0
-spawn(function()
-	while wait(1) do
-		ServerTime=ServerTime+1
-	end
-end)
 function CreatePageConfig(parrent,title,callback)
 	local PageConfig = InstanceItem("ScrollingFrame", {
 		["Visible"] = false,
@@ -198,134 +199,7 @@ function CreatePageConfig(parrent,title,callback)
 
 	return PageConfig
 end
-local part=Instance.new("Part",workspace)
-part.Anchored=true
-part.CFrame = CFrame.new(0,100000,0)
 
-function ChangeCamera(val)
-	if val then
-		game.Workspace.CurrentCamera.CameraSubject =part
-	else
-		local camera = workspace.CurrentCamera
-		camera.CameraType = Enum.CameraType.Custom
-		camera.CameraSubject = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-	end
-end
-
-function Boostfps1()
-	spawn(function()
-
-		local g = game
-		local w = g.Workspace
-		local l = g.Lighting
-		local t = w.Terrain
-		t.WaterWaveSize = 0
-		t.WaterWaveSpeed = 0
-		t.WaterReflectance = 0
-		t.WaterTransparency = 0
-		l.GlobalShadows = false
-		game:GetService("Lighting").FogStart = 0
-		game:GetService("Lighting").FogEnd = 100
-		l.Brightness = 0
-		settings().Rendering.QualityLevel = "Level01"
-
-		for i, v in pairs(g:GetDescendants()) do
-
-			if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then 
-				v.Material = "SmoothPlastic"
-
-			elseif v:IsA("Decal") or v:IsA("Texture") then
-				v:Destroy()
-			elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-				v.Lifetime = NumberRange.new(0)
-			elseif v:IsA("Explosion") then
-				v.BlastPressure = 1
-				v.BlastRadius = 1
-			elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
-				v.Enabled = false
-			elseif v:IsA("MeshPart") then
-				v.Material = "SmoothPlastic"
-			end
-		end
-		for i, e in pairs(l:GetChildren()) do
-			if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
-				e.Enabled = false
-			end
-		end
-
-		workspace.Terrain:Clear()
-		local ss = game:GetService("SoundService")
-		ss.RespectFilteringEnabled = false
-		ss.AmbientReverb = Enum.ReverbType.NoReverb			
-
-	end)
-end
-
-function Boostfps2()
-	pcall(function()
-		spawn(function()
-
-			local g = game
-			local w = g.Workspace
-			local l = g.Lighting
-			local t = w.Terrain
-			t.WaterWaveSize = 0
-			t.WaterWaveSpeed = 0
-			t.WaterReflectance = 0
-			t.WaterTransparency = 0
-			l.GlobalShadows = false
-			game:GetService("Lighting").FogStart = 0
-			game:GetService("Lighting").FogEnd = 100
-			l.Brightness = 0
-			settings().Rendering.QualityLevel = "Level01"
-
-			for i, v in pairs(g:GetDescendants()) do
-
-				if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then 
-					v.Material = "Plastic"
-					v.Transparency=1
-					v.Reflectance = 0
-				elseif v:IsA("Sound") then
-					v.Volume = 0
-				elseif v:IsA("Decal") or v:IsA("Texture") then
-					v.Transparency = 1
-				elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-					v.Lifetime = NumberRange.new(0)
-				elseif v:IsA("Explosion") then
-					v.BlastPressure = 1
-					v.BlastRadius = 1
-				elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
-					v.Enabled = false
-				elseif v:IsA("MeshPart") then
-					v.Material = "Plastic"
-					v.Transparency=1
-					v.Reflectance = 0
-					v.TextureID = 10385902758728957
-					if v:IsA("SpecialMesh") then
-						v:Destroy()
-					end
-				elseif v:IsA("SpecialMesh") then
-					v:Destroy()
-				elseif v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-					v:Destroy()
-				elseif v:IsA("Animation") or v:IsA("Animator") then
-					v:Destroy()
-				end
-			end
-			for i, e in pairs(l:GetChildren()) do
-				if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
-					e.Enabled = false
-				end
-			end
-
-			workspace.Terrain:Clear()
-			local ss = game:GetService("SoundService")
-			ss.RespectFilteringEnabled = false
-			ss.AmbientReverb = Enum.ReverbType.NoReverb			
-		end)
-
-	end)
-end
 
 local SawUI={}
 function AddPageOthers(Page,resetcallback,addpage)
@@ -1520,8 +1394,6 @@ function SawUI:CreateWindow(windowconfig)
 		["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
 	}, Bar)
 
-	local RunService = game:GetService("RunService")
-
 	local fps = 0
 	local frameCount = 0
 	local lastTime = tick()
@@ -1623,8 +1495,9 @@ function SawUI:CreateWindow(windowconfig)
 		return string.format("%02d:%02d:%02d", hours, minutes, secs)
 	end
 
-	spawn(function()
-		while wait(1) do
+	task.spawn(function()
+		while task.wait(1) do
+			ServerTime=ServerTime+1
 			Performance.Text=convertSecondsToTime(ServerTime)
 		end
 	end)
@@ -1866,19 +1739,11 @@ function SawUI:CreateWindow(windowconfig)
 		getgenv().Config.BoostFps=v
 		if v then
 
-			Boostfps1()
+			BoostFps()
 
 		end
 	end})  
-	boostfps:CreateToggle({title="[ULTRA] Boost Fps",default=getgenv().Config.UltraBoostFps,callback=function(v)
-		getgenv().Config.UltraBoostFps=v
-		if v then
 
-			Boostfps2()
-
-
-		end
-	end})  
 
 	local u= Instance.new("ScreenGui",game.CoreGui)
 	u.Enabled=false
@@ -1894,7 +1759,7 @@ function SawUI:CreateWindow(windowconfig)
 
 	uu.MouseButton1Click:Connect(function()
 		screenval=not screenval
-		game:GetService("RunService"):Set3dRenderingEnabled(screenval)
+		RunService:Set3dRenderingEnabled(screenval)
 	end)
 
 
@@ -1902,8 +1767,8 @@ function SawUI:CreateWindow(windowconfig)
 	Rendertab:CreateToggle({title="Clean Chunk (STRONG)",default=getgenv().Config.CleanChunk,callback=function(v)
 		getgenv().Config.CleanChunk=v
 		ChangeCamera(v)
-		spawn(function()
-			while wait() and getgenv().Config.CleanChunk do
+		task.spawn(function()
+			while task.wait(1) and getgenv().Config.CleanChunk do
 				ChangeCamera(v)
 			end
 		end)
@@ -1914,9 +1779,9 @@ function SawUI:CreateWindow(windowconfig)
 		u.Enabled=v
 		pcall(function()
 			if v then
-				game:GetService("RunService"):Set3dRenderingEnabled(false)
+				RunService:Set3dRenderingEnabled(false)
 			else
-				game:GetService("RunService"):Set3dRenderingEnabled(true)
+				RunService:Set3dRenderingEnabled(true)
 			end
 		end)
 	end})
@@ -2053,6 +1918,7 @@ function SawUI:CreateWindow(windowconfig)
 	return pagefunc
 end
 
+--[[ ═══════ 4. GAME INIT & CONFIG ═══════ ]]--
 if not getgenv().Config then
 	getgenv().Config={
 		AutoAttack=false,
@@ -2184,17 +2050,17 @@ local GameData = {
         DamageType = require(replicatedStorage.TS.damage["damage-type"]).DamageType,
         Inventory = require(replicatedStorage.TS.inventory["inventory-util"]).InventoryUtil,
       
-        Network = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.lib.network),
+        Network = require(Players.LocalPlayer.PlayerScripts.TS.lib.network),
         PlayerUtil = require(replicatedStorage.TS.player["player-util"]).GamePlayerUtil,
         
         ProjMeta = require(replicatedStorage.TS.projectile['projectile-meta']).ProjectileMeta,
         Promise = require(replicatedStorage.rbxts_include.node_modules["@easy-games"].knit.src.Knit.Util.Promise),
         Remotes = require(replicatedStorage.TS.remotes).default.Client,
         Shop = require(replicatedStorage.TS.games.bedwars.shop["bedwars-shop"]).BedwarsShop,
-        ShopPurchase = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.controllers.global.shop.api["purchase-item"]).shopPurchaseItem,
+        ShopPurchase = require(Players.LocalPlayer.PlayerScripts.TS.controllers.global.shop.api["purchase-item"]).shopPurchaseItem,
         Sound = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["game-core"].out).SoundManager,
-        Store = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.ui.store).ClientStore,
-        SyncEvents = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS["client-sync-events"]).ClientSyncEvents,
+        Store = require(Players.LocalPlayer.PlayerScripts.TS.ui.store).ClientStore,
+        SyncEvents = require(Players.LocalPlayer.PlayerScripts.TS["client-sync-events"]).ClientSyncEvents,
         TeamUpgradeMeta = require(replicatedStorage.TS.games.bedwars["team-upgrade"]["team-upgrade-meta"]),
         UI = require(replicatedStorage.rbxts_include.node_modules["@easy-games"]["game-core"].out).UILayers
     },
@@ -2206,37 +2072,15 @@ local GameData = {
     GameEvents = {}
 }
 
-
--- local projectileRemote = {InvokeServer = function() end}
--- task.spawn(function()
--- 	projectileRemote = bedwars.Client:Get(remotes.FireProjectile).instance
--- end)
-
--- local function launchProjectile(item, pos, proj, speed, dir)
--- 	if not pos then return end
-
--- 	pos = pos - dir * 0.1
--- 	local shootPosition = (CFrame.lookAlong(pos, Vector3.new(0, -speed, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ)))
--- 	switchItem(item.tool, 0)
--- 	task.wait(0.1)
--- 	bedwars.ProjectileController:createLocalProjectile(bedwars.ProjectileMeta[proj], proj, proj, shootPosition.Position, '', shootPosition.LookVector * speed, {drawDurationSeconds = 1})
--- 	if projectileRemote:InvokeServer(item.tool, proj, proj, shootPosition.Position, pos, shootPosition.LookVector * speed, httpService:GenerateGUID(true), {shotId = httpService:GenerateGUID(false), drawDurationSec = 1}, workspace:GetServerTimeNow() - 0.045) then
--- 		local shoot = bedwars.ItemMeta[item.itemType].projectileSource.launchSound
--- 		shoot = shoot and shoot[math.random(1, #shoot)] or nil
--- 		if shoot then
--- 			bedwars.SoundManager:playSound(shoot)
--- 		end
--- 	end
--- end
-
+--[[ ═══════ 5. CONFIG SAVE/LOAD ═══════ ]]--
 function load()
 	if isfolder("Sawhub") == false then
 		makefolder("Sawhub")
 	end
 	if isfile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json") == false then
-		writefile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json", game:GetService("HttpService"):JSONEncode(getgenv().Config))
+		writefile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json", HttpService:JSONEncode(getgenv().Config))
 	else
-		local Decode = game:GetService("HttpService"):JSONDecode(readfile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json"))
+		local Decode = HttpService:JSONDecode(readfile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json"))
 		for i,v in pairs(Decode) do
 			getgenv().Config[i] = v
 		end
@@ -2244,7 +2088,7 @@ function load()
 end
 
 function Save()
-	writefile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json", game:GetService("HttpService"):JSONEncode(getgenv().Config))
+	writefile("/Sawhub/Bedwar-" .. game.Players.LocalPlayer.Name .. ".json", HttpService:JSONEncode(getgenv().Config))
 end
 
 load()
@@ -2279,6 +2123,74 @@ local function createBeam(player1, player2)
 	beam.Parent = hrp1
 end
 
+function RayCast(origin, direction)
+    local ignored = {Players.LocalPlayer.Character,workspace:FindFirstChild("AntiVVV")}
+    local raycastParameters = RaycastParams.new()
+    raycastParameters.FilterDescendantsInstances = ignored
+    raycastParameters.FilterType = Enum.RaycastFilterType.Exclude
+    raycastParameters.IgnoreWater = true
+    
+    return workspace:Raycast(origin, direction, raycastParameters)
+end
+
+
+local AntiHitSettings = {
+    Range = 18,
+    Height = 15,
+    Up = 0.2,
+    Down = 0.1,
+    Trans = 0.5,
+    Material = "ForceField",
+    Color = Color3.fromRGB(255, 0, 0),
+    Dynamic = true
+}
+
+local cloneChar
+local hbConnection
+
+local function IsAlive(checkPlr)
+    checkPlr = checkPlr or plr
+    local char = checkPlr.Character
+    if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
+        return char.Humanoid.Health > 0
+    end
+    return false
+end
+
+local function GetNearestEntity(maxRange)
+    local nearest = nil
+    local minDist = maxRange
+
+    if not IsAlive() then return nil, maxRange end
+
+    local lpRoot = plr.Character.HumanoidRootPart
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= plr and IsAlive(player) and player.Team ~= plr.Team then
+            local targetRoot = player.Character.HumanoidRootPart
+            local dist = (lpRoot.Position - targetRoot.Position).Magnitude
+            if dist <= minDist then
+                minDist = dist
+                nearest = player
+            end
+        end
+    end
+    return nearest, minDist
+end
+
+local function cleanAntiHit()
+    if hbConnection then 
+        hbConnection:Disconnect() 
+        hbConnection = nil 
+    end
+    if cloneChar then 
+        cloneChar:Destroy() 
+        cloneChar = nil 
+    end
+    if IsAlive() then
+        Camera.CameraSubject = plr.Character.Humanoid
+    end
+end
 
 local Sawhub= SawUI:CreateWindow({title="Saw Hub"})
 
@@ -2331,32 +2243,157 @@ BowSec:CreateToggle({title="Show FOV",default=getgenv().Config.ShowFOV,callback=
 end})
 
 
+--[[ ═══════ 9. RUNTIME LOOPS & HOOKS ═══════ ]]--
 local FOVCircle = Drawing.new("Circle")
-FOVCircle.Thickness = 2
-FOVCircle.NumSides = 460
+FOVCircle.Thickness = 1
+FOVCircle.NumSides = 11
 FOVCircle.Filled = false
 FOVCircle.Transparency = 0.5
 FOVCircle.Radius = 200
 FOVCircle.Color = Color3.fromRGB(255, 0, 0)
 
-game:GetService("RunService").Stepped:Connect(function()
+RunService.Stepped:Connect(function()
     FOVCircle.Radius = getgenv().Config.Fov
-    FOVCircle.Thickness = 1
-    FOVCircle.NumSides = 11
-    FOVCircle.Position = game:GetService('UserInputService'):GetMouseLocation()
-    if getgenv().Config.ShowFOV then
-        FOVCircle.Visible = true
-    else
-        FOVCircle.Visible = false
-    end
+    FOVCircle.Position = UIS:GetMouseLocation()
+    FOVCircle.Visible = getgenv().Config.ShowFOV
 end)
 
--- OffenseSec:CreateToggle({title="Auto Kill Void",default=getgenv().Config.KillVoid,callback=function(v)
---     getgenv().Config.KillVoid=v
--- end})
 
 DefenseSec:CreateToggle({title="Anti Knockback",default=getgenv().Config.AntiKnockback,callback=function(v)
     getgenv().Config.AntiKnockback=v
+end})
+
+DefenseSec:CreateToggle({
+    title = "Anti Hit",
+    default = getgenv().Config.AntiHit,
+    callback = function(v)
+        getgenv().Config.AntiHit = v
+        
+        if not v then
+            cleanAntiHit()
+        else
+            task.spawn(function()
+                while getgenv().Config.AntiHit do
+                    task.wait()
+                    
+                    if not IsAlive() then
+                        cleanAntiHit()
+                        continue
+                    end
+
+                    local target, dist = GetNearestEntity(AntiHitSettings.Range)
+                    
+                    if not target then
+                        cleanAntiHit()
+                        continue
+                    end
+
+                    local char = plr.Character
+                    local root = char:FindFirstChild("HumanoidRootPart")
+                    local hum = char:FindFirstChild("Humanoid")
+
+                    if not cloneChar then
+                        char.Archivable = true
+                        cloneChar = char:Clone()
+                        cloneChar.Parent = Workspace
+                        Camera.CameraSubject = cloneChar:FindFirstChild("Humanoid") or hum
+
+                        for _, obj in next, cloneChar:GetChildren() do
+                            if obj:IsA("Accessory") and obj:FindFirstChild("Handle") then
+                                obj.Handle.Transparency = 1
+                            elseif obj:IsA("BasePart") then
+                                obj.Transparency = obj.Name == "HumanoidRootPart" and AntiHitSettings.Trans or 1
+                                if obj.Name == "HumanoidRootPart" then
+                                    obj.Material = Enum.Material[AntiHitSettings.Material] or Enum.Material.ForceField
+                                    obj.Color = AntiHitSettings.Color
+                                elseif obj.Name == "Head" then
+                                    obj:ClearAllChildren()
+                                end
+                            end
+                        end
+
+                        local cloneRoot = cloneChar:FindFirstChild("HumanoidRootPart")
+                        if cloneRoot then
+                            hbConnection = RunService.Heartbeat:Connect(function()
+                                if cloneRoot and root then
+                                    cloneRoot.Position = Vector3.new(root.Position.X, cloneRoot.Position.Y, root.Position.Z)
+                                end
+                            end)
+                        end
+                    end
+
+                    local cloneRoot = cloneChar:FindFirstChild("HumanoidRootPart")
+                    if cloneRoot then
+                        local h1 = hum.Health
+                        local targetHum = target.Character:FindFirstChild("Humanoid")
+                        local h2 = targetHum and targetHum.Health or 100
+                        
+                        local upTime = AntiHitSettings.Up
+                        local downTime = AntiHitSettings.Down
+
+                        if AntiHitSettings.Dynamic then
+                            local diff = h1 - h2
+                            if math.abs(diff) > 5 then
+                                if diff > 0 then
+                                    downTime = AntiHitSettings.Down + 0.2
+                                    upTime = math.max(AntiHitSettings.Up - 0.1, 0.1)
+                                else
+                                    downTime = math.max(AntiHitSettings.Down - 0.1, 0.1)
+                                    upTime = math.max(AntiHitSettings.Up + 0.2, 0.3)
+                                end
+                            end
+                        end
+
+                        root.CFrame += Vector3.new(0, AntiHitSettings.Height, 0)
+                        task.wait(upTime)
+                        root.CFrame = cloneRoot.CFrame
+                        task.wait(downTime)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+
+
+
+MovementSec:CreateToggle({title="Fly",default=getgenv().Config.Fly,callback=function(v)
+    getgenv().Config.Fly=v
+    task.spawn(function()
+        if getgenv().Config.Fly then
+            lastGroundReset = os.clock()
+            
+            while wait() and getgenv().Config.Fly do
+                local char = plr.Character
+                local root = char and char:FindFirstChild("HumanoidRootPart")
+                local hum = char and char:FindFirstChild("Humanoid")
+                
+                if not root or not hum then return end
+
+                local moveDir = getMoveDirection()
+                local verticalVel = 0
+
+                if UIS:IsKeyDown(Enum.KeyCode.Space) then
+                    verticalVel = FlyConfig.VerticalSpeed
+                elseif UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    verticalVel = -FlyConfig.VerticalSpeed
+                end
+
+                root.AssemblyLinearVelocity = Vector3.new(
+                    moveDir.X * FlyConfig.Speed,
+                    verticalVel + 0.85,
+                    moveDir.Z * FlyConfig.Speed
+                )
+
+                if os.clock() - lastGroundReset >= FlyConfig.TPDownInterval then
+                    resetFallDistance()
+                    lastGroundReset = os.clock()
+                end
+            end
+       
+        end
+    end)
 end})
 
 MovementSec:CreateSlider({title="Speed",Min=16,Max=50,Precise=getgenv().Config.Speed or 20,callback=function(v)
@@ -2369,15 +2406,6 @@ end})
 
 MovementSec:CreateToggle({title="Boost Speed Jump",default=getgenv().Config.BoostSpeed,callback=function(v)
     getgenv().Config.BoostSpeed=v
-    task.spawn(function()
-        while wait() and getgenv().Config.BoostSpeed do
-            pcall(function()
-                game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = getgenv().Config.Speed
-                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpPower = getgenv().Config.JumpHeight * 10
-                game:GetService("Players").LocalPlayer.Character.Humanoid.JumpHeight = getgenv().Config.JumpHeight
-            end)
-        end
-    end)
 end})
 
 SafetySec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,callback=function(v)
@@ -2388,7 +2416,7 @@ SafetySec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,call
             part.Name="AntiVVV"
             part.Size=Vector3.new(2024,5,2024)
             part.Anchored=true
-            part.Position = Vector3.new(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.X,game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Y-10,game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position.Z)
+            part.Position = Vector3.new(plr.Character.HumanoidRootPart.Position.X,plr.Character.HumanoidRootPart.Position.Y-10,plr.Character.HumanoidRootPart.Position.Z)
             part.Parent=workspace
         else
             local part = workspace:FindFirstChild("AntiVVV")
@@ -2406,7 +2434,7 @@ SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,call
 	task.spawn(function()
 		local tracked, extraGravity, velocity = 0, 0, 0
 		local antiFall
-		antiFall = game:GetService("RunService").PreSimulation:Connect(function(dt)
+		antiFall = RunService.PreSimulation:Connect(function(dt)
 			if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
 				if not getgenv().Config.AntiFall then antiFall:Disconnect() return end
 				local root = plr.Character.HumanoidRootPart
@@ -2420,7 +2448,7 @@ SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,call
 						local Failed = 100
 						local velo = root.AssemblyLinearVelocity.Y
 
-						root.AssemblyLinearVelocity = Vector3.new(root.AssemblyLinearVelocity.X, -86, root.AssemblyLinearVelocity.Z)
+						root.AssemblyLinearVelocity = Vector3.new(root.AssemblyLinearVelocity.X, -90, root.AssemblyLinearVelocity.Z)
 						
 
 						velocity = velo
@@ -2467,65 +2495,24 @@ EspSec:CreateToggle({title="Highlight Players",default=getgenv().Config.Highligh
     getgenv().Config.HighlightPlayers=v
 end})
 
-local function clearBeams()
-	for k,c in pairs(game.Players:GetPlayers()) do
-		if c.Character then 
-			for huhu,char in pairs(c.Character:GetDescendants()) do
-				if char:IsA("Beam") then
-					char:Destroy()
-				end
-			end
-		end
-	end
-end
+
 
 EspSec:CreateToggle({
 	title="Tracker",
 	default=getgenv().Config.Tracker,
 	callback=function(v)
 		getgenv().Config.Tracker=v
-		task.spawn(function()
-			local myPlayer = game:GetService("Players").LocalPlayer
-			while getgenv().Config.Tracker do
-				for _, otherPlayer in ipairs(game:GetService("Players"):GetPlayers()) do
-					if otherPlayer ~= myPlayer and otherPlayer.TeamColor ~= myPlayer.TeamColor then
-						createBeam(myPlayer, otherPlayer)
-					end
-				end
-				task.wait(1)
-			end
-			clearBeams()
-		end)
-
 	end
 })
 
 EspSec:CreateToggle({title="Esp Bee",default=getgenv().Config.EspBee,callback=function(v)
     getgenv().Config.EspBee=v
-    task.spawn(function()
-        while wait() and getgenv().Config.EspBee do
-            pcall(function()
-                for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
-                    if v.Name=="Bee" and not v:FindFirstChild("EspHl") then
-                        local hl = Instance.new("Highlight")
-                        hl.Name = "EspHl"
-                        hl.Parent = v
-                        hl.FillColor = Color3.new(1, 0, 0)
-                        hl.Adornee = v
-                        if v:FindFirstChild("Root") and v.Root:FindFirstChild("ProximityPrompt") then
-                            v.Root.ProximityPrompt.MaxActivationDistance = 100
-                        end
-                    end
-                end
-            end)
-        end
-    end)
 end})
 
 ConfigSec:CreateButton({title="Save Config",callback=Save})
 
 
-game:GetService("UserInputService").InputBegan:Connect(function(input)
+UIS.InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.Q then
 		getgenv().Config.AutoBlock=not getgenv().Config.AutoBlock
 		if getgenv().Config.AutoBlock then
@@ -2539,10 +2526,10 @@ end)
 
 
 local function getClosestToMouse()
-    local mousePos = game:GetService("UserInputService"):GetMouseLocation()
+    local mousePos = UIS:GetMouseLocation()
     local closestPlr, closestDist = nil, getgenv().Config.Fov
 
-    for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+    for _, p in pairs(Players:GetPlayers()) do
         if p ~= plr and p.Character and p.Character:FindFirstChild("Head") and p.Team ~= plr.Team then
             local head = p.Character.Head
             local head3D, onScreen = workspace.CurrentCamera:WorldToViewportPoint(head.Position)
@@ -2766,26 +2753,25 @@ local GetTools = function()
     end
     return Found
 end
-local HttpService= game:GetService("HttpService")
 local GroundRay = RaycastParams.new()
 GroundRay.FilterType = Enum.RaycastFilterType.Include
 GroundRay.FilterDescendantsInstances = {workspace:WaitForChild("Map")}
 function firebow(pos2)
-    local Pos=game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+    local Pos=plr.Character.HumanoidRootPart.Position
 	print(GetTools())
     for i,v in pairs(GetTools()) do
 
-		if game:GetService("Players").LocalPlayer.Character:FindFirstChild(v.Item.tool.Name) then
-    
+		if plr.Character:FindFirstChild(v.Item.tool.Name) then
+
 			local ProjData = GameData.Modules.ProjMeta[v.Proj]
-			local AimPos = Aim(Pos, ProjData.launchVelocity, ProjData.gravitationalAcceleration or 196.2, pos2.HumanoidRootPart.Position, pos2.HumanoidRootPart.Velocity, workspace.Gravity,pos2.Humanoid.HipHeight, GroundRay)
+			local AimPos = Aim(Pos, 200, ProjData.gravitationalAcceleration or 196.2, pos2.HumanoidRootPart.Position, pos2.HumanoidRootPart.Velocity, workspace.Gravity,pos2.Humanoid.HipHeight, GroundRay)
 			local Args = {
 				v.Item.tool,
 				v.Ammo,
 				v.Proj,
 				CFrame.new(Pos, AimPos).Position,
 				Pos,
-				(CFrame.new(Pos, AimPos)).LookVector * ProjData.launchVelocity,
+				(CFrame.new(Pos, AimPos)).LookVector * 200,
 				HttpService:GenerateGUID(true),
 				{drawDurationSec = 1, shotId = HttpService:GenerateGUID(false)},
 				workspace:GetServerTimeNow() - (math.pow(10, -2) * ((50 - 5) / 2))
@@ -2796,55 +2782,47 @@ function firebow(pos2)
     end
 end
 
+
+
+
 task.spawn(function()
-	while wait(.3) do
-		if getgenv().Config.AutoBow then
-			if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-				local closestPlr = getClosestToMouse()
-				if  closestPlr then
-					local suc,err = pcall(function()
-						firebow(closestPlr.Character)
-					end)
-					if not suc then
-						warn(err)
-					end
-				end
-			end
-		end
-	end
+    while task.wait(0.1) do
+        if getgenv().Config.BoostSpeed then
+            pcall(function()
+                plr.Character.Humanoid.WalkSpeed = getgenv().Config.Speed
+                plr.Character.Humanoid.JumpPower = getgenv().Config.JumpHeight * 10
+                plr.Character.Humanoid.JumpHeight = getgenv().Config.JumpHeight
+            end)
+        end
+
+        if getgenv().Config.AutoCollect then
+            for i,v in pairs(workspace.ItemDrops:GetChildren()) do
+                if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and (v.Position-plr.Character.HumanoidRootPart.Position).Magnitude < 30 then
+                    local args = {
+                        [1] = {
+                            ["itemDrop"] = v
+                        }
+                    }
+                    PickupItemDropRemote:InvokeServer(unpack(args))
+                end
+            end
+        end
+
+        if getgenv().Config.AutoBow then
+            if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+                local closestPlr = getClosestToMouse()
+                if closestPlr then
+                    local suc,err = pcall(function()
+                        firebow(closestPlr.Character)
+                    end)
+                    if not suc then
+                        warn(err)
+                    end
+                end
+            end
+        end
+    end
 end)
-
-local player = game.Players.LocalPlayer
-
--- local function setupAntiFall(character)
---     local hrp = character:WaitForChild("HumanoidRootPart")
---     local humanoid = character:WaitForChild("Humanoid")
-
---     local bodyVelocity = Instance.new("BodyVelocity")
---     bodyVelocity.MaxForce = Vector3.new(0, 0, 0) 
---     bodyVelocity.Velocity = Vector3.new(0, 0, 0)
---     bodyVelocity.Parent = hrp
-
---     humanoid.StateChanged:Connect(function(_, newState)
---         if getgenv().Config.AntiFall then 
---             if newState == Enum.HumanoidStateType.Freefall then
---                 bodyVelocity.MaxForce = Vector3.new(0, 5000, 0) 
---                 bodyVelocity.Velocity = Vector3.new(0, -30, 0) 
---             elseif newState == Enum.HumanoidStateType.Landed then
---                 bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
---             end
---         end
---     end)
--- end
-
-
--- if player.Character then
---     setupAntiFall(player.Character)
--- end
-
-
--- player.CharacterAdded:Connect(setupAntiFall)
-
 
 local mt = getrawmetatable(game)
 local oldIndex = mt.__namecall
@@ -2863,29 +2841,16 @@ end)
 setreadonly(mt, true)
 
 
-function Find2(a,b)
-    for i,v in pairs(a:GetChildren()) do
-        if string.find(v.Name,b) then
-            return v
-        end
-    end
-    return nil
-end
-
-
-
-local Mouse=game:GetService("Players").LocalPlayer:GetMouse()
-local UIS=game:GetService("UserInputService")
 
 
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.5) do
         if getgenv().Config.HighlightPlayers then
-            for _, v in ipairs(game:GetService("Players"):GetPlayers()) do
-                if v ~= game.Players.LocalPlayer and v.Character then
+            for _, v in ipairs(Players:GetPlayers()) do
+                if v ~= plr and v.Character then
                     local char = v.Character
 					
-                    local isEnemy = (v.Team ~= game.Players.LocalPlayer.Team)
+                    local isEnemy = (v.Team ~= plr.Team)
                     if isEnemy then
                         if not char:FindFirstChild("EspHl") then
                             local hl = Instance.new("Highlight")
@@ -2899,166 +2864,110 @@ task.spawn(function()
                 end
             end
         else
-            for _, v in ipairs(game:GetService("Players"):GetPlayers()) do
+            for _, v in ipairs(Players:GetPlayers()) do
                 if v.Character and v.Character:FindFirstChild("EspHl") then
                     v.Character.EspHl:Destroy()
+                end
+            end
+        end
+
+        if getgenv().Config.EspBee then
+            pcall(function()
+                for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
+                    if v.Name=="Bee" and not v:FindFirstChild("EspHl") then
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "EspHl"
+                        hl.Parent = v
+                        hl.FillColor = Color3.new(1, 0, 0)
+                        hl.Adornee = v
+                        if v:FindFirstChild("Root") and v.Root:FindFirstChild("ProximityPrompt") then
+                            v.Root.ProximityPrompt.MaxActivationDistance = 100
+                        end
+                    end
+                end
+            end)
+        end
+
+        if getgenv().Config.Tracker then
+            for _, otherPlayer in ipairs(Players:GetPlayers()) do
+                if otherPlayer ~= plr and otherPlayer.TeamColor ~= plr.TeamColor then
+                    createBeam(plr, otherPlayer)
                 end
             end
         end
     end
 end)
 
-task.spawn(function()
-    while task.wait() do
-        if getgenv().Config.AutoCollect then
-            for i,v in pairs(workspace.ItemDrops:GetChildren()) do
-                if game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and (v.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 30 then
-                local args = {
-						[1] = {
-							["itemDrop"] = v
-						}
-					}
-
-					game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("PickupItemDrop"):InvokeServer(unpack(args))
-                end
-            end
-        end
-
-    end 
-end)
 
 
-task.spawn(function()
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if getgenv().Config.AutoAttack then
-            for i,v in pairs(game:GetService("Players"):GetChildren()) do
-                if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Team ~= game:GetService("Players").LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Name ~= game:GetService("Players").LocalPlayer.Name then
-                    local sw=Find2(game:GetService("ReplicatedStorage").Inventories[plr.Name],"sword")
-                    if sw and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 30 then
-                        local args = {
-                            [1] = {
-                                ["chargedAttack"] = {
-                                ["chargeRatio"] = 0
+
+
+-- Merged RenderStepped: AutoAttack + AutoBlock in a single connection
+RunService.RenderStepped:Connect(function()
+    -- AutoAttack
+    if getgenv().Config.AutoAttack then
+        for i,v in pairs(Players:GetPlayers()) do
+            if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Team ~= plr.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Name ~= plr.Name then
+                local sw=Find2(game:GetService("ReplicatedStorage").Inventories[plr.Name],"sword")
+                if sw and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position-plr.Character.HumanoidRootPart.Position).Magnitude < 20 then
+                    local args = {
+                        [1] = {
+                            ["chargedAttack"] = {
+                            ["chargeRatio"] = 0
+                        },
+                        ["entityInstance"] = v.Character,
+                        ["validate"] = {
+                            ["targetPosition"] = {
+                                ["value"] = v.Character.HumanoidRootPart.Position
                             },
-                            ["entityInstance"] = v.Character,
-                            ["validate"] = {
-                                ["targetPosition"] = {
-                                    ["value"] = v.Character.HumanoidRootPart.Position
+                            ["raycast"] = {
+                                ["cameraPosition"] = {
+                                    ["value"] = plr.Character.HumanoidRootPart.Position
                                 },
-                                ["raycast"] = {
-                                    ["cameraPosition"] = {
-                                        ["value"] = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
-                                    },
-                                    ["cursorDirection"] = {
-                                        ["value"] = (v.Character.HumanoidRootPart.Position-game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).unit
-                                    }
-                                },
-                                ["selfPosition"] = {
-                                    ["value"] = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+                                ["cursorDirection"] = {
+                                    ["value"] = (v.Character.HumanoidRootPart.Position-plr.Character.HumanoidRootPart.Position).unit
                                 }
                             },
-                            ["weapon"] = sw
-                        }
+                            ["selfPosition"] = {
+                                ["value"] = plr.Character.HumanoidRootPart.Position
+                            }
+                        },
+                        ["weapon"] = sw
                     }
-
-                    game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("SwordHit"):FireServer(unpack(args))
+                }
+                SwordHitRemote:FireServer(unpack(args))
                 end
             end
-        end 
-	end
-    end)
-end)
+        end
+    end
 
+    -- AutoBlock
+    if getgenv().Config.AutoBlock then
+        local character = plr.Character
+        if character and character:FindFirstChild("HumanoidRootPart") and plr.Team then
+            local blockType = "wool_" .. string.lower(plr.Team.Name)
+            local inventory = game:GetService("ReplicatedStorage").Inventories:FindFirstChild(plr.Name)
 
-function RayCast(origin, direction)
-    local ignored = {game:GetService("Players").LocalPlayer.Character,workspace:FindFirstChild("AntiVVV")}
-    local raycastParameters = RaycastParams.new()
-    raycastParameters.FilterDescendantsInstances = ignored
-    raycastParameters.FilterType = Enum.RaycastFilterType.Exclude
-    raycastParameters.IgnoreWater = true
-    
-    return workspace:Raycast(origin, direction, raycastParameters)
-end
+            if inventory and inventory:FindFirstChild(blockType) then
+                local hrp = character.HumanoidRootPart
+                local velocity = hrp.AssemblyLinearVelocity
 
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local player = Players.LocalPlayer
-local inventories = ReplicatedStorage:WaitForChild("Inventories")
-
-local placeBlockRemote = ReplicatedStorage:WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@easy-games"):WaitForChild("block-engine"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("PlaceBlock")
-
-local function placeBlock(gridPos, blockType)
-    local args = {
-        [1] = {
-            ["position"] = gridPos,
-            ["blockType"] = blockType,
-            ["blockData"] = 0,
-            ["mouseBlockInfo"] = {
-                ["placementPosition"] = gridPos
-            }
-        }
-    }
-    placeBlockRemote:InvokeServer(unpack(args))
-end
-
-local ttpp={{1,0,0},{-1,0,0},{0,0,1},{0,0,-1},{1,1,0},{-1,1,0},{0,1,1},{0,1,-1}}
-
-
-
--- task.spawn(function()
---     game:GetService("RunService").RenderStepped:Connect(function()
---         if not getgenv().Config.KillVoid then return end
--- 		for i,v in pairs(game:GetService("Players"):GetPlayers()) do
--- 			if v.Name ~= player.Name and v.Team ~= player.Team then
--- 				local character = v.Character
--- 				if character and character:FindFirstChild("HumanoidRootPart") and (character.HumanoidRootPart.Position-player.Character.HumanoidRootPart.Position).magnitude < 30 then
--- 					local blockType = "wool_" .. string.lower(player.Team.Name)
--- 					local inventory = inventories:FindFirstChild(player.Name)
--- 					if inventory and inventory:FindFirstChild(blockType) then
--- 						for _,cc in pairs(ttpp) do
--- 							if RayCast(v.Character.HumanoidRootPart.Position, Vector3.new(cc[1], -3, cc[2])) then
--- 								task.spawn(function()
--- 									placeBlock(Vector3.new(math.round((v.Character.HumanoidRootPart.Position.X+cc[1]*3) / 3), math.round((v.Character.HumanoidRootPart.Position.Y-2+cc[3]*3) / 3), math.round((v.Character.HumanoidRootPart.Position.Z+cc[2]*3) / 3)), blockType)
--- 								end)
--- 							end
--- 						end
--- 					end
--- 				end
--- 			end
--- 		end
---     end)	
--- end)
-
-task.spawn(function()
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if not getgenv().Config.AutoBlock then return end
-
-        local character = player.Character
-        if not character or not character:FindFirstChild("HumanoidRootPart") or not player.Team then return end
-
-        local blockType = "wool_" .. string.lower(player.Team.Name)
-        local inventory = inventories:FindFirstChild(player.Name)
-
-        if inventory and inventory:FindFirstChild(blockType) then
-            local hrp = character.HumanoidRootPart
-            local velocity = hrp.AssemblyLinearVelocity
-
-            if not RayCast(hrp.Position, Vector3.new(0, -5, 0)) then
-                local posX = hrp.Position.X + (velocity.X * 0.06)
-                local posZ = hrp.Position.Z + (velocity.Z * 0.06)
-                local gridPos = Vector3.new(math.round(posX / 3), math.round((hrp.Position.Y - 4.5) / 3), math.round(posZ / 3))
-                task.spawn(placeBlock, gridPos, blockType)
-            end
-
-            local lookDirection = velocity.Magnitude < 0.1 and hrp.CFrame.LookVector or velocity.Unit
-            for i=1,3 do
-				local checkPos = hrp.Position + (lookDirection * (i*3))
-
-                if not RayCast(checkPos, Vector3.new(0, -5, 0)) then
-                    local gridPos = Vector3.new(math.round(checkPos.X / 3), math.round((checkPos.Y - 4.5) / 3), math.round(checkPos.Z / 3))
+                if not RayCast(hrp.Position, Vector3.new(0, -5, 0)) then
+                    local posX = hrp.Position.X + (velocity.X * 0.06)
+                    local posZ = hrp.Position.Z + (velocity.Z * 0.06)
+                    local gridPos = Vector3.new(math.round(posX / 3), math.round((hrp.Position.Y - 4.5) / 3), math.round(posZ / 3))
                     task.spawn(placeBlock, gridPos, blockType)
                 end
-			end
+
+                local lookDirection = velocity.Magnitude < 0.1 and hrp.CFrame.LookVector or velocity.Unit
+                for i=1,3 do
+                    local checkPos = hrp.Position + (lookDirection * (i*3))
+                    if not RayCast(checkPos, Vector3.new(0, -5, 0)) then
+                        local gridPos = Vector3.new(math.round(checkPos.X / 3), math.round((checkPos.Y - 4.5) / 3), math.round(checkPos.Z / 3))
+                        task.spawn(placeBlock, gridPos, blockType)
+                    end
+                end
+            end
         end
-    end)
+    end
 end)
