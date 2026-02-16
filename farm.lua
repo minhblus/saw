@@ -1,4 +1,3 @@
---[[ ═══════ 1. SERVICES & VARIABLES ═══════ ]]--
 
 local TS = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -11,7 +10,6 @@ local Tweeninfo = TweenInfo.new
 local vim = game:service('VirtualInputManager')
 local Camera = Workspace.CurrentCamera
 
---[[ ═══════ 2. CORE UTILITIES ═══════ ]]--
 local function InstanceItem(name, prop, parent)
 	local item = assert(Instance.new(name), "Instance name invalid: " .. tostring(name))
 	for i, v in pairs(prop or {}) do
@@ -199,7 +197,62 @@ function CreatePageConfig(parrent,title,callback)
 
 	return PageConfig
 end
+local part=Instance.new("Part",workspace)
+part.Anchored=true
+part.CFrame = CFrame.new(0,100000,0)
 
+function ChangeCamera(val)
+	if val then
+		game.Workspace.CurrentCamera.CameraSubject =part
+	else
+		local camera = workspace.CurrentCamera
+		camera.CameraType = Enum.CameraType.Custom
+		camera.CameraSubject = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+	end
+end
+
+function BoostFps(level)
+	pcall(function()
+		
+        task.spawn(function()
+			local g = game
+			local w = g.Workspace
+			local l = g.Lighting
+			local t = w.Terrain
+			t.WaterWaveSize = 0
+			t.WaterWaveSpeed = 0
+			t.WaterReflectance = 0
+			t.WaterTransparency = 0
+			l.GlobalShadows = false
+			l.FogStart = 0
+			l.FogEnd = 100
+			l.Brightness = 0
+			settings().Rendering.QualityLevel = "Level01"
+
+			for i, v in pairs(g:GetDescendants()) do
+				if v:IsA("Decal") or v:IsA("Texture") then
+					v:Destroy()
+				elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+					v.Lifetime = NumberRange.new(0)
+				elseif v:IsA("Explosion") then
+					v.BlastPressure = 1
+					v.BlastRadius = 1
+				elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") or v:IsA("Sparkles") then
+					v.Enabled = false
+
+				elseif v:IsA("PostEffect") then
+					v.Enabled = false
+
+				end
+			end
+
+			w.Terrain:Clear()
+			local ss = game:GetService("SoundService")
+			ss.RespectFilteringEnabled = false
+			ss.AmbientReverb = Enum.ReverbType.NoReverb
+		end)
+	end)
+end
 
 local SawUI={}
 function AddPageOthers(Page,resetcallback,addpage)
@@ -1918,7 +1971,6 @@ function SawUI:CreateWindow(windowconfig)
 	return pagefunc
 end
 
---[[ ═══════ 4. GAME INIT & CONFIG ═══════ ]]--
 if not getgenv().Config then
 	getgenv().Config={
 		AutoAttack=false,
@@ -2072,7 +2124,6 @@ local GameData = {
     GameEvents = {}
 }
 
---[[ ═══════ 5. CONFIG SAVE/LOAD ═══════ ]]--
 function load()
 	if isfolder("Sawhub") == false then
 		makefolder("Sawhub")
@@ -2136,8 +2187,8 @@ end
 
 local AntiHitSettings = {
     Range = 18,
-    Height = 15,
-    Up = 0.2,
+    Height = 50,
+    Up = 0.1,
     Down = 0.1,
     Trans = 0.5,
     Material = "ForceField",
@@ -2243,7 +2294,6 @@ BowSec:CreateToggle({title="Show FOV",default=getgenv().Config.ShowFOV,callback=
 end})
 
 
---[[ ═══════ 9. RUNTIME LOOPS & HOOKS ═══════ ]]--
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 1
 FOVCircle.NumSides = 11
@@ -2356,7 +2406,39 @@ DefenseSec:CreateToggle({
 })
 
 
+local FlyConfig = {
+    Speed = 20,
+    VerticalSpeed = 18,
+    TPDownInterval = 2,
+    HeightOffset = 3.5
+}
 
+local flyConnection
+local lastGroundReset = os.clock()
+
+local function getMoveDirection()
+    local char = plr.Character
+    if not char or not char:FindFirstChild("Humanoid") then return Vector3.zero end
+    return char.Humanoid.MoveDirection
+end
+local rayParams = RaycastParams.new()
+local function resetFallDistance()
+    local char = plr.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+    rayParams.FilterDescendantsInstances = {char,workspace:FindFirstChild("AntiVVV")}
+
+    local ray = workspace:Raycast(root.Position, Vector3.new(0, -500, 0), rayParams)
+    if ray then
+        local oldCFrame = root.CFrame
+        root.CFrame = CFrame.new(ray.Position + Vector3.new(0, 3, 0))
+        task.wait(0.1)
+        root.CFrame = oldCFrame
+    end
+end
 
 MovementSec:CreateToggle({title="Fly",default=getgenv().Config.Fly,callback=function(v)
     getgenv().Config.Fly=v
@@ -2439,7 +2521,7 @@ SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,call
 				if not getgenv().Config.AntiFall then antiFall:Disconnect() return end
 				local root = plr.Character.HumanoidRootPart
 				if root.AssemblyLinearVelocity.Y < -85 then
-					rayParams.FilterDescendantsInstances = {plr.Character, workspace.CurrentCamera}
+					rayParams.FilterDescendantsInstances = {plr.Character, workspace.CurrentCamera,workspace:FindFirstChild("AntiVVV")}
 					rayParams.CollisionGroup = root.CollisionGroup
 
 					local rootSize = root.Size.Y / 2.5 + plr.Character.Humanoid.HipHeight
@@ -2495,7 +2577,17 @@ EspSec:CreateToggle({title="Highlight Players",default=getgenv().Config.Highligh
     getgenv().Config.HighlightPlayers=v
 end})
 
-
+local function clearBeams()
+	for k,c in pairs(game.Players:GetPlayers()) do
+		if c.Character then 
+			for huhu,char in pairs(c.Character:GetDescendants()) do
+				if char:IsA("Beam") then
+					char:Destroy()
+				end
+			end
+		end
+	end
+end
 
 EspSec:CreateToggle({
 	title="Tracker",
@@ -2753,6 +2845,41 @@ local GetTools = function()
     end
     return Found
 end
+
+local GetItemType = function(Item: string, find: boolean, checkitemmeta: string)
+    for i,v in GetInventory().items do
+        if v and typeof(v) == "table" then
+            if v.itemType then
+                local metadata = bedwars.ItemMeta[v.itemType]
+                if Item and v.itemType == Item or Item and find and tostring(v.itemType):find(Item) then
+                    return {Item = v, Meta = metadata}
+                else
+                    if checkitemmeta then
+                        if metadata[checkitemmeta] then
+                            return {Item = v, Meta = metadata}
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return
+end
+
+local GetBestSword = function()
+    local inventory = GetInventory()
+    local Sword = {Sword = nil, Damage = 0}
+    for i,v in inventory.items do
+        if bedwars.ItemMeta[v.itemType] and bedwars.ItemMeta[v.itemType].sword then
+            local sword = bedwars.ItemMeta[v.itemType].sword
+            if sword.damage > Sword.Damage then
+                Sword = {Sword = v, Damage = sword.damage}
+            end
+        end
+    end
+    return Sword
+end
+
 local GroundRay = RaycastParams.new()
 GroundRay.FilterType = Enum.RaycastFilterType.Include
 GroundRay.FilterDescendantsInstances = {workspace:WaitForChild("Map")}
@@ -2764,26 +2891,31 @@ function firebow(pos2)
 		if plr.Character:FindFirstChild(v.Item.tool.Name) then
 
 			local ProjData = GameData.Modules.ProjMeta[v.Proj]
-			local AimPos = Aim(Pos, 200, ProjData.gravitationalAcceleration or 196.2, pos2.HumanoidRootPart.Position, pos2.HumanoidRootPart.Velocity, workspace.Gravity,pos2.Humanoid.HipHeight, GroundRay)
-			local Args = {
-				v.Item.tool,
-				v.Ammo,
-				v.Proj,
-				CFrame.new(Pos, AimPos).Position,
-				Pos,
-				(CFrame.new(Pos, AimPos)).LookVector * 200,
-				HttpService:GenerateGUID(true),
-				{drawDurationSec = 1, shotId = HttpService:GenerateGUID(false)},
-				workspace:GetServerTimeNow() - (math.pow(10, -2) * ((50 - 5) / 2))
-			}
+			local AimPos = Aim(Pos, ProjData.launchVelocity, ProjData.gravitationalAcceleration or 196.2, pos2.HumanoidRootPart.Position, pos2.HumanoidRootPart.Velocity, workspace.Gravity,pos2.Humanoid.HipHeight, GroundRay)
+			if AimPos ~= 0 then
+				local Args = {
+					v.Item.tool,
+					v.Ammo,
+					v.Proj,
+					CFrame.new(Pos, AimPos).Position,
+					Pos,
+					(CFrame.new(Pos, AimPos)).LookVector * ProjData.launchVelocity,
+					HttpService:GenerateGUID(true),
+					{drawDurationSec = 1, shotId = HttpService:GenerateGUID(false)},
+					workspace:GetServerTimeNow() - (math.pow(10, -2) * ((50 - 5) / 2))
+				}
 
-			replicatedStorage.rbxts_include.node_modules["@rbxts"].net.out._NetManaged.ProjectileFire:InvokeServer(Args[1], Args[2], Args[3], Args[4], Args[5], Args[6], Args[7], Args[8], Args[9], Args[10])
+				replicatedStorage.rbxts_include.node_modules["@rbxts"].net.out._NetManaged.ProjectileFire:InvokeServer(Args[1], Args[2], Args[3], Args[4], Args[5], Args[6], Args[7], Args[8], Args[9], Args[10])
+			end
 		end
     end
 end
 
 
-
+-- Cache remote paths (used by AutoCollect, AutoAttack, AutoBlock)
+local NetManaged = replicatedStorage.rbxts_include.node_modules["@rbxts"].net.out._NetManaged
+local PickupItemDropRemote = NetManaged.PickupItemDrop
+local SwordHitRemote = NetManaged.SwordHit
 
 task.spawn(function()
     while task.wait(0.1) do
@@ -2841,7 +2973,14 @@ end)
 setreadonly(mt, true)
 
 
-
+function Find2(a,b)
+    for i,v in pairs(a:GetChildren()) do
+        if string.find(v.Name,b) then
+            return v
+        end
+    end
+    return nil
+end
 
 task.spawn(function()
     while task.wait(0.5) do
@@ -2898,9 +3037,21 @@ task.spawn(function()
     end
 end)
 
+local placeBlockRemote = replicatedStorage:WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@easy-games"):WaitForChild("block-engine"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("PlaceBlock")
 
-
-
+local function placeBlock(gridPos, blockType)
+    local args = {
+        [1] = {
+            ["position"] = gridPos,
+            ["blockType"] = blockType,
+            ["blockData"] = 0,
+            ["mouseBlockInfo"] = {
+                ["placementPosition"] = gridPos
+            }
+        }
+    }
+    placeBlockRemote:InvokeServer(unpack(args))
+end
 
 -- Merged RenderStepped: AutoAttack + AutoBlock in a single connection
 RunService.RenderStepped:Connect(function()
@@ -2908,8 +3059,8 @@ RunService.RenderStepped:Connect(function()
     if getgenv().Config.AutoAttack then
         for i,v in pairs(Players:GetPlayers()) do
             if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Team ~= plr.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Name ~= plr.Name then
-                local sw=Find2(game:GetService("ReplicatedStorage").Inventories[plr.Name],"sword")
-                if sw and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position-plr.Character.HumanoidRootPart.Position).Magnitude < 20 then
+                local sw=GetBestSword()
+                if sw and plr.Character and plr.Character:FindFirstChild(sw.Sword.tool.Name) and plr.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position-plr.Character.HumanoidRootPart.Position).Magnitude < 20 then
                     local args = {
                         [1] = {
                             ["chargedAttack"] = {
@@ -2932,7 +3083,7 @@ RunService.RenderStepped:Connect(function()
                                 ["value"] = plr.Character.HumanoidRootPart.Position
                             }
                         },
-                        ["weapon"] = sw
+                        ["weapon"] = sw.Sword.tool
                     }
                 }
                 SwordHitRemote:FireServer(unpack(args))
