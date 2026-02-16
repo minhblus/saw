@@ -2509,6 +2509,10 @@ SafetySec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,call
     end)
 end})
 
+SafetySec:CreateSlider({title="Anti Fall Speed",Min=10,Max=100,Precise=getgenv().Config.AntiFallSpeed or 70,callback=function(v)
+    getgenv().Config.AntiFallSpeed=v
+end})
+
 local rayParams = RaycastParams.new()
 local power=0
 SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,callback=function(v)
@@ -2530,12 +2534,11 @@ SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,call
 						local Failed = 100
 						local velo = root.AssemblyLinearVelocity.Y
 
-						root.AssemblyLinearVelocity = Vector3.new(root.AssemblyLinearVelocity.X, -90, root.AssemblyLinearVelocity.Z)
+						root.Velocity = Vector3.new(0, -getgenv().Config.AntiFallSpeed, 0)
 						
 
 						velocity = velo
-						root.CFrame = root.CFrame + Vector3.new(0, dt * power, 0)
-						power = power - dt * workspace.Gravity
+
 					else
 						velocity = root.AssemblyLinearVelocity.Y
 					end
