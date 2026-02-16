@@ -1,4 +1,5 @@
-
+repeat wait() until game:IsLoaded()
+repeat wait() until game:GetService("CoreGui")
 local TS = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -1299,6 +1300,92 @@ function AddPageOthers(Page,resetcallback,addpage)
 	return secfunc
 end
 
+
+
+
+
+local Notify = Instance.new("ScreenGui")
+Notify.Name = "NotifySystem"
+Notify.IgnoreGuiInset = true
+Notify.Parent = game:GetService("CoreGui")
+
+local Container = Instance.new("Frame")
+Container.Parent = Notify
+Container.BackgroundTransparency = 1
+Container.Size = UDim2.new(1, 0, 1, 0)
+Container.Position = UDim2.new(0, 0, 0.045, 0)
+
+local ListLayout = Instance.new("UIListLayout")
+ListLayout.Parent = Container
+ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+ListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ListLayout.Padding = UDim.new(0, 8)
+
+function CreateNotify(text, timee)
+    local Noti = Instance.new("Frame")
+    local UICorner = Instance.new("UICorner")
+    local TextLabel = Instance.new("TextLabel")
+    local TextStroke = Instance.new("UIStroke")
+
+    Noti.Name = "Noti"
+    Noti.Parent = Container
+    Noti.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+    Noti.Size = UDim2.new(0, 0, 0, 40)
+    Noti.ClipsDescendants = true
+
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = Noti
+
+    TextLabel.Parent = Noti
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Size = UDim2.new(1, 0, 1, 0)
+    TextLabel.Font = Enum.Font.Montserrat
+    TextLabel.Text = text
+    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextLabel.TextSize = 14
+    TextLabel.TextTransparency = 1
+    
+    TextStroke.Parent = Noti
+    TextStroke.Color = Color3.fromRGB(0, 170, 0)
+    TextStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    local textWidth = TextLabel.TextBounds.X + 50
+
+    TS:Create(Noti, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, textWidth, 0, 40)}):Play()
+    TS:Create(TextLabel, TweenInfo.new(0.2), {TextTransparency = 0}):Play()
+
+    local fc = {}
+    
+    function fc:Set(text)
+        if not Noti then return end
+        TextLabel.Text = text
+        local newWidth = TextLabel.TextBounds.X + 50
+        TS:Create(Noti, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {Size = UDim2.new(0, newWidth, 0, 40)}):Play()
+    end
+    
+    function fc:Destroy()
+        if not Noti then return end
+        local outTween = TS:Create(Noti, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 40)})
+        TS:Create(TextLabel, TweenInfo.new(0.1), {TextTransparency = 1}):Play()
+        outTween:Play()
+        outTween.Completed:Connect(function()
+            if Noti then Noti:Destroy() end
+        end)
+    end
+
+    function fc:Check()
+        return Noti and Noti.Parent ~= nil
+    end
+    
+    if timee then
+        task.delay(timee, function()
+            fc:Destroy()
+        end)
+    end
+    
+    return fc
+end
 function SawUI:CreateWindow(windowconfig)
 	local UI = InstanceItem("ScreenGui", {
 		["ResetOnSpawn"] = true,
@@ -1981,6 +2068,24 @@ if not getgenv().Config then
 	}
 end
 
+local loadhubb=CreateNotify("Loading Hub")
+
+task.spawn(function()
+	while task.wait(.1) and loadhubb:Check() do
+		loadhubb:Set("Loading Hub.")
+		task.wait(.1)
+		loadhubb:Set("Loading Hub..")
+		task.wait(.1)
+		loadhubb:Set("Loading Hub...")
+	end
+end)
+
+repeat task.wait() until game:GetService("Players").LocalPlayer
+repeat task.wait() until game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+repeat task.wait() until game:GetService("Players").LocalPlayer.Character
+task.wait(3)
+loadhubb:Destroy()
+
 local canDebug = getgenv().canDebug or false	
 local replicatedStorage=game:GetService("ReplicatedStorage")
 local KnitInit, Knit
@@ -2489,7 +2594,76 @@ end})
 MovementSec:CreateToggle({title="Boost Speed Jump",default=getgenv().Config.BoostSpeed,callback=function(v)
     getgenv().Config.BoostSpeed=v
 end})
+local RunService = game:GetService("RunService")
 
+local voidConnection
+local countdownActive = false
+local currentNotify = nil
+
+SafetySec:CreateToggle({
+    title = "Void Notify",
+    default = getgenv().Config.VoidNotify,
+    callback = function(v)
+        getgenv().Config.VoidNotify = v
+        
+        if voidConnection then voidConnection:Disconnect() end
+        
+        if not v then 
+            if currentNotify then 
+                currentNotify:Destroy() 
+                currentNotify = nil 
+            end
+            countdownActive = false
+            return 
+        end
+
+        voidConnection = RunService.Heartbeat:Connect(function()
+            local char = plr.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+            local params = RaycastParams.new()
+            params.FilterDescendantsInstances = {char,workspace:FindFirstChild("AntiVVV"),workspace.CurrentCamera}
+            params.FilterType = Enum.RaycastFilterType.Exclude
+            
+            local result = workspace:Raycast(root.Position, Vector3.new(0, -50, 0), params)
+
+            if not result then 
+                if not countdownActive then
+                    countdownActive = true
+                    
+                    task.spawn(function()
+                        if currentNotify then currentNotify:Destroy() end
+                        
+                        currentNotify = CreateNotify("Void Time: 2.00s")
+                        local timeLeft = 2.0
+                        
+                        while timeLeft > 0 and countdownActive do
+                            timeLeft = timeLeft - 0.05
+                            if currentNotify and currentNotify:Check() then
+                                currentNotify:Set("Void Time: " .. string.format("%.2f", math.max(0, timeLeft)) .. "s")
+                            end
+                            task.wait(0.05)
+                        end
+                        
+                        if currentNotify then
+                            currentNotify:Destroy()
+                            currentNotify = nil
+                        end
+                        countdownActive = false
+                    end)
+                end
+            else
+                if countdownActive then
+                    countdownActive = false
+                    if currentNotify then
+                        currentNotify:Destroy()
+                        currentNotify = nil
+                    end
+                end
+            end
+        end)
+    end
+})
 SafetySec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,callback=function(v)
     getgenv().Config.AntiVoid=v
     task.spawn(function()
@@ -2894,7 +3068,7 @@ function firebow(pos2)
 		if plr.Character:FindFirstChild(v.Item.tool.Name) then
 
 			local ProjData = GameData.Modules.ProjMeta[v.Proj]
-			local AimPos = Aim(Pos, ProjData.launchVelocity, ProjData.gravitationalAcceleration or 196.2, pos2.HumanoidRootPart.Position, pos2.HumanoidRootPart.Velocity, workspace.Gravity,pos2.Humanoid.HipHeight, GroundRay)
+			local AimPos = Aim(Pos, ProjData.launchVelocity, ProjData.gravitationalAcceleration or 196.2, pos2.Head.Position, pos2.HumanoidRootPart.Velocity, workspace.Gravity,pos2.Humanoid.HipHeight, GroundRay)
 			if AimPos ~= 0 then
 				local Args = {
 					v.Item.tool,
