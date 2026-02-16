@@ -2521,7 +2521,7 @@ SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,call
 				if not getgenv().Config.AntiFall then antiFall:Disconnect() return end
 				local root = plr.Character.HumanoidRootPart
 				if root.AssemblyLinearVelocity.Y < -85 then
-					rayParams.FilterDescendantsInstances = {plr.Character, workspace.CurrentCamera,workspace:FindFirstChild("AntiVVV")}
+					rayParams.FilterDescendantsInstances = {plr.Character, workspace.CurrentCamera}
 					rayParams.CollisionGroup = root.CollisionGroup
 
 					local rootSize = root.Size.Y / 2.5 + plr.Character.Humanoid.HipHeight
