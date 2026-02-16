@@ -2510,7 +2510,7 @@ SafetySec:CreateToggle({title="Anti Void",default=getgenv().Config.AntiVoid,call
 end})
 
 local rayParams = RaycastParams.new()
-
+local power=0
 SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,callback=function(v)
     getgenv().Config.AntiFall=v
 	task.spawn(function()
@@ -2534,8 +2534,8 @@ SafetySec:CreateToggle({title="Anti Fall",default=getgenv().Config.AntiFall,call
 						
 
 						velocity = velo
-						root.CFrame = root.CFrame + Vector3.new(0, (Failed and -extraGravity or extraGravity) * dt, 0)
-						extraGravity = extraGravity + (Failed and workspace.Gravity or -workspace.Gravity) * dt
+						root.CFrame = root.CFrame + Vector3.new(0, dt * power, 0)
+						power = power - dt * workspace.Gravity
 					else
 						velocity = root.AssemblyLinearVelocity.Y
 					end
@@ -3060,7 +3060,7 @@ RunService.RenderStepped:Connect(function()
         for i,v in pairs(Players:GetPlayers()) do
             if v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Team ~= plr.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Name ~= plr.Name then
                 local sw=GetBestSword()
-                if sw and plr.Character and plr.Character:FindFirstChild(sw.Sword.tool.Name) and plr.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position-plr.Character.HumanoidRootPart.Position).Magnitude < 20 then
+                if sw and plr.Character and sw.Sword and plr.Character:FindFirstChild(sw.Sword.tool.Name) and plr.Character:FindFirstChild("HumanoidRootPart") and (v.Character.HumanoidRootPart.Position-plr.Character.HumanoidRootPart.Position).Magnitude < 20 then
                     local args = {
                         [1] = {
                             ["chargedAttack"] = {
