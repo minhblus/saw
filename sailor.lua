@@ -3064,19 +3064,59 @@ local datamap={}
 
 for _, v in ipairs(PortalConfig.GetSortedPortals()) do
 	local data = v.data
-	local island=workspace[data.IslandFolder]
-    local n
 
-    for k,c in pairs(island:GetChildren()) do
-        if c:GetAttribute("CheckpointId") then
-            n=c:GetPivot().Position
-        end
+	if workspace:FindFirstChild(data.IslandFolder) then
+		local island=workspace[data.IslandFolder]
+		local n
+
+		for k,c in pairs(island:GetChildren()) do
+			if c:GetAttribute("CheckpointId") then
+				n=c:GetPivot().Position
+			end
+		end
+
+		datamap[v.id]={island,n}
+	end
+end
+local currentTween
+function tpTomap(pos)
+    local bestPortalId = nil
+    local minDistanceToTarget = math.huge
+
+
+	for id, portalData in pairs(datamap) do
+		local portalPos = portalData[2]
+
+		for _,chil in pairs(portalData[1]:GetChildren()) do
+			if string.find(chil.Name,"Portal") then
+				portalPos = chil.Position
+				
+				datamap[id][2] = portalPos
+				break
+			end
+		end
+		
+		local distFromPortalToTarget = (portalPos - targetPos).Magnitude+30
+
+
+		if distFromPortalToTarget < minDistanceToTarget then
+			minDistanceToTarget = distFromPortalToTarget
+			bestPortalId = id
+		end
 	end
 
-    datamap[v.id]={island,n}
+	    if bestPortalId then
+
+		if currentTween then
+			currentTween:Cancel()
+			task.wait(.1) 
+		end
+        game:GetService("ReplicatedStorage").Remotes.TeleportToPortal:FireServer(bestPortalId)
+        task.wait(0.3) 
+    end
+
 end
 
-local currentTween
 
 function TpTo(targetCFrame)
     local root = getRoot(LP.Character)
@@ -3112,7 +3152,7 @@ function TpTo(targetCFrame)
 	end
 
     if bestPortalId then
-		print(currentTween)
+
 		if currentTween then
 			currentTween:Cancel()
 			task.wait(.1) 
@@ -3350,7 +3390,7 @@ function checkgetname(a,b)
 end
 
 local bossspawn={"QinShiBoss","SaberBoss","MoonSlayerBoss","IchigoBoss","BlessedMaidenBoss","SaberAlterBoss","IceQueenBoss"}
- 
+local BossStronge={"StrongestinHistoryBoss","StrongestofTodayBoss"}
 
 function spawnbossfinal(bn)
 	if table.find(bossspawn,bn) then
@@ -3360,8 +3400,17 @@ function spawnbossfinal(bn)
 		else
 			game:GetService("ReplicatedStorage").Remotes.RequestSummonBoss:FireServer(bn,"Normal")
 		end
+	elseif table.find(BossStronge,bn) then
+		if bn=="StrongestinHistoryBoss" then
+			bn="StrongestHistory"
+		elseif bn=="StrongestofTodayBoss" then
+			bn="StrongestToday"
+		end
+		game:GetService("ReplicatedStorage").Remotes.RequestSpawnStrongestBoss:FireServer(bn,"Normal")
 	elseif bn=="AtomicBoss" then
 		game:GetService("ReplicatedStorage").RemoteEvents.RequestSpawnAtomic:FireServer("Normal")
+	elseif bn=="RimuruBoss" then
+		game:GetService("ReplicatedStorage").RemoteEvents.RequestSpawnRimuru:FireServer("Normal")
 	end
 end
 
@@ -3394,7 +3443,7 @@ task.spawn(function()
 			if piti and piti >= 24 then
 				local bn=getgenv().Config.BossPity or ""
 				local b2=getBoss2(Vector3.new(764.051513671875, -0.6666639447212219, -1086.5523681640625))
-				if table.find(bossspawn,bn) and not (string.find(b2.Name,bn) or string.find(bn,b2.Name) or b2.Name==bn) then
+				if table.find(bossspawn,bn) and (b2 and not (string.find(b2.Name,bn) or string.find(bn,b2.Name) or b2.Name==bn)) then
 					attackmob(b2)
 				end
 				if not checkgetname(workspace.NPCs,bn) then
