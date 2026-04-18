@@ -3162,15 +3162,18 @@ function TpTo(targetCFrame)
     end
 
     local newDistance = (root.Position - targetPos).Magnitude
-    if newDistance > 30 then
+    if newDistance > 50 then
         currentTween = game:GetService("TweenService"):Create(root, TweenInfo.new(newDistance/75), {CFrame = targetCFrame})
 		currentTween:Play()
     else
+		if currentTween then
+			currentTween:Cancel()
+		end
         root.CFrame = targetCFrame
     end
 end
 
- function equiptool(itemName)
+function equiptool(itemName)
 	if LP.Backpack:FindFirstChild(itemName) then
 		LP.Character.Humanoid:EquipTool(LP.Backpack:FindFirstChild(itemName))
 	end
@@ -3228,11 +3231,7 @@ end
 
 function AddQuest(quest2)
     if not game:GetService("Players").LocalPlayer.PlayerGui.QuestUI.Quest.Visible then
-		pcall(function()
-			local pos = workspace.ServiceNPCs[quest2]:GetPivot()
-			TpTo(pos)
-			fireproximityprompt(workspace.ServiceNPCs[quest2].HumanoidRootPart.QuestPrompt, 1, true)
-		end)
+		game:GetService("ReplicatedStorage").RemoteEvents.QuestAccept:FireServer(quest2)
     end
 end
 
@@ -3315,6 +3314,38 @@ function getpityboss()
     return 0 
 end
 
+function addhighlight(obj)
+
+
+    if not obj or obj:FindFirstChild("sawhubontop") then return end
+    
+    local highlight = Instance.new("Highlight")
+    highlight.FillColor = Color3.fromRGB(255, 255, 0)
+    highlight.OutlineColor = Color3.fromRGB(255, 165, 0)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+	highlight.Name="sawhubontop"
+    highlight.Adornee = obj
+    highlight.Parent = obj
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = obj
+    billboard.Size = UDim2.new(0, 100, 0, 40)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = obj
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = obj.Name
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextScaled = true
+    label.Font = Enum.Font.GothamBold
+    label.Parent = billboard
+end
+
+
 local Sawhub= UI:CreateWindow({Name="Saw Hub"})
 
 
@@ -3339,6 +3370,21 @@ end})
 ConfigSec:CreateDropdown({Name="Use Skill",List={"Z","X","C","V","F"},Default=getgenv().Config.UseSkill or {"Z","X","C","V"},Multi=true,Callback=function(v)
 	getgenv().Config.UseSkill=v
 end})
+
+local Sea2Sec = Sawhub.Home:CreateSection({Name="Sea 2"})
+Sea2Sec:CreateToggle({Name="Esp Ancient Fragment",Default=getgenv().Config.EspAncientFragment or false,Callback=function(v)
+	getgenv().Config.EspAncientFragment=v
+	task.spawn(function()
+		while wait() and getgenv().Config.EspAncientFragment do 
+			for _,item in pairs(workspace.Sea2MapQuest) do
+				if v.Name=="MapFragment_Ancient Fragment" or string.find(v.Name,"MapFragment_Ancient Fragment") or string.find("MapFragment_Ancient Fragment",v.Name) then
+					addhighlight(v)
+				end
+			end
+		end
+	end)
+end})
+
 
 local MobSec = Sawhub.Home:CreateSection({Name="Mob"})
 MobSec:CreateDropdown({Name="Select Mob",List=allmobs,Default=getgenv().Config.Mob or "",Multi=false,Callback=function(v)
@@ -3533,6 +3579,9 @@ task.spawn(function()
 			if game:GetService("Players").LocalPlayer.PlayerGui.QuestUI.Quest.Visible then
 				for _, v in ipairs(workspace.NPCs:GetChildren()) do
 					if string.find(v.Name, getgenv().Config.Mob) then
+						if (v:FindFirstChild("Humanoid") and v.Humanoid.Health <= 0) then
+							continue
+						end
 						repeat
 							TweenFloat()
 							task.wait()
@@ -3568,6 +3617,9 @@ task.spawn(function()
 			TweenFloat()
             local boss = getmobnearest()
             if boss then
+				if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0 or not boss:FindFirstChild("HumanoidRootPart") then
+					continue
+				end
 				repeat 
 					task.wait()
 					TweenFloat()
@@ -3641,3 +3693,16 @@ game:GetService('RunService').Stepped:Connect(function()
 end)
 
 Sawhub:Init()
+
+
+
+local rmt=game:GetService("ReplicatedStorage"):FindFirstChild("Remotes"):FindFirstChild("MHP")
+getgenv().b = not getgenv().b 
+local c
+c = game:GetService("RunService").Heartbeat:Connect(function()
+    if getgenv().b then
+        rmt:FireServer()
+	else
+		c:Disconnect()
+	end
+end)
