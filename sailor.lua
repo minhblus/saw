@@ -3376,9 +3376,9 @@ Sea2Sec:CreateToggle({Name="Esp Ancient Fragment",Default=getgenv().Config.EspAn
 	getgenv().Config.EspAncientFragment=v
 	task.spawn(function()
 		while wait() and getgenv().Config.EspAncientFragment do 
-			for _,item in pairs(workspace.Sea2MapQuest) do
-				if v.Name=="MapFragment_Ancient Fragment" or string.find(v.Name,"MapFragment_Ancient Fragment") or string.find("MapFragment_Ancient Fragment",v.Name) then
-					addhighlight(v)
+		for _,item in pairs(workspace.Sea2MapQuest:GetChildren()) do
+				if item.Name=="MapFragment_Ancient Fragment" or string.find(item.Name,"MapFragment_Ancient Fragment") or string.find("MapFragment_Ancient Fragment",item.Name) then
+					addhighlight(item)
 				end
 			end
 		end
@@ -3693,16 +3693,3 @@ game:GetService('RunService').Stepped:Connect(function()
 end)
 
 Sawhub:Init()
-
-
-
-local rmt=game:GetService("ReplicatedStorage"):FindFirstChild("Remotes"):FindFirstChild("MHP")
-getgenv().b = not getgenv().b 
-local c
-c = game:GetService("RunService").Heartbeat:Connect(function()
-    if getgenv().b then
-        rmt:FireServer()
-	else
-		c:Disconnect()
-	end
-end)
