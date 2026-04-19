@@ -3315,8 +3315,6 @@ function getpityboss()
 end
 
 function addhighlight(obj)
-
-
     if not obj or obj:FindFirstChild("sawhubontop") then return end
     
     local highlight = Instance.new("Highlight")
@@ -3345,7 +3343,14 @@ function addhighlight(obj)
     label.Parent = billboard
 end
 
-
+function findbossname(name)
+	for i,v in pairs(workspace.NPCs:GetChildren()) do
+		if v.Name==name then
+			return v 
+		end
+	end
+	return false
+end
 local Sawhub= UI:CreateWindow({Name="Saw Hub"})
 
 
@@ -3380,6 +3385,20 @@ Sea2Sec:CreateToggle({Name="Esp Ancient Fragment",Default=getgenv().Config.EspAn
 				if item.Name=="MapFragment_Ancient Fragment" or string.find(item.Name,"MapFragment_Ancient Fragment") or string.find("MapFragment_Ancient Fragment",item.Name) then
 					addhighlight(item)
 				end
+			end
+		end
+	end)
+end})
+
+Sea2Sec:CreateToggle({Name="Auto Kraken",Default=getgenv().Config.AutoKraken or false,Callback=function(v)
+	getgenv().Config.AutoKraken=v
+end})
+Sea2Sec:CreateToggle({Name="Auto Spawn Kraken",Default=getgenv().Config.AutoSpawnKraken or false,Callback=function(v)
+	getgenv().Config.AutoSpawnKraken=v
+	task.spawn(function()
+		while task.wait(.1) and getgenv().Config.AutoSpawnKraken do
+			if not findbossname("Kraken") and not findbossname("Sea Serpent") then
+				TpTo(CFrame.new(-2364.94434, -8.30165672, 932.541626))
 			end
 		end
 	end)
@@ -3544,6 +3563,7 @@ task.spawn(function()
 		end
 	end
 end)
+
 task.spawn(function()
     while task.wait() do
         if getgenv().Config.AutoFarmBoss and TaskFarm=="FarmBoss" then
@@ -3566,6 +3586,45 @@ task.spawn(function()
 						end
 					end
 				until not boss or not boss.Parent or (boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0) or not getgenv().Config.AutoFarmBoss or TaskFarm~="FarmBoss"
+			end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait() do
+        if getgenv().Config.AutoKraken and TaskFarm=="AutoKraken" then
+			TweenFloat()
+			
+            local boss
+			for i,v in pairs(workspace.NPCs:GetChildren()) do
+				if v.Name=="Kraken" or v.Name== "Sea Serpent" then
+					boss = v
+					break
+				end
+			end
+            if boss then
+				repeat
+                    task.wait()
+                    local root = getRoot(LP.Character)
+                    local hitbox = boss:FindFirstChild("SeaBeastHitbox")
+                    
+                    if boss.Parent and root and hitbox then
+                        -- Luôn luôn duy trì vị trí phía trên boss
+                        local targetCFrame = CFrame.new(hitbox.Position + Vector3.new(0, 50, 0), hitbox.Position)
+                        TpTo(targetCFrame)
+
+                        -- Kiểm tra khoảng cách để đánh (có thể nới lỏng Magnitude lên 50-60 cho chắc chắn)
+                        if (root.Position - targetCFrame.Position).Magnitude <= 60 then
+                            equiptool(getgenv().Config.Weapon)
+                            Attack()
+                            skiluse()
+                        end
+                    elseif boss.Parent then
+                        -- Nếu chưa tìm thấy hitbox thì TP tới Pivot chính của boss
+                        TpTo(boss:GetPivot())
+                    end
+                until not boss or not boss.Parent or (boss:GetAttribute("_BossHP") and tonumber(boss:GetAttribute("_BossHP")) <= 0) or not getgenv().Config.AutoKraken or TaskFarm ~= "AutoKraken"
 			end
         end
     end
@@ -3662,9 +3721,12 @@ EspSec:CreateToggle({Name="Player Name ESP",Default=getgenv().Config.ShowBossESP
 	end)
 end})
 
+
 task.spawn(function()
 	while task.wait() do
-		if getgenv().Config.AutoFarmBoss and getBoss() then
+		if getgenv().Config.AutoKraken and (findbossname("Kraken") or findbossname("Sea Serpent")) then
+			TaskFarm="AutoKraken"
+		elseif getgenv().Config.AutoFarmBoss and getBoss() then
 			TaskFarm="FarmBoss"
 		elseif getgenv().Config.AutoFarmMob then
 			TaskFarm="FarmMob"
