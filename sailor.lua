@@ -3133,7 +3133,7 @@ function TpTo(targetCFrame)
 		local portalPos = portalData[2]
 
 		for _,chil in pairs(portalData[1]:GetChildren()) do
-			print(chil.Name)
+
 			if string.find(chil.Name,"Portal") then
 				portalPos = chil.Position
 				
@@ -3376,6 +3376,10 @@ ConfigSec:CreateDropdown({Name="Use Skill",List={"Z","X","C","V","F"},Default=ge
 	getgenv().Config.UseSkill=v
 end})
 
+ConfigSec:CreateToggle({Name="Only Skill Boss",Default=getgenv().Config.OnlySkillBoss or false,Callback=function(v)
+	getgenv().Config.OnlySkillBoss=v
+end})
+
 local Sea2Sec = Sawhub.Home:CreateSection({Name="Sea 2"})
 Sea2Sec:CreateToggle({Name="Esp Ancient Fragment",Default=getgenv().Config.EspAncientFragment or false,Callback=function(v)
 	getgenv().Config.EspAncientFragment=v
@@ -3423,7 +3427,7 @@ end})
 
 local NearestSec=Sawhub.Home:CreateSection({Name="Nearest"})
 
-NearestSec:CreateSlider({Name="Distance Farm",Min=100,Default=getgenv().Config.DistanceFarm or 500,Max=2000,Callback=function(v)
+NearestSec:CreateSlider({Name="Distance Farm",Min=100,Default=getgenv().Config.DistanceFarm or 500,Max=10000,Callback=function(v)
 	getgenv().Config.DistanceFarm=v
 end})
 NearestSec:CreateToggle({Name="Auto Farm Nearest",Default=getgenv().Config.AutoFarmNearest,Callback=function(v)
@@ -3443,7 +3447,28 @@ PitySec:CreateDropdown({Name="Select Boss Final",List=allbosses,Default=getgenv(
 	getgenv().Config.BossPity=v
 end})
 
-local TaskFarm=""
+local PowerSec = Sawhub.Settings:CreateSection({Name="Power"})
+PowerSec:CreateToggle({Name="Power Saver",Default=getgenv().Config.PowerSaver or false,Callback=function(v)
+	getgenv().Config.PowerSaver = v
+	if v then
+		setfpscap(10)
+		game:GetService("RunService"):Set3dRenderingEnabled(false)
+	else
+		setfpscap(120)
+		game:GetService("RunService"):Set3dRenderingEnabled(true)
+	end
+end})
+
+PowerSec:CreateButton({Name="Disable LocalScripts (BreakGame)",Callback=function()
+	for i,v in pairs(game:GetDescendants()) do
+		if v:IsA("LocalScript") then
+			v.Enabled=false
+		end
+	end
+end})
+
+
+local TaskFarm="None"
 
 function checkgetname(a,b)
 	for i,v in pairs(a:GetChildren()) do
@@ -3483,8 +3508,7 @@ function attackmob(boss)
 	if boss then
 		repeat 
 			task.wait()
-			TweenFloat()
-			
+
 			if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
 				TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
 				equiptool(getgenv().Config.Weapon)
@@ -3504,7 +3528,7 @@ task.spawn(function()
     while task.wait(.1) do
         if getgenv().Config.AutoFarmPity then
 			local piti=getpityboss()
-			print(piti)
+
 			if piti and piti >= 24 then
 				local bn=getgenv().Config.BossPity or ""
 				local b2=getBoss2(Vector3.new(764.051513671875, -0.6666639447212219, -1086.5523681640625))
@@ -3518,8 +3542,7 @@ task.spawn(function()
 					if boss then
 						repeat 
 							task.wait()
-							TweenFloat()
-							
+
 							if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
 								TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
 								equiptool(getgenv().Config.Weapon)
@@ -3543,8 +3566,7 @@ task.spawn(function()
 					if boss then
 						repeat 
 							task.wait()
-							TweenFloat()
-							
+
 							if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
 								TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
 								equiptool(getgenv().Config.Weapon)
@@ -3567,12 +3589,11 @@ end)
 task.spawn(function()
     while task.wait() do
         if getgenv().Config.AutoFarmBoss and TaskFarm=="FarmBoss" then
-			TweenFloat()
+
             local boss = getBoss()
             if boss then
 				repeat 
 					task.wait()
-					TweenFloat()
 					
 					if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
 						TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
@@ -3594,8 +3615,7 @@ end)
 task.spawn(function()
     while task.wait() do
         if getgenv().Config.AutoKraken and TaskFarm=="AutoKraken" then
-			TweenFloat()
-			
+
             local boss
 			for i,v in pairs(workspace.NPCs:GetChildren()) do
 				if v.Name=="Kraken" or v.Name== "Sea Serpent" then
@@ -3633,7 +3653,7 @@ end)
 task.spawn(function()
 	while task.wait() do
 		if getgenv().Config.AutoFarmMob and TaskFarm=="FarmMob" then
-			TweenFloat()
+
 			AddQuest(quests[getgenv().Config.Mob])
 			if game:GetService("Players").LocalPlayer.PlayerGui.QuestUI.Quest.Visible then
 				for _, v in ipairs(workspace.NPCs:GetChildren()) do
@@ -3642,7 +3662,7 @@ task.spawn(function()
 							continue
 						end
 						repeat
-							TweenFloat()
+			
 							task.wait()
 							local char = LP.Character
 							local myRoot = char and char:FindFirstChild("HumanoidRootPart")
@@ -3658,7 +3678,9 @@ task.spawn(function()
 								equiptool(getgenv().Config.Weapon)
 								
 								Attack()
-								skiluse()
+								if not getgenv().Config.OnlySkillBoss then
+									skiluse()
+								end
 							end
 
 							local vHum = v:FindFirstChild("Humanoid")
@@ -3673,7 +3695,7 @@ end)
 task.spawn(function()
     while task.wait() do
         if getgenv().Config.AutoFarmNearest and TaskFarm=="FarmNearest" then
-			TweenFloat()
+
             local boss = getmobnearest()
             if boss then
 				if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0 or not boss:FindFirstChild("HumanoidRootPart") then
@@ -3681,7 +3703,7 @@ task.spawn(function()
 				end
 				repeat 
 					task.wait()
-					TweenFloat()
+
 					
 					if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
 						TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
@@ -3732,6 +3754,13 @@ task.spawn(function()
 			TaskFarm="FarmMob"
 		elseif getgenv().Config.AutoFarmNearest then
 			TaskFarm="FarmNearest"
+		else
+			TaskFarm="None"
+		end
+		if TaskFarm~="None" then
+			TweenFloat()
+		else
+			RemoveFloat()
 		end
 	end
 
@@ -3745,7 +3774,7 @@ game:GetService("Players").LocalPlayer.Idled:connect(function()
 end)
 
 game:GetService('RunService').Stepped:Connect(function()
-	if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and (getgenv().Config.AutoFarmBoss or getgenv().Config.AutoFarmMob) then
+	if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and (TaskFarm~="None") then
 		for k,v in next,game.Players.LocalPlayer.Character:GetChildren() do
 			if v:IsA('BasePart') then
 				v.CanCollide = false
