@@ -1,5 +1,5 @@
-repeat wait() until game:IsLoaded()
-repeat wait() until game:GetService("CoreGui")
+repeat task.wait() until game:IsLoaded()
+repeat task.wait() until game:GetService("CoreGui")
 local TS = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -13,51 +13,87 @@ local Camera = workspace.CurrentCamera
 local UI={}
 
 local Theme = {
-	Background = Color3.fromRGB(25, 25, 30),       -- Darker background
-	SecondaryBackground = Color3.fromRGB(35, 35, 42), -- Slightly lighter for secondary elements
-	Accent = Color3.fromRGB(85, 170, 255),         -- Bright blue accent
-	TextColor = Color3.fromRGB(255, 255, 255),     -- White text
-	SubTextColor = Color3.fromRGB(180, 180, 180),  -- Light gray for secondary text
-	ElementBackground = Color3.fromRGB(45, 45, 55), -- Elements background
-	Success = Color3.fromRGB(0, 210, 105),         -- Green for success states
-	Warning = Color3.fromRGB(255, 140, 0),         -- Orange for warnings
-	Error = Color3.fromRGB(255, 60, 60)            -- Red for errors
+	Background = Color3.fromRGB(24, 26, 30),
+	SecondaryBackground = Color3.fromRGB(30, 33, 39),
+	Accent = Color3.fromRGB(90, 175, 255),
+	TextColor = Color3.fromRGB(238, 242, 248),
+	SubTextColor = Color3.fromRGB(168, 176, 190),
+	ElementBackground = Color3.fromRGB(38, 42, 50),
+	StrokeColor = Color3.fromRGB(56, 62, 74),
+	Success = Color3.fromRGB(52, 199, 121),
+	Warning = Color3.fromRGB(255, 170, 75),
+	Error = Color3.fromRGB(255, 95, 95)
 }
 
+local function softTween(target, properties, duration, easingStyle, easingDirection)
+	TS:Create(
+		target,
+		TweenInfo.new(duration or 0.12, easingStyle or Enum.EasingStyle.Quad, easingDirection or Enum.EasingDirection.Out),
+		properties
+	):Play()
+end
+
+local function styleModernSurface(frame, cornerRadius)
+	frame.BackgroundColor3 = Theme.SecondaryBackground
+	local corner = frame:FindFirstChildOfClass("UICorner") or Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, cornerRadius or 8)
+	corner.Parent = frame
+
+	local stroke = frame:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke")
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	stroke.Color = Theme.StrokeColor
+	stroke.Thickness = 1
+	stroke.Transparency = 0
+	stroke.LineJoinMode = Enum.LineJoinMode.Round
+	stroke.Parent = frame
+end
+
 function TweenObject(obj, properties, duration, ...)
-	game:GetService("TweenService"):Create(obj, Tweeninfo(duration, ...), properties):Play()
+	TS:Create(obj, Tweeninfo(duration, ...), properties):Play()
 end
 
 function DraggingEnabled(frame, parent)
 	parent = parent or frame
 
 	local dragging = false
-	local dragInput, mousePos, framePos
+	local mousePos, framePos
+	local dragConnection
 
 	frame.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
 			mousePos = input.Position
 			framePos = parent.Position
+			if dragConnection then
+				dragConnection:Disconnect()
+				dragConnection = nil
+			end
+
+			dragConnection = UIS.InputChanged:Connect(function(changedInput)
+				if not dragging then
+					return
+				end
+				if changedInput.UserInputType ~= Enum.UserInputType.MouseMovement and changedInput.UserInputType ~= Enum.UserInputType.Touch then
+					return
+				end
+				local delta = changedInput.Position - mousePos
+				parent.Position = UDim2.new(
+					framePos.X.Scale,
+					framePos.X.Offset + delta.X,
+					framePos.Y.Scale,
+					framePos.Y.Offset + delta.Y
+				)
+			end)
 
 			input.Changed:Connect(function()
 				if input.UserInputState == Enum.UserInputState.End then
 					dragging = false
+					if dragConnection then
+						dragConnection:Disconnect()
+						dragConnection = nil
+					end
 				end
 			end)
-		end
-	end)
-
-	frame.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-
-	game:GetService("UserInputService").InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			local delta = input.Position - mousePos
-			TweenObject(parent, {Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)}, 0.1)
 		end
 	end)
 end
@@ -78,12 +114,7 @@ function AddListCanva(uilist,needlist)
 	end)
 end
 
-local ServerTime=0
-spawn(function()
-	while wait(1) do
-		ServerTime=ServerTime+1
-	end
-end)
+local serverStartTime = os.clock()
 
 local Notify = Instance.new("ScreenGui")
 Notify.Name = "NotifySystem"
@@ -181,7 +212,7 @@ function UI:CreateWindow(options)
 	Frame_2.Position = UDim2.new(0.500000, 0, 0.500000, 0)
 	Frame_2.Size = UDim2.new(0, 750,0, 500)
 	Frame_2.AnchorPoint = Vector2.new(0.500000, 0.500000)
-	Frame_2.BackgroundColor3 = Color3.fromRGB(17, 19, 21)
+	Frame_2.BackgroundColor3 = Theme.Background
 	Frame_2.BackgroundTransparency = 0
 	Frame_2.BorderSizePixel = 0
 	Frame_2.ClipsDescendants = false
@@ -199,7 +230,7 @@ function UI:CreateWindow(options)
 	page_4.Position = UDim2.new(0.271190, 0, 0.100000, 0)
 	page_4.Size = UDim2.new(0.714667, 0, 0.880000, 0)
 	page_4.AnchorPoint = Vector2.new(0.000000, 0.000000)
-	page_4.BackgroundColor3 = Color3.fromRGB(18, 20, 22)
+	page_4.BackgroundColor3 = Theme.SecondaryBackground
 	page_4.BackgroundTransparency = 0
 	page_4.BorderSizePixel = 0
 	page_4.ClipsDescendants = false
@@ -210,7 +241,7 @@ function UI:CreateWindow(options)
 	local UIStroke_5 = Instance.new("UIStroke")
 	UIStroke_5.Name = "UIStroke"
 	UIStroke_5.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	UIStroke_5.Color = Color3.fromRGB(37, 37, 37)
+	UIStroke_5.Color = Theme.StrokeColor
 	UIStroke_5.Thickness = 1
 	UIStroke_5.Transparency = 0
 	UIStroke_5.LineJoinMode = Enum.LineJoinMode.Round
@@ -232,7 +263,7 @@ function UI:CreateWindow(options)
 	PageName_7.Visible = true
 	PageName_7.ZIndex = 1
 	PageName_7.Text = "..."
-	PageName_7.TextColor3 = Color3.fromRGB(200, 200, 200)
+	PageName_7.TextColor3 = Theme.TextColor
 	PageName_7.TextScaled = false
 	PageName_7.TextSize = 18
 	PageName_7.Font = Enum.Font.Montserrat
@@ -247,7 +278,7 @@ function UI:CreateWindow(options)
 	search_8.Position = UDim2.new(0.271190, 0, 0.022000, 0)
 	search_8.Size = UDim2.new(0.714667, 0, 0.060000, 0)
 	search_8.AnchorPoint = Vector2.new(0.000000, 0.000000)
-	search_8.BackgroundColor3 = Color3.fromRGB(18, 20, 22)
+	search_8.BackgroundColor3 = Theme.SecondaryBackground
 	search_8.BackgroundTransparency = 0
 	search_8.BorderSizePixel = 0
 	search_8.ClipsDescendants = false
@@ -263,7 +294,7 @@ function UI:CreateWindow(options)
 	local UIStroke_10 = Instance.new("UIStroke")
 	UIStroke_10.Name = "UIStroke"
 	UIStroke_10.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	UIStroke_10.Color = Color3.fromRGB(37, 37, 37)
+	UIStroke_10.Color = Theme.StrokeColor
 	UIStroke_10.Thickness = 1
 	UIStroke_10.Transparency = 0
 	UIStroke_10.LineJoinMode = Enum.LineJoinMode.Round
@@ -280,7 +311,7 @@ function UI:CreateWindow(options)
 	Search_11.Visible = true
 	Search_11.ZIndex = 1
 	Search_11.Image = "rbxassetid://8445471332"
-	Search_11.ImageColor3 = Color3.fromRGB(177, 177, 177)
+	Search_11.ImageColor3 = Theme.SubTextColor
 	Search_11.ImageTransparency = 0
 	Search_11.ScaleType = Enum.ScaleType.Stretch
 	Search_11.SliceCenter = Rect.new(0.000000, 0.000000, 0.000000, 0.000000)
@@ -308,7 +339,9 @@ function UI:CreateWindow(options)
 	searchbox_13.Visible = true
 	searchbox_13.ZIndex = 1
 	searchbox_13.Text = ""
-	searchbox_13.TextColor3 = Color3.fromRGB(255, 255, 255)
+	searchbox_13.TextColor3 = Theme.TextColor
+	searchbox_13.PlaceholderText = "Search..."
+	searchbox_13.PlaceholderColor3 = Theme.SubTextColor
 	searchbox_13.TextScaled = false
 	searchbox_13.TextSize = 14
 	searchbox_13.Font = Enum.Font.Montserrat
@@ -325,7 +358,7 @@ function UI:CreateWindow(options)
 	NameHub_14.Position = UDim2.new(0.015476, 0, 0.022000, 0)
 	NameHub_14.Size = UDim2.new(0.230667, 0, 0.120000, 0)
 	NameHub_14.AnchorPoint = Vector2.new(0.000000, 0.000000)
-	NameHub_14.BackgroundColor3 = Color3.fromRGB(18, 20, 22)
+	NameHub_14.BackgroundColor3 = Theme.SecondaryBackground
 	NameHub_14.BackgroundTransparency = 0
 	NameHub_14.BorderSizePixel = 0
 	NameHub_14.ClipsDescendants = false
@@ -336,7 +369,7 @@ function UI:CreateWindow(options)
 	local UIStroke_15 = Instance.new("UIStroke")
 	UIStroke_15.Name = "UIStroke"
 	UIStroke_15.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	UIStroke_15.Color = Color3.fromRGB(37, 37, 37)
+	UIStroke_15.Color = Theme.StrokeColor
 	UIStroke_15.Thickness = 1
 	UIStroke_15.Transparency = 0
 	UIStroke_15.LineJoinMode = Enum.LineJoinMode.Round
@@ -1052,8 +1085,8 @@ function UI:CreateWindow(options)
 
 	local fps = 0
 	local frameCount = 0
-	local gameName
-	local lastTime = tick()
+	local gameName = "Unknown Game"
+	local lastTime = os.clock()
 	local MarketplaceService = game:GetService("MarketplaceService")
 
 	local success, info = pcall(function()
@@ -1072,16 +1105,20 @@ function UI:CreateWindow(options)
 		return string.format("%02d:%02d:%02d", hours, minutes, secs)
 	end
 
-	game:GetService("RunService").RenderStepped:Connect(function()
+	local statusUpdateAccumulator = 0
+	RunService.Heartbeat:Connect(function(deltaTime)
+		statusUpdateAccumulator = statusUpdateAccumulator + deltaTime
 		frameCount =frameCount+ 1
-		local currentTime = tick()
+		local currentTime = os.clock()
 
-		if currentTime - lastTime >= 1 then
+		if currentTime - lastTime >= 1 and statusUpdateAccumulator >= 0.25 then
 			fps = frameCount
 			frameCount = 0
 			lastTime = currentTime
+			statusUpdateAccumulator = 0
+			local serverTime = math.floor(os.clock() - serverStartTime)
 
-			TextLabel_49.Text=gameName.." | "..fps .." FPS | "..convertSecondsToTime(ServerTime).." | v1.0.0"
+			TextLabel_49.Text=gameName.." | "..fps .." FPS | "..convertSecondsToTime(serverTime).." | v1.0.0"
 		end
 	end)
 
@@ -1827,7 +1864,7 @@ function UI:CreateWindow(options)
 	close_2.BorderSizePixel = 0
 	close_2.Visible = true
 	close_2.ZIndex = 1
-	close_2.Text = "Button"
+	close_2.Text = ""
 	close_2.TextColor3 = Color3.fromRGB(0, 0, 0)
 	close_2.TextScaled = false
 	close_2.TextSize = 14
@@ -1960,11 +1997,74 @@ function UI:CreateWindow(options)
 
 	local function cleanUI(val)
 		for i,v in pairs(Frame_2:GetChildren()) do
-			if v.Name ~= "UIU" and v.Name ~= "Bar" then
+			if v.Name ~= "UIU" and v.Name ~= "Bar" and v.Name ~="dropdown" then
 				v.Visible=val
 			end
 		end
 
+	end
+
+	local minimizedToBar = false
+	local savedExpandedSize = Frame_2.Size
+
+	local function tweenFrameFromTop(targetSize, duration)
+		local currentPos = Frame_2.Position
+		local currentSize = Frame_2.Size
+		local deltaY = (currentSize.Y.Offset - targetSize.Y.Offset) * 0.5
+		local targetPos = UDim2.new(
+			currentPos.X.Scale,
+			currentPos.X.Offset,
+			currentPos.Y.Scale,
+			currentPos.Y.Offset - deltaY
+		)
+		softTween(Frame_2, {Position = targetPos, Size = targetSize}, duration or 0.12)
+	end
+
+	local function minimizeToBar()
+		if minimizedToBar then
+			return
+		end
+		savedExpandedSize = Frame_2.Size
+		cleanUI(false)
+		Add_54.Visible = true
+		Remove_52.Visible = false
+		tweenFrameFromTop(UDim2.new(0, 750, 0, 30), 0.12)
+		minimizedToBar = true
+	end
+
+	local function restoreFromBar()
+		if not minimizedToBar then
+			return
+		end
+		Add_54.Visible = false
+		Remove_52.Visible = true
+		cleanUI(true)
+		tweenFrameFromTop(savedExpandedSize, 0.12)
+		minimizedToBar = false
+	end
+
+	local function collapseMainWindow()
+		softTween(Frame_2, {Size = UDim2.new(0, 0, 0, 500)}, 0.12)
+		task.delay(0.12, function()
+			cleanUI(false)
+			softTween(Bar_46, {Size = UDim2.new(0, 0, 0, 30)}, 0.12)
+			task.delay(0.12, function()
+				Bar_46.Visible = false
+			end)
+		end)
+		opend = true
+	end
+
+	local function expandMainWindow()
+		Bar_46.Visible = true
+		softTween(Bar_46, {Size = UDim2.new(0, 750, 0, 30)}, 0.12)
+		task.delay(0.12, function()
+			Add_54.Visible = false
+			Remove_52.Visible = true
+			cleanUI(true)
+			softTween(Frame_2, {Size = UDim2.new(0, 750, 0, 500)}, 0.12)
+		end)
+		opend = false
 	end
 	
 	Rejoin_1.MouseButton1Click:Connect(function()
@@ -1973,28 +2073,15 @@ function UI:CreateWindow(options)
 	end)
 
 	Remove_52.MouseButton1Click:Connect(function()
-		TS:Create(Frame_2,TweenInfo.new(0.1),{Size=UDim2.new(0.627, 0,0, 0)}):Play()
-		task.wait(.1)
-		cleanUI(false)
-		Add_54.Visible=true
-		Remove_52.Visible=false
+		minimizeToBar()
 	end)
 
 	Add_54.MouseButton1Click:Connect(function()
-		Add_54.Visible=false
-		Remove_52.Visible=true
-		cleanUI(true)
-		TS:Create(Frame_2,TweenInfo.new(0.1),{Size=UDim2.new(0, 750,0, 500)}):Play()
+		restoreFromBar()
 	end)
 
 	Close_50.MouseButton1Click:Connect(function()
-		TS:Create(Frame_2,TweenInfo.new(0.1),{Size=UDim2.new(0, 0,0, 500)}):Play()
-		task.wait(.1)
-		cleanUI(false)
-		TS:Create(Bar_46,TweenInfo.new(0.1),{Size=UDim2.new(0, 0,0, 30)}):Play()
-		task.wait(.1)
-		Bar_46.Visible=false
-		opend=true
+		collapseMainWindow()
 	end)
 
     K_4.Text=guisetting.Keybind or "RightShift"
@@ -2024,22 +2111,9 @@ function UI:CreateWindow(options)
 		if c then return end 
 		if k.KeyCode==Enum.KeyCode[guisetting.Keybind] then
 			if not opend then
-				TS:Create(Frame_2,TweenInfo.new(0.1),{Size=UDim2.new(00, 0,0, 500)}):Play()
-				task.wait(.1)
-				cleanUI(false)
-				TS:Create(Bar_46,TweenInfo.new(0.1),{Size=UDim2.new(0, 0,0, 30)}):Play()
-				task.wait(.1)
-				Bar_46.Visible=false
-				opend=true
+				collapseMainWindow()
 			else
-				Bar_46.Visible=true
-				TS:Create(Bar_46,TweenInfo.new(0.1),{Size=UDim2.new(0, 750,0, 30)}):Play()
-				task.wait(.1)
-				Add_54.Visible=false
-				Remove_52.Visible=true
-				cleanUI(true)
-				TS:Create(Frame_2,TweenInfo.new(0.1),{Size=UDim2.new(0, 750,0, 500)}):Play()
-				opend=false
+				expandMainWindow()
 			end
 		end
 	end)
@@ -2058,7 +2132,7 @@ function UI:CreateWindow(options)
 		Section_1.Position = UDim2.new(0.004301, 0, -0.001245, 0)
 		Section_1.Size = UDim2.new(1.000000, -2, 0.000000, 200)
 		Section_1.AnchorPoint = Vector2.new(0.000000, 0.000000)
-		Section_1.BackgroundColor3 = Color3.fromRGB(15, 17, 18)
+		Section_1.BackgroundColor3 = Theme.SecondaryBackground
 		Section_1.BackgroundTransparency = 0
 		Section_1.BorderSizePixel = 0
 		Section_1.ClipsDescendants = false
@@ -2069,7 +2143,7 @@ function UI:CreateWindow(options)
 		local hehee_2 = Instance.new("UIStroke")
 		hehee_2.Name = "hehee"
 		hehee_2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		hehee_2.Color = Color3.fromRGB(37, 37, 37)
+		hehee_2.Color = Theme.StrokeColor
 		hehee_2.Thickness = 1
 		hehee_2.Transparency = 0
 		hehee_2.LineJoinMode = Enum.LineJoinMode.Round
@@ -2079,6 +2153,7 @@ function UI:CreateWindow(options)
 		UIAA_3.Name = "UIAA"
 		UIAA_3.CornerRadius = UDim.new(0.000000, 8)
 		UIAA_3.Parent = Section_1
+		styleModernSurface(Section_1, 8)
 
 		local SectionList_4 = Instance.new("UIListLayout")
 		SectionList_4.Name = "SectionList"
@@ -2107,13 +2182,13 @@ function UI:CreateWindow(options)
 		TextLabel_6.Position = UDim2.new(0.102183, 0, 0.000000, 0)
 		TextLabel_6.Size = UDim2.new(0.278175, 0, 1.000000, 0)
 		TextLabel_6.AnchorPoint = Vector2.new(0.000000, 0.000000)
-		TextLabel_6.BackgroundColor3 = Color3.fromRGB(15, 17, 18)
+		TextLabel_6.BackgroundColor3 = Theme.SecondaryBackground
 		TextLabel_6.BackgroundTransparency = 0
 		TextLabel_6.BorderSizePixel = 0
 		TextLabel_6.Visible = true
 		TextLabel_6.ZIndex = 2
 		TextLabel_6.Text = optionssec.Name
-		TextLabel_6.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextLabel_6.TextColor3 = Theme.TextColor
 		TextLabel_6.TextScaled = false
 		TextLabel_6.TextSize = 14
 		TextLabel_6.Font = Enum.Font.Montserrat
@@ -2130,7 +2205,7 @@ function UI:CreateWindow(options)
 		Frame_7.Position = UDim2.new(0.500000, 0, 0.500000, 0)
 		Frame_7.Size = UDim2.new(1.000000, -20, 0.000000, 2)
 		Frame_7.AnchorPoint = Vector2.new(0.500000, 0.500000)
-		Frame_7.BackgroundColor3 = Color3.fromRGB(139, 139, 139)
+		Frame_7.BackgroundColor3 = Theme.StrokeColor
 		Frame_7.BackgroundTransparency = 0
 		Frame_7.BorderSizePixel = 0
 		Frame_7.ClipsDescendants = false
@@ -2176,7 +2251,7 @@ function UI:CreateWindow(options)
 			ButtonName_2.Visible = true
 			ButtonName_2.ZIndex = 1
 			ButtonName_2.Text = optionsbutton.Name
-			ButtonName_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+			ButtonName_2.TextColor3 = Theme.TextColor
 			ButtonName_2.TextScaled = false
 			ButtonName_2.TextSize = 14
 			ButtonName_2.Font = Enum.Font.GothamBold
@@ -2191,7 +2266,7 @@ function UI:CreateWindow(options)
 			Fire_3.Position = UDim2.new(1.000000, 0, 0.500000, 0)
 			Fire_3.Size = UDim2.new(0.000000, 49, 0.000000, 20)
 			Fire_3.AnchorPoint = Vector2.new(1.000000, 0.500000)
-			Fire_3.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+			Fire_3.BackgroundColor3 = Theme.ElementBackground
 			Fire_3.BackgroundTransparency = 0
 			Fire_3.BorderSizePixel = 0
 			Fire_3.Visible = true
@@ -2216,7 +2291,7 @@ function UI:CreateWindow(options)
 			local dad_5 = Instance.new("UIStroke")
 			dad_5.Name = "dad"
 			dad_5.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			dad_5.Color = Color3.fromRGB(71, 71, 71)
+			dad_5.Color = Theme.StrokeColor
 			dad_5.Thickness = 1
 			dad_5.Transparency = 0
 			dad_5.LineJoinMode = Enum.LineJoinMode.Round
@@ -2229,6 +2304,12 @@ function UI:CreateWindow(options)
 				task.spawn(function()
 					optionsbutton.Callback()
 				end)
+			end)
+			Fire_3.MouseEnter:Connect(function()
+				softTween(Fire_3, {BackgroundColor3 = Theme.Accent}, 0.12)
+			end)
+			Fire_3.MouseLeave:Connect(function()
+				softTween(Fire_3, {BackgroundColor3 = Theme.ElementBackground}, 0.12)
 			end)
 
 			function buttonlib:Fire()
@@ -2264,7 +2345,7 @@ function UI:CreateWindow(options)
 			ToggleName_2.Visible = true
 			ToggleName_2.ZIndex = 1
 			ToggleName_2.Text = toggleoptions.Name
-			ToggleName_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+			ToggleName_2.TextColor3 = Theme.TextColor
 			ToggleName_2.TextScaled = false
 			ToggleName_2.TextSize = 14
 			ToggleName_2.Font = Enum.Font.GothamBold
@@ -2279,7 +2360,7 @@ function UI:CreateWindow(options)
 			Fire_3.Position = UDim2.new(1.000000, 0, 0.500000, 0)
 			Fire_3.Size = UDim2.new(0.000000, 20, 0.000000, 20)
 			Fire_3.AnchorPoint = Vector2.new(1.000000, 0.500000)
-			Fire_3.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			Fire_3.BackgroundColor3 = Theme.ElementBackground
 			Fire_3.BackgroundTransparency = 0
 			Fire_3.BorderSizePixel = 0
 			Fire_3.Visible = true
@@ -2306,7 +2387,7 @@ function UI:CreateWindow(options)
 			Check_5.Position = UDim2.new(0.000000, 0, 0.000000, 0)
 			Check_5.Size = UDim2.new(1.000000, 0, 1.000000, 0)
 			Check_5.AnchorPoint = Vector2.new(0.000000, 0.000000)
-			Check_5.BackgroundColor3 = Color3.fromRGB(66, 197, 197)
+			Check_5.BackgroundColor3 = Theme.Accent
 			Check_5.BackgroundTransparency = 0
 			Check_5.BorderSizePixel = 1
 			Check_5.Visible = true
@@ -2336,8 +2417,10 @@ function UI:CreateWindow(options)
 				togglefunc.Enabled=val
 				if val then
 					Check_5.Visible=true
+					softTween(Fire_3, {BackgroundColor3 = Theme.Accent}, 0.12)
 				else
 					Check_5.Visible=false
+					softTween(Fire_3, {BackgroundColor3 = Theme.ElementBackground}, 0.12)
 				end
 				toggleoptions.Callback(val)
 			end
@@ -2378,7 +2461,7 @@ function UI:CreateWindow(options)
 			SliderName_2.Visible = true
 			SliderName_2.ZIndex = 1
 			SliderName_2.Text = slideroptions.Name
-			SliderName_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+			SliderName_2.TextColor3 = Theme.TextColor
 			SliderName_2.TextScaled = false
 			SliderName_2.TextSize = 14
 			SliderName_2.Font = Enum.Font.GothamBold
@@ -2399,7 +2482,7 @@ function UI:CreateWindow(options)
 			Number_3.Visible = true
 			Number_3.ZIndex = 1
 			Number_3.Text =  tostring(slideroptions.Default) or tostring(Min)
-			Number_3.TextColor3 = Color3.fromRGB(72, 72, 72)
+			Number_3.TextColor3 = Theme.SubTextColor
 			Number_3.TextScaled = false
 			Number_3.TextSize = 12
 			Number_3.Font = Enum.Font.GothamBold
@@ -2414,7 +2497,7 @@ function UI:CreateWindow(options)
 			Fire_4.Position = UDim2.new(0.000000, 0, 0.700000, 0)
 			Fire_4.Size = UDim2.new(0.000000, 231, 0.000000, 5)
 			Fire_4.AnchorPoint = Vector2.new(0.000000, 0.000000)
-			Fire_4.BackgroundColor3 = Color3.fromRGB(29, 29, 29)
+			Fire_4.BackgroundColor3 = Theme.ElementBackground
 			Fire_4.BackgroundTransparency = 0
 			Fire_4.BorderSizePixel = 0
 			Fire_4.Visible = true
@@ -2436,7 +2519,7 @@ function UI:CreateWindow(options)
 			Ttt_5.Position = UDim2.new(0.000000, 0, 0.000000, 0)
 			Ttt_5.Size = UDim2.new(0.500000, 0, 1.000000, 0)
 			Ttt_5.AnchorPoint = Vector2.new(0.000000, 0.000000)
-			Ttt_5.BackgroundColor3 = Color3.fromRGB(66, 197, 197)
+			Ttt_5.BackgroundColor3 = Theme.Accent
 			Ttt_5.BackgroundTransparency = 0
 			Ttt_5.BorderSizePixel = 0
 			Ttt_5.ClipsDescendants = false
@@ -2454,7 +2537,7 @@ function UI:CreateWindow(options)
 			Cir_7.Position = UDim2.new(1.000000, 5, 0.500000, 0)
 			Cir_7.Size = UDim2.new(0.000000, 10, 0.000000, 10)
 			Cir_7.AnchorPoint = Vector2.new(1.000000, 0.500000)
-			Cir_7.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			Cir_7.BackgroundColor3 = Theme.TextColor
 			Cir_7.BackgroundTransparency = 0
 			Cir_7.BorderSizePixel = 0
 			Cir_7.ClipsDescendants = false
@@ -2486,7 +2569,8 @@ function UI:CreateWindow(options)
 			local Dragging = false
 
 			local function Sliding(Input)
-				local pos = math.clamp((Input.Position.X - Fire_4.AbsolutePosition.X) / Fire_4.AbsoluteSize.X, 0, 1)
+				local width = math.max(Fire_4.AbsoluteSize.X, 1)
+				local pos = math.clamp((Input.Position.X - Fire_4.AbsolutePosition.X) / width, 0, 1)
 				local value = Min + (pos * (Max - Min))
 
 				value = math.floor(value / Increment + 0.5) * Increment
@@ -2496,7 +2580,8 @@ function UI:CreateWindow(options)
 				local precision = decimals and #decimals or 0
 				local formattedValue = string.format("%." .. precision .. "f", value)
 
-				Ttt_5.Size = UDim2.new((value - Min) / (Max - Min), 0, 1, 0)
+				local denominator = math.max(Max - Min, 1e-6)
+				Ttt_5.Size = UDim2.new((value - Min) / denominator, 0, 1, 0)
 				Number_3.Text = formattedValue
 
 				sliderfunc.Value=value
@@ -2511,7 +2596,8 @@ function UI:CreateWindow(options)
 				local precision = decimals and #decimals or 0
 				local formattedValue = string.format("%." .. precision .. "f", value)
 
-				Ttt_5.Size = UDim2.new((value - Min) / (Max - Min), 0, 1, 0)
+				local denominator = math.max(Max - Min, 1e-6)
+				Ttt_5.Size = UDim2.new((value - Min) / denominator, 0, 1, 0)
 				Number_3.Text = formattedValue
 
 				sliderfunc.Value=value
@@ -2574,7 +2660,7 @@ function UI:CreateWindow(options)
 			namedrop_2.Visible = true
 			namedrop_2.ZIndex = 1
 			namedrop_2.Text = dropoptions["Name"]
-			namedrop_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+			namedrop_2.TextColor3 = Theme.TextColor
 			namedrop_2.TextScaled = false
 			namedrop_2.TextSize = 14
 			namedrop_2.Font = Enum.Font.GothamBold
@@ -2589,7 +2675,7 @@ function UI:CreateWindow(options)
 			Opend_3.Position = UDim2.new(1.000000, 0, 0.500000, 0)
 			Opend_3.Size = UDim2.new(0.000000, 128, 0.000000, 20)
 			Opend_3.AnchorPoint = Vector2.new(1.000000, 0.500000)
-			Opend_3.BackgroundColor3 = Color3.fromRGB(35, 38, 39)
+			Opend_3.BackgroundColor3 = Theme.ElementBackground
 			Opend_3.BackgroundTransparency = 0
 			Opend_3.BorderSizePixel = 0
 			Opend_3.Visible = true
@@ -2614,11 +2700,12 @@ function UI:CreateWindow(options)
 			local UIStroke_5 = Instance.new("UIStroke")
 			UIStroke_5.Name = "UIStroke"
 			UIStroke_5.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			UIStroke_5.Color = Color3.fromRGB(71, 71, 71)
+			UIStroke_5.Color = Theme.StrokeColor
 			UIStroke_5.Thickness = 1
 			UIStroke_5.Transparency = 0
 			UIStroke_5.LineJoinMode = Enum.LineJoinMode.Round
 			UIStroke_5.Parent = Opend_3
+			styleModernSurface(Opend_3, 4)
 
 			local show_6 = Instance.new("TextLabel")
 			show_6.Name = "show"
@@ -2631,7 +2718,7 @@ function UI:CreateWindow(options)
 			show_6.Visible = true
 			show_6.ZIndex = 1
 			show_6.Text = "..."
-			show_6.TextColor3 = Color3.fromRGB(84, 84, 84)
+			show_6.TextColor3 = Theme.SubTextColor
 			show_6.TextScaled = false
 			show_6.TextSize = 12
 			show_6.Font = Enum.Font.GothamBold
@@ -2647,8 +2734,8 @@ function UI:CreateWindow(options)
 			dropdownname_1.Position = UDim2.new(0.689977, 0, -0.004545, 0)
 			dropdownname_1.Size = UDim2.new(0.000000, 164, 1.000000, 0)
 			dropdownname_1.AnchorPoint = Vector2.new(0.000000, 0.000000)
-			dropdownname_1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-			dropdownname_1.BackgroundTransparency = 0.5
+			dropdownname_1.BackgroundColor3 = Theme.SecondaryBackground
+			dropdownname_1.BackgroundTransparency = 0.1
 			dropdownname_1.BorderSizePixel = 0
 			dropdownname_1.ClipsDescendants = false
 			dropdownname_1.Visible = true
@@ -2693,16 +2780,16 @@ function UI:CreateWindow(options)
 			searchdrop_5.Position = UDim2.new(0.060976, 0, 0.029545, 0)
 			searchdrop_5.Size = UDim2.new(0.000000, 144, 0.000000, 23)
 			searchdrop_5.AnchorPoint = Vector2.new(0.000000, 0.000000)
-			searchdrop_5.BackgroundColor3 = Color3.fromRGB(18, 20, 22)
+			searchdrop_5.BackgroundColor3 = Theme.Background
 			searchdrop_5.BackgroundTransparency = 0
 			searchdrop_5.BorderSizePixel = 0
 			searchdrop_5.Visible = true
 			searchdrop_5.ZIndex = 1
 			searchdrop_5.PlaceholderText = "Search"
-			searchdrop_5.TextColor3 = Color3.fromRGB(162, 162, 162)
+			searchdrop_5.TextColor3 = Theme.TextColor
 			searchdrop_5.TextScaled = false
 			searchdrop_5.TextSize = 14
-			searchdrop_5.Font = Enum.Font.SourceSans
+			searchdrop_5.Font = Enum.Font.Montserrat
 			searchdrop_5.TextXAlignment = Enum.TextXAlignment.Center
 			searchdrop_5.TextYAlignment = Enum.TextYAlignment.Center
 			searchdrop_5.TextWrapped = false
@@ -2719,7 +2806,7 @@ function UI:CreateWindow(options)
 			local UIStroke_7 = Instance.new("UIStroke")
 			UIStroke_7.Name = "UIStroke"
 			UIStroke_7.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			UIStroke_7.Color = Color3.fromRGB(37, 37, 37)
+			UIStroke_7.Color = Theme.StrokeColor
 			UIStroke_7.Thickness = 1
 			UIStroke_7.Transparency = 0
 			UIStroke_7.LineJoinMode = Enum.LineJoinMode.Round
@@ -2730,6 +2817,8 @@ function UI:CreateWindow(options)
 			local selectedItems = {}
 			local itemSelected
 			local itemCount = 0
+			local searchSerial = 0
+			local allToken = "__ALL__"
 
 			Opend_3.MouseButton1Click:Connect(function()
 				cleandrop()
@@ -2758,57 +2847,80 @@ function UI:CreateWindow(options)
 					for name in pairs(selectedItems) do
 						table.insert(selectedList, name)
 					end
-					task.spawn(function()
-						dropoptions.Callback(selectedList)
-					end)
+					dropoptions.Callback(selectedList)
 				else
-					task.spawn(function()
-						dropoptions.Callback(itemSelected or "")
-					end)
+					dropoptions.Callback(itemSelected or "")
 				end
 			end
 			
 			searchdrop_5:GetPropertyChangedSignal("Text"):Connect(function()
-				local keyword = searchdrop_5.Text:lower()
-
-				for name, button in pairs(buttonList) do
-					if keyword == "" then
-						button.Visible = true
-					else
-						local match = name:lower():find(keyword, 1, true)
-						button.Visible = match ~= nil
+				searchSerial = searchSerial + 1
+				local serial = searchSerial
+				task.delay(0.06, function()
+					if serial ~= searchSerial then
+						return
 					end
-				end
+					local keyword = searchdrop_5.Text:lower()
+					for name, button in pairs(buttonList) do
+						if keyword == "" then
+							button.Visible = true
+						else
+							button.Visible = name:lower():find(keyword, 1, true) ~= nil
+						end
+					end
+				end)
 			end)
 
 
-			local function addButton(itemName)
+			local function addButton(itemName, displayName)
 				local TextButton_1 = Instance.new("TextButton")
 				TextButton_1.Name = itemName
 				TextButton_1.Position = UDim2.new(0.000000, 0, 0.000000, 0)
 				TextButton_1.Size = UDim2.new(1.000000, -20, 0.000000, 19)
 				TextButton_1.AnchorPoint = Vector2.new(0.000000, 0.000000)
-				TextButton_1.BackgroundColor3 = Color3.fromRGB(18, 20, 22)
+				TextButton_1.BackgroundColor3 = Theme.Background
 				TextButton_1.BackgroundTransparency = 0
 				TextButton_1.BorderSizePixel = 0
 				TextButton_1.Visible = true
 				TextButton_1.ZIndex = 1
-				TextButton_1.Text = itemName
-				TextButton_1.TextColor3 = Color3.fromRGB(255, 255, 255)
-				TextButton_1.TextScaled = true
+				TextButton_1.Text = displayName or itemName
+				TextButton_1.TextColor3 = Theme.TextColor
+				TextButton_1.TextScaled = false
 				TextButton_1.TextSize = 14
 				TextButton_1.Font = Enum.Font.Gotham
-				TextButton_1.TextXAlignment = Enum.TextXAlignment.Center
+				TextButton_1.TextXAlignment = Enum.TextXAlignment.Left
 				TextButton_1.TextYAlignment = Enum.TextYAlignment.Center
 				TextButton_1.TextWrapped = true
 				TextButton_1.TextTransparency = 0
 				TextButton_1.AutoButtonColor = true
 				TextButton_1.Parent = item_2
+				local textPadding = Instance.new("UIPadding")
+				textPadding.PaddingLeft = UDim.new(0, 8)
+				textPadding.Parent = TextButton_1
 
 				local UICorner_2 = Instance.new("UICorner")
 				UICorner_2.Name = "UICorner"
 				UICorner_2.CornerRadius = UDim.new(0.000000, 4)
 				UICorner_2.Parent = TextButton_1
+
+				if itemName == allToken then
+					TextButton_1.LayoutOrder = -1000
+					TextButton_1.Size = UDim2.new(1.000000, -20, 0.000000, 22)
+					TextButton_1.BackgroundColor3 = Theme.ElementBackground
+					local allStroke = Instance.new("UIStroke")
+					allStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+					allStroke.Color = Theme.Accent
+					allStroke.Thickness = 1
+					allStroke.Parent = TextButton_1
+
+					local spacer = Instance.new("Frame")
+					spacer.Name = "AllSpacer"
+					spacer.LayoutOrder = -999
+					spacer.Size = UDim2.new(1, -20, 0, 6)
+					spacer.BackgroundTransparency = 1
+					spacer.BorderSizePixel = 0
+					spacer.Parent = item_2
+				end
 
 
 
@@ -2817,6 +2929,18 @@ function UI:CreateWindow(options)
 
 				TextButton_1.MouseButton1Click:Connect(function()
 					dropcall:Set(itemName)
+				end)
+				TextButton_1.MouseEnter:Connect(function()
+					if (dropoptions.Multi and selectedItems[itemName]) or ((not dropoptions.Multi) and itemSelected == itemName) then
+						return
+					end
+					softTween(TextButton_1, {BackgroundColor3 = Theme.ElementBackground}, 0.1)
+				end)
+				TextButton_1.MouseLeave:Connect(function()
+					if (dropoptions.Multi and selectedItems[itemName]) or ((not dropoptions.Multi) and itemSelected == itemName) then
+						return
+					end
+					softTween(TextButton_1, {BackgroundColor3 = Theme.Background}, 0.1)
 				end)
 			end
 
@@ -2829,17 +2953,29 @@ function UI:CreateWindow(options)
 				if not buttonList[item] then return end
 
 				if dropoptions.Multi then
+					if item == allToken then
+						for name, btn in pairs(buttonList) do
+							if name ~= allToken then
+								local nextState = not selectedItems[name]
+								selectedItems[name] = nextState or nil
+								btn.BackgroundColor3 = nextState and Theme.Accent or Theme.Background
+							end
+						end
+						updateText()
+						updateCallback()
+						return
+					end
 					-- Toggle selection
 					local isSelected = not selectedItems[item]
 					selectedItems[item] = isSelected or nil
-					buttonList[item].BackgroundColor3 = isSelected and Color3.fromRGB(66, 197, 197) or Color3.fromRGB(18, 20, 22)
+					buttonList[item].BackgroundColor3 = isSelected and Theme.Accent or Theme.Background
 
 				else
 					itemSelected = item
 					for _, btn in pairs(buttonList) do
-						btn.BackgroundColor3=Color3.fromRGB(18, 20, 22)
+						btn.BackgroundColor3 = Theme.Background
 					end
-					buttonList[item].BackgroundColor3 = Color3.fromRGB(66, 197, 197)
+					buttonList[item].BackgroundColor3 = Theme.Accent
 				end
 
 				updateText()
@@ -2861,6 +2997,9 @@ function UI:CreateWindow(options)
 				for _, item in pairs(items) do
 					addButton(item)
 					itemCount =itemCount+ 1
+				end
+				if dropoptions.Multi then
+					addButton(allToken, "ALL")
 				end
 			end
 
@@ -2895,30 +3034,125 @@ function UI:CreateWindow(options)
 
 
 
+	local activeTabButton
+	local tabRegistry = {}
+	local function applyTabVisual(button, isActive)
+		local title = button:FindFirstChild("TextLabel")
+		local icon = button:FindFirstChild("ImageLabel")
+		softTween(button, {
+			BackgroundColor3 = isActive and Theme.Accent or Theme.ElementBackground,
+			BackgroundTransparency = isActive and 0.82 or 1
+		}, 0.12)
+		if title and title:IsA("TextLabel") then
+			softTween(title, {TextColor3 = isActive and Theme.TextColor or Theme.SubTextColor}, 0.12)
+		end
+		if icon and icon:IsA("ImageLabel") then
+			softTween(icon, {ImageColor3 = isActive and Theme.TextColor or Theme.SubTextColor}, 0.12)
+		end
+	end
+
+	local function styleTabButton(button)
+		if not button or not button:IsA("TextButton") then
+			return
+		end
+		button.AutoButtonColor = false
+		button.BackgroundColor3 = Theme.ElementBackground
+		applyTabVisual(button, false)
+		button.MouseEnter:Connect(function()
+			if activeTabButton == button then
+				return
+			end
+			applyTabVisual(button, true)
+		end)
+		button.MouseLeave:Connect(function()
+			if activeTabButton == button then
+				return
+			end
+			applyTabVisual(button, false)
+		end)
+	end
+
 	for i,v in pairs(ListTab_21:GetChildren()) do
 		if v:IsA("TextButton") then
+			styleTabButton(v)
 			local page=createpage()
-			page.Name=v.TextLabel.Text
+			local tabName = v.TextLabel.Text
+			page.Name=tabName
 			page.Visible=false
-			lib[v.TextLabel.Text]={}
-			local l = lib[v.TextLabel.Text]
+			tabRegistry[tabName] = {
+				name = tabName,
+				button = v,
+				page = page,
+				hasSection = false
+			}
+			lib[tabName]={}
+			local l = lib[tabName]
 			function l:CreateSection(op)
+				tabRegistry[tabName].hasSection = true
 				return CreateSection(page,op)
 			end
 
 			v.MouseButton1Click:Connect(function()
+				if not v.Visible then
+					return
+				end
+				if activeTabButton and activeTabButton ~= v then
+					applyTabVisual(activeTabButton, false)
+				end
+				activeTabButton = v
+				applyTabVisual(v, true)
 				TS:Create(ChooseTab_57,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.InOut),{Position=UDim2.new(0.5,0,0,math.abs(v.AbsolutePosition.Y-ChooseTab_57.AbsolutePosition.Y+ChooseTab_57.Position.Y.Offset))}):Play()
 				resetpage()
 				PageName_7.Text=v.TextLabel.Text
 				page.Visible=true
 			end)
 			if not first then
+				activeTabButton = v
+				applyTabVisual(v, true)
 				TS:Create(ChooseTab_57,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.InOut),{Position=UDim2.new(0.5,0,0,math.abs(v.AbsolutePosition.Y-ChooseTab_57.AbsolutePosition.Y+ChooseTab_57.Position.Y.Offset))}):Play()
 				resetpage()
 				page.Visible=true
 				PageName_7.Text=v.TextLabel.Text
 				first=true
 			end
+		end
+	end
+
+	local function refreshVisibleTabs()
+		local fallbackTab
+		local activeInfo
+		for _, tabInfo in pairs(tabRegistry) do
+			local visible = tabInfo.hasSection
+			tabInfo.button.Visible = visible
+			tabInfo.page.Visible = false
+			if visible and not fallbackTab then
+				fallbackTab = tabInfo
+			end
+			if activeTabButton == tabInfo.button then
+				activeInfo = tabInfo
+			end
+		end
+
+		if activeTabButton and (not activeTabButton.Visible) then
+			activeTabButton = nil
+			activeInfo = nil
+		end
+
+		if activeInfo and activeTabButton then
+			PageName_7.Text = activeInfo.name
+			activeInfo.page.Visible = true
+			return
+		end
+
+		if not activeTabButton and fallbackTab then
+			local v = fallbackTab.button
+			activeTabButton = v
+			applyTabVisual(v, true)
+			TS:Create(ChooseTab_57,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.InOut),{Position=UDim2.new(0.5,0,0,math.abs(v.AbsolutePosition.Y-ChooseTab_57.AbsolutePosition.Y+ChooseTab_57.Position.Y.Offset))}):Play()
+			PageName_7.Text = fallbackTab.name
+			fallbackTab.page.Visible = true
+		elseif not fallbackTab then
+			PageName_7.Text = "No Sections"
 		end
 	end
 
@@ -2976,6 +3210,7 @@ function UI:CreateWindow(options)
     end
 
     function lib:Init(conf)
+		refreshVisibleTabs()
 
         if guisetting.AutoLoad then
             TS:Create(AutoLoadConText_17,TweenInfo.new(.3),{BackgroundColor3=Color3.fromRGB(0, 170, 0)}):Play()
@@ -3008,23 +3243,34 @@ function UI:CreateWindow(options)
 	return lib
 end
 
+
 if not getgenv().Config then
 	getgenv().Config={}
 end
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+local Workspace = game:GetService("Workspace")
+
+local CombatRemotes = ReplicatedStorage.CombatSystem.Remotes
+local RequestHitRemote = CombatRemotes.RequestHit
+local TeleportToPortalRemote = ReplicatedStorage.Remotes.TeleportToPortal
 function Attack()
-	game:GetService("ReplicatedStorage").CombatSystem.Remotes.RequestHit:FireServer()
+	RequestHitRemote:FireServer()
 end
 
 function checktable(a,k)
 	for _,a in ipairs(a) do
-		if a == k or string.find(a,k) or string.find(k,a) then
+		if a == k or string.find(a,k,1,true) or string.find(k,a,1,true) then
 			return true
 		end
 	end
 	return false
 end
 
-local LP = game.Players.LocalPlayer
+local LP = Players.LocalPlayer
 function getRoot(char)
 	if char then
 		local rootPart = char:FindFirstChild('HumanoidRootPart')
@@ -3041,10 +3287,11 @@ function sendkey(key)
     VIM:SendKeyEvent(false, key, false, game)
 end
 function TweenFloat()
-	if getRoot(LP.Character) then
-		if not getRoot(LP.Character):FindFirstChild("VelocityBody") then
+	local root = getRoot(LP.Character)
+	if root then
+		if not root:FindFirstChild("VelocityBody") then
 			local BV = Instance.new("BodyVelocity")
-			BV.Parent = getRoot(LP.Character)
+			BV.Parent = root
 			BV.Name = "VelocityBody"
 			BV.MaxForce = Vector3.new(100000, 100000, 100000)
 			BV.Velocity = Vector3.new(0, 0, 0)
@@ -3052,9 +3299,10 @@ function TweenFloat()
 	end
 end
 function RemoveFloat()
-	if getRoot(LP.Character) then
-		if getRoot(LP.Character):FindFirstChild("VelocityBody") then
-			getRoot(LP.Character).VelocityBody:Destroy()
+	local root = getRoot(LP.Character)
+	if root then
+		if root:FindFirstChild("VelocityBody") then
+			root.VelocityBody:Destroy()
 		end
 	end
 end
@@ -3249,37 +3497,105 @@ function getTools()
 end
 
 
-local function applyESP(player)
-	if player == LP or not player.Character then return end
-	
-	local head = player.Character:FindFirstChild("Head")
-	if not head then return end
-	if head:FindFirstChild("PlayerESP") then return end
+local espProxyFolder = Workspace:FindFirstChild("SawHubEspProxies") or Instance.new("Folder")
+espProxyFolder.Name = "SawHubEspProxies"
+espProxyFolder.Parent = Workspace
+local playerEspCache = {}
 
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "PlayerESP"
-	billboard.Adornee = head
-	billboard.Size = UDim2.new(0, 100, 0, 50)
-	billboard.StudsOffset = Vector3.new(0, 2, 0)
-	billboard.AlwaysOnTop = true
-	billboard.Parent = head
-
-	local label = Instance.new("TextLabel")
-	label.Parent = billboard
-	label.BackgroundTransparency = 1
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.Text = player.Name
-	label.TextColor3 = Color3.new(0, 1, 0)
-	label.TextStrokeTransparency = 0
-	label.TextScaled = true
+local function clearPlayerEsp(player)
+	local cache = playerEspCache[player]
+	if not cache then
+		return
+	end
+	if cache.billboard then
+		cache.billboard:Destroy()
+	end
+	if cache.highlight then
+		cache.highlight:Destroy()
+	end
+	if cache.proxy then
+		cache.proxy:Destroy()
+	end
+	playerEspCache[player] = nil
 end
+
+local function applyESP(player)
+	if player == LP then
+		return
+	end
+	local character = player.Character
+	if not character then
+		clearPlayerEsp(player)
+		return
+	end
+
+	local cache = playerEspCache[player]
+	if not cache then
+		local proxy = Instance.new("Part")
+		proxy.Name = "ESP_" .. player.Name
+		proxy.Anchored = true
+		proxy.CanCollide = false
+		proxy.CanQuery = false
+		proxy.CanTouch = false
+		proxy.Transparency = 1
+		proxy.Size = Vector3.new(1, 1, 1)
+		proxy.Parent = espProxyFolder
+
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "PlayerESP"
+		billboard.Adornee = proxy
+		billboard.Size = UDim2.new(0, 140, 0, 50)
+		billboard.StudsOffset = Vector3.new(0, 3, 0)
+		billboard.AlwaysOnTop = true
+		billboard.Parent = proxy
+
+		local label = Instance.new("TextLabel")
+		label.Parent = billboard
+		label.BackgroundTransparency = 1
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.Text = player.Name
+		label.TextColor3 = Color3.fromRGB(80, 255, 120)
+		label.TextStrokeTransparency = 0
+		label.TextScaled = true
+		label.Font = Enum.Font.GothamBold
+
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "PlayerESPHighlight"
+		highlight.FillTransparency = 1
+		highlight.OutlineColor = Color3.fromRGB(80, 255, 120)
+		highlight.OutlineTransparency = 0.2
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		highlight.Parent = proxy
+
+		cache = {proxy = proxy, billboard = billboard, highlight = highlight, label = label}
+		playerEspCache[player] = cache
+	end
+
+	local playerPivot = character:GetPivot()
+	cache.proxy.CFrame = playerPivot + Vector3.new(0, 3, 0)
+	cache.highlight.Adornee = character
+	cache.highlight.Enabled = getgenv().Config.ShowPlayerOutlineESP ~= false
+	local myRoot = getRoot(LP.Character)
+	if cache.label then
+		if getgenv().Config.ShowPlayerDistanceESP and myRoot then
+			local distance = math.floor((myRoot.Position - playerPivot.Position).Magnitude)
+			cache.label.Text = string.format("%s [%dm]", player.Name, distance)
+		else
+			cache.label.Text = player.Name
+		end
+	end
+end
+
+Players.PlayerRemoving:Connect(function(player)
+	clearPlayerEsp(player)
+end)
 
 function getmobnearest()
 	if getRoot(LP.Character) then
 		local nearestBoss = nil
 		local nearestDistance = getgenv().Config.DistanceFarm or 500
 		for _,v in ipairs(workspace.NPCs:GetChildren()) do
-			if v.Name~="Dummy" then
+			if v.Name~="TrainingDummy" then
 				local distance = (v:GetPivot().Position - getRoot(LP.Character).Position).Magnitude
 				if distance < nearestDistance then
 					if not v:FindFirstChild("Humanoid") or v.Humanoid.Health>0 then
@@ -3355,8 +3671,6 @@ local Sawhub= UI:CreateWindow({Name="Saw Hub"})
 
 
 
-local ConfigSec=Sawhub.Settings:CreateSection({Name="Config"})
-
 local FixSec = Sawhub.Home:CreateSection({Name="Fix"})
 FixSec:CreateButton({Name="Fix Float",Callback=function()
     RemoveFloat()
@@ -3379,6 +3693,70 @@ end})
 ConfigSec:CreateToggle({Name="Only Skill Boss",Default=getgenv().Config.OnlySkillBoss or false,Callback=function(v)
 	getgenv().Config.OnlySkillBoss=v
 end})
+
+local TeleportSec = Sawhub.Players:CreateSection({Name="Teleport Maps"})
+do
+	local portalIds = {}
+	for portalId in pairs(datamap) do
+		table.insert(portalIds, portalId)
+	end
+	table.sort(portalIds, function(a, b)
+		return tostring(a) < tostring(b)
+	end)
+
+	for _, portalId in ipairs(portalIds) do
+		local safePortalId = portalId
+		TeleportSec:CreateButton({
+			Name = "TP " .. tostring(safePortalId),
+			Callback = function()
+				if currentTween then
+					currentTween:Cancel()
+				end
+				TeleportToPortalRemote:FireServer(safePortalId)
+			end
+		})
+	end
+end
+
+local PlayerToolsSec = Sawhub.Players:CreateSection({Name="Player Tools"})
+local selectedPlayerName = ""
+local function getOtherPlayers()
+	local names = {}
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LP then
+			table.insert(names, player.Name)
+		end
+	end
+	table.sort(names)
+	return names
+end
+
+local playerDropdown = PlayerToolsSec:CreateDropdown({
+	Name = "Select Player",
+	List = getOtherPlayers(),
+	Default = {selectedPlayerName},
+	Multi = false,
+	Callback = function(v)
+		selectedPlayerName = v
+	end
+})
+
+PlayerToolsSec:CreateButton({
+	Name = "Refresh Players",
+	Callback = function()
+		playerDropdown:New(getOtherPlayers())
+	end
+})
+
+PlayerToolsSec:CreateButton({
+	Name = "TP To Player",
+	Callback = function()
+		local target = Players:FindFirstChild(selectedPlayerName)
+		if target and target.Character then
+			TpTo(target.Character:GetPivot())
+		end
+	end
+})
 
 local Sea2Sec = Sawhub.Home:CreateSection({Name="Sea 2"})
 Sea2Sec:CreateToggle({Name="Esp Ancient Fragment",Default=getgenv().Config.EspAncientFragment or false,Callback=function(v)
@@ -3467,6 +3845,19 @@ PowerSec:CreateButton({Name="Disable LocalScripts (BreakGame)",Callback=function
 	end
 end})
 
+local SettingsToolsSec = Sawhub.Settings:CreateSection({Name="Session"})
+SettingsToolsSec:CreateButton({Name="Rejoin Server",Callback=function()
+	local TeleportService = game:GetService("TeleportService")
+	TeleportService:Teleport(game.PlaceId, LP)
+end})
+
+SettingsToolsSec:CreateButton({Name="Copy JobId",Callback=function()
+	if setclipboard then
+		setclipboard(game.JobId)
+		CreateNotify("Copied JobId", 2)
+	end
+end})
+
 
 local TaskFarm="None"
 
@@ -3505,23 +3896,59 @@ function spawnbossfinal(bn)
 end
 
 function attackmob(boss)
-	if boss then
-		repeat 
-			task.wait()
-
-			if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
-				TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
-				equiptool(getgenv().Config.Weapon)
-				Attack()
-				skiluse()
-			else
-				local currentPivot = boss:GetPivot()
-				if currentPivot then
-					TpTo(currentPivot)
-				end
-			end
-		until not boss or not boss.Parent or (boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0)
+	if not boss then
+		return
 	end
+
+	repeat
+		task.wait()
+		local root = getRoot(LP.Character)
+		local humanoid = boss:FindFirstChild("Humanoid")
+		local hrp = boss:FindFirstChild("HumanoidRootPart")
+		local isAlive = (not humanoid) or humanoid.Health > 0
+
+		if root and hrp and isAlive and (root.Position - hrp.Position + Vector3.new(0, 10, 0)).Magnitude <= 30 then
+			TpTo(CFrame.new(hrp.Position + Vector3.new(0, 0, 10), hrp.Position))
+			equiptool(getgenv().Config.Weapon)
+			Attack()
+			skiluse()
+		elseif boss.Parent and isAlive then
+			local currentPivot = boss:GetPivot()
+			if currentPivot then
+				TpTo(currentPivot)
+			end
+		end
+	until (not boss) or (not boss.Parent) or (humanoid and humanoid.Health <= 0)
+end
+
+local function attackTargetLoop(target, shouldContinue, useSkill)
+	if not target then
+		return
+	end
+	repeat
+		task.wait()
+		if shouldContinue and not shouldContinue() then
+			break
+		end
+		local root = getRoot(LP.Character)
+		local humanoid = target:FindFirstChild("Humanoid")
+		local hrp = target:FindFirstChild("HumanoidRootPart")
+		local isAlive = (not humanoid) or humanoid.Health > 0
+
+		if root and hrp and isAlive and (root.Position - hrp.Position + Vector3.new(0, 10, 0)).Magnitude <= 30 then
+			TpTo(CFrame.new(hrp.Position + Vector3.new(0, 0, 10), hrp.Position))
+			equiptool(getgenv().Config.Weapon)
+			Attack()
+			if useSkill ~= false then
+				skiluse()
+			end
+		elseif target.Parent and isAlive then
+			local pivot = target:GetPivot()
+			if pivot then
+				TpTo(pivot)
+			end
+		end
+	until (not target) or (not target.Parent) or (humanoid and humanoid.Health <= 0)
 end
 
 task.spawn(function()
@@ -3540,21 +3967,9 @@ task.spawn(function()
 				else
 					local boss=checkgetname(workspace.NPCs,bn)
 					if boss then
-						repeat 
-							task.wait()
-
-							if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
-								TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
-								equiptool(getgenv().Config.Weapon)
-								Attack()
-								skiluse()
-							else
-								local currentPivot = boss:GetPivot()
-								if currentPivot then
-									TpTo(currentPivot)
-								end
-							end
-						until not boss or not boss.Parent or (boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0) or not getgenv().Config.AutoFarmPity
+						attackTargetLoop(boss, function()
+							return getgenv().Config.AutoFarmPity
+						end, true)
 					end
 				end
 
@@ -3564,21 +3979,9 @@ task.spawn(function()
 				else
 					local boss=checkgetname(workspace.NPCs,"SaberBoss") or getBoss2(Vector3.new(764.051513671875, -0.6666639447212219, -1086.5523681640625))
 					if boss then
-						repeat 
-							task.wait()
-
-							if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
-								TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
-								equiptool(getgenv().Config.Weapon)
-								Attack()
-								skiluse()
-							else
-								local currentPivot = boss:GetPivot()
-								if currentPivot then
-									TpTo(currentPivot)
-								end
-							end
-						until not boss or not boss.Parent or (boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0) or not getgenv().Config.AutoFarmPity
+						attackTargetLoop(boss, function()
+							return getgenv().Config.AutoFarmPity
+						end, true)
 					end
 				end
 			end
@@ -3592,21 +3995,9 @@ task.spawn(function()
 
             local boss = getBoss()
             if boss then
-				repeat 
-					task.wait()
-					
-					if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
-						TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
-						equiptool(getgenv().Config.Weapon)
-						Attack()
-						skiluse()
-					else
-						local currentPivot = boss:GetPivot()
-						if currentPivot then
-							TpTo(currentPivot)
-						end
-					end
-				until not boss or not boss.Parent or (boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0) or not getgenv().Config.AutoFarmBoss or TaskFarm~="FarmBoss"
+				attackTargetLoop(boss, function()
+					return getgenv().Config.AutoFarmBoss and TaskFarm=="FarmBoss"
+				end, true)
 			end
         end
     end
@@ -3701,22 +4092,9 @@ task.spawn(function()
 				if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0 or not boss:FindFirstChild("HumanoidRootPart") then
 					continue
 				end
-				repeat 
-					task.wait()
-
-					
-					if boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 and boss:FindFirstChild("HumanoidRootPart") and getRoot(LP.Character) and (getRoot(LP.Character).Position - boss.HumanoidRootPart.Position + Vector3.new(0,10,0)).Magnitude <= 30 then
-						TpTo(CFrame.new(boss.HumanoidRootPart.Position + Vector3.new(0, 0, 10),boss.HumanoidRootPart.Position))
-						equiptool(getgenv().Config.Weapon)
-						Attack()
-						skiluse()
-					else
-						local currentPivot = boss:GetPivot()
-						if currentPivot then
-							TpTo(currentPivot)
-						end
-					end
-				until not boss or not boss.Parent or (boss:FindFirstChild("Humanoid") and boss.Humanoid.Health <= 0) or not getgenv().Config.AutoFarmNearest or TaskFarm~="FarmNearest"
+				attackTargetLoop(boss, function()
+					return getgenv().Config.AutoFarmNearest and TaskFarm=="FarmNearest"
+				end, true)
 			end
         end
     end
@@ -3724,21 +4102,26 @@ end)
 
 
 local EspSec=Sawhub.Visuals:CreateSection({Name="Esp"})	
+EspSec:CreateToggle({Name="Player ESP Distance",Default=getgenv().Config.ShowPlayerDistanceESP or false,Callback=function(v)
+	getgenv().Config.ShowPlayerDistanceESP = v
+end})
+
+EspSec:CreateToggle({Name="Player ESP Outline",Default=(getgenv().Config.ShowPlayerOutlineESP ~= false),Callback=function(v)
+	getgenv().Config.ShowPlayerOutlineESP = v
+end})
+
 EspSec:CreateToggle({Name="Player Name ESP",Default=getgenv().Config.ShowBossESP,Callback=function(v)
 	getgenv().Config.ShowBossESP= v
 	task.spawn(function()
 		while task.wait(.5) and getgenv().Config.ShowBossESP do
 
-			for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+			for _, player in ipairs(Players:GetPlayers()) do
 				applyESP(player)
 			end
 			
 		end
-		for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-			local head = player.Character:FindFirstChild("Head")
-			if not head then return end
-			if head:FindFirstChild("PlayerESP") then  head.PlayerESP:Destroy() end
-
+		for player, _ in pairs(playerEspCache) do
+			clearPlayerEsp(player)
 		end
 	end)
 end})
@@ -3767,15 +4150,16 @@ task.spawn(function()
 end)
 game:GetService("Players").LocalPlayer.Idled:connect(function()
    
-        game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-        wait(1)
-        game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        VirtualUser:Button2Down(Vector2.new(0,0),Workspace.CurrentCamera.CFrame)
+        task.wait(1)
+        VirtualUser:Button2Up(Vector2.new(0,0),Workspace.CurrentCamera.CFrame)
    
 end)
 
-game:GetService('RunService').Stepped:Connect(function()
-	if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and (TaskFarm~="None") then
-		for k,v in next,game.Players.LocalPlayer.Character:GetChildren() do
+RunService.Stepped:Connect(function()
+	local character = LP.Character
+	if character and character:FindFirstChild('HumanoidRootPart') and (TaskFarm~="None") then
+		for k,v in next,character:GetChildren() do
 			if v:IsA('BasePart') then
 				v.CanCollide = false
 			end
