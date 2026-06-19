@@ -3253,6 +3253,7 @@ if not getgenv().Config then
 		MutationHarvest={},
 		ChoosePets={},
 		ChooseSeedsShovel={},
+		ChooseSeedsHarvest={},
 
 	}
 end
@@ -3344,10 +3345,22 @@ repeat task.wait()
 	end
 until garden and garden:FindFirstChild("Visual")
 
- 
+local weight = {}
+for i,v in pairs(game:GetService("ReplicatedStorage").PlantGenerationModules.Fruits:GetChildren()) do
+	local c = require(v)
+	weight[v.Name]=c.GrowData.BaseWeight
+end
+
 local function HarvestFruit(v)
 	local seedname=v:GetAttribute("SeedName") or v:GetAttribute("CorePartName")
 	if table.find(getgenv().Config.ChooseSeedsHarvest,seedname) and v:FindFirstChild("HarvestPart") and ((#getgenv().Config.MutationHarvest > 0 and table.find(getgenv().Config.MutationHarvest,v:GetAttribute("Mutation"))) or #getgenv().Config.MutationHarvest == 0) then
+		Networking.Garden.CollectFruit:Fire(v:GetAttribute("PlantId"),v:GetAttribute("FruitId") or "")
+	end
+end
+
+local function HarvestFruitWeight(v)
+	local seedname=v:GetAttribute("SeedName") or v:GetAttribute("CorePartName")
+	if v:FindFirstChild("HarvestPart") and v:GetAttribute("SizeMulti") and v:GetAttribute("SizeMulti")*weight[seedname] <= getgenv().Config.MinWeight then
 		Networking.Garden.CollectFruit:Fire(v:GetAttribute("PlantId"),v:GetAttribute("FruitId") or "")
 	end
 end
@@ -3481,7 +3494,14 @@ local function Rejoin()
 				foundAnything = Site.nextPageCursor
 			end
 			local num = 0;
-			for i,v in pairs(Site.data) do
+			local servers = Site.data
+
+			for i = #servers, 2, -1 do
+				local j = math.random(i)
+				servers[i], servers[j] = servers[j], servers[i]
+			end
+
+			for i,v in pairs(servers) do
 				local Possible = true
 				ID = tostring(v.id)
 				if tonumber(v.maxPlayers) > tonumber(v.playing) then
@@ -3493,7 +3513,7 @@ local function Rejoin()
 						else
 							if tonumber(actualHour) ~= tonumber(Existing) then
 								local delFile = pcall(function()
-									-- delfile("NotSameServers.json")
+									delfile("NotSameServers.json")
 									AllIDs = {}
 									table.insert(AllIDs, actualHour)
 								end)
@@ -3506,7 +3526,7 @@ local function Rejoin()
 						wait()
 						
 						pcall(function()
-							-- writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
+							writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
 							wait()
 							game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
 						end)
@@ -3815,6 +3835,38 @@ HarvestSec:CreateToggle({
 	Callback = function(value)
 		getgenv().Config.AutoHarvest=value
 		
+	end
+}) 
+
+local HarvestWeightSec=Sawhub.Home:CreateSection({Name="Harvest Weight"})
+
+HarvestWeightSec:CreateSlider({
+    Name = "Min Weight",
+    Min = 1,
+    Max = 100,
+    Default = getgenv().Config.MinWeight or 20,
+    Callback = function(value)
+        getgenv().Config.MinWeight=value
+    end
+})
+
+HarvestWeightSec:CreateToggle({
+	Name="Auto Harvest",
+	Default=getgenv().Config.AutoHarvestWeight or false,
+	Callback = function(value)
+		getgenv().Config.AutoHarvestWeight=value
+		task.spawn(function()
+			while task.wait(.01) and getgenv().Config.AutoHarvestWeight  do
+				for i,v in pairs(garden.Plants:GetChildren()) do
+					HarvestFruitWeight(v)
+					if v:FindFirstChild("Fruits") then
+						for _,cc in pairs(v.Fruits:GetChildren()) do
+							HarvestFruitWeight(cc)
+						end
+					end
+				end
+			end
+		end)
 	end
 }) 
 
