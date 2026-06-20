@@ -1,3 +1,21 @@
+-- getgenv().Config = {
+--     ["AutoSell"] = false,
+--     ["RejoinDelay"] = 2,
+--     ["ChoosePets"] = {"GoldenDragonfly", "Unicorn", "Raccoon", "BlackDragon","Bear"},
+--     ["AutoBuySeed"] = false,
+--     ["FpsCap"] = 15,
+--     ["AutoBuyPet"] = true,
+--     ["AutoHarvest"] = false,
+--     ["AutoRejoinBuy"] = true,
+--     ["AutoBuyGear"] = true,
+--     ["AutoSellCooldown"] = false,
+--     ["ChooseGear"] = {"Uncommon Sprinkler", "Rare Sprinkler", "Common Watering Can", "Common Sprinkler", "Super Sprinkler", "Legendary Sprinkler", "Super Watering Can"},
+--     ["AutoPlant"] = false,
+--     ["WhiteScreen"] = true,
+--     ["DelaySell"] = 60,
+-- 	 ["WebhookLink"] = "https://discord.com/api/webhooks/1457297487193837669/eT24cv3bdft3cJA_hjo7H8aDleqcUZEZjeQFl8W0ZZr-bxYRF2YiGH6kSQsIouhpPu6o",
+
+-- }
 
 wait(2)
 repeat wait() until game:IsLoaded()
@@ -3747,7 +3765,7 @@ local Sawhub= UI:CreateWindow({title="Saw Hub"})
 local SafeSec=Sawhub.Home:CreateSection({Name="Safe"})
 SafeSec:CreateToggle({
     Name = "Auto Seat",
-    Default = false,
+    Default = getgenv().Config.AutoSeat or false,
     Callback = function(value)
         getgenv().Config.AutoSeat = value
 		task.spawn(function()
