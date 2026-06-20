@@ -1,3 +1,4 @@
+
 wait(2)
 repeat wait() until game:IsLoaded()
 repeat wait() until game:GetService("CoreGui")
@@ -3743,7 +3744,29 @@ local dataplr = PlayerStateClient:GetLocalReplica()
 
 local Sawhub= UI:CreateWindow({title="Saw Hub"})
 
-
+local SafeSec=Sawhub.Home:CreateSection({Name="Safe"})
+SafeSec:CreateToggle({
+    Name = "Auto Seat",
+    Default = false,
+    Callback = function(value)
+        getgenv().Config.AutoSeat = value
+		task.spawn(function()
+			local getseat = {}
+			for i,v in pairs(garden.Props:GetDescendants()) do
+				if v.ClassName=="Seat" then
+					table.insert( getseat, v)
+				end
+			end
+			while getgenv().Config.AutoSeat and task.wait(.1) do
+				for i,v in pairs(getseat) do
+					if v.Occupant==nil then
+						plr.Character.HumanoidRootPart.CFrame = v.CFrame
+					end
+				end
+			end
+		end)
+    end
+})
 local SeedSec=Sawhub.Home:CreateSection({Name="Seeds"})
 
 SeedSec:CreateDropdown({
