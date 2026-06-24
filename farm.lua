@@ -1,24 +1,3 @@
-getgenv().Config = {
-    ["DelaySell"] = 60,
-    ["RejoinDelay"] = 2,
-    ["ChoosePets"] = {"Raccoon", "BlackDragon", "Bear", "GoldenDragonfly", "Unicorn"},
-    ["AutoPlant"] = false,
-    ["FpsCap"] = 15,
-    ["AutoBuyPet"] = true,
-    ["ChooseSeeds"] = {"Dragon's Breath", "Moon Bloom"},
-    ["WebhookLink"] = "https://discord.com/api/webhooks/1457297487193837669/eT24cv3bdft3cJA_hjo7H8aDleqcUZEZjeQFl8W0ZZr-bxYRF2YiGH6kSQsIouhpPu6o",
-    ["AutoHarvest"] = false,
-    ["WhiteScreen"] = true,
-    ["AutoRejoinBuy"] = true,
-    ["AutoSeat"] = false,
-    ["AutoBuyGear"] = true,
-    ["AutoHarvestWeight"] = false,
-    ["AutoSellCooldown"] = false,
-    ["MinWeight"] = 20,
-    ["AutoSell"] = false,
-    ["ChooseGear"] = {"Uncommon Sprinkler", "Rare Sprinkler", "Common Watering Can", "Common Sprinkler", "Super Watering Can", "Legendary Sprinkler", "Super Sprinkler"},
-    ["AutoBuySeed"] = true,
-}
 
 wait(2)
 repeat wait() until game:IsLoaded()
@@ -3424,3 +3403,16 @@ HarvestWeightSec:CreateToggle({
 		end)
 	end
 }) 
+
+local Networking = require(game.ReplicatedStorage.SharedModules.Networking)
+
+Networking.AntiAfk.RequestHop.Fire = function()
+    print("Blocked")
+end
+
+game:GetService("Players").LocalPlayer.Idled:connect(function()
+	game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+	wait(1)
+	game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
+
