@@ -3413,7 +3413,28 @@ minhblusdzSec:CreateButton({
         Rejoin()
     end
 })
+local VIM = game:GetService("VirtualInputManager")
+
+function sendkey(key)
+    VIM:SendKeyEvent(true, key, false, game)
+    task.wait()
+    VIM:SendKeyEvent(false, key, false, game)
+end
+minhblusdzSec:CreateToggle({
+	Name="Anti Afk",
+	Default=getgenv().Config.AntiAfk or false,
+	Callback = function(value)
+		getgenv().Config.AntiAfk=value
+		task.spawn(function()
+			while task.wait(5) and getgenv().Config.AntiAfk do
+				sendkey(Enum.KeyCode.A)
+			end
+		end)
+	end
+}) 
 local HarvestSec=Sawhub.Home:CreateSection({Name="Harvest"})
+
+
 HarvestSec:CreateDropdown({
     Name = "Choose Seeds",
     List = allseed,
